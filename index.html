@@ -27,7 +27,9 @@
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
 body {
+  background: #f0f2f8;
   background: var(--bg);
+  color: #1a1a2e;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
@@ -56,7 +58,6 @@ body::after {
   z-index: 0;
 }
 
-/* TOPBAR */
 .topbar {
   position: fixed;
   top: 0; left: 0;
@@ -85,41 +86,27 @@ body::after {
   filter: drop-shadow(0 0 12px rgba(79,124,255,0.3));
 }
 
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.topbar-right { display: flex; align-items: center; gap: 10px; }
 
 .avatar-btn {
   width: 38px; height: 38px;
   border-radius: 50%;
   background: linear-gradient(135deg, #4f7cff, #7b9fff);
   border: 2px solid rgba(79,124,255,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  overflow: hidden;
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; overflow: hidden;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff;
   transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .avatar-btn:active { transform: scale(0.92); }
 .avatar-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-/* PAGE WRAP */
 .page-wrap {
-  padding-top: 80px;
   padding: 80px 16px 0;
   position: relative;
   z-index: 1;
 }
 
-/* SCREENS */
 .screen { display: none; animation: fadeUp 0.35s ease both; }
 .screen.active { display: block; }
 
@@ -128,7 +115,6 @@ body::after {
   to   { opacity:1; transform: translateY(0); }
 }
 
-/* CARD */
 .card {
   background: var(--card);
   border: 1px solid rgba(255,255,255,0.9);
@@ -140,10 +126,9 @@ body::after {
   margin-bottom: 14px;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-
 .card:active { transform: scale(0.98); }
 
-/* BALANCE CARD */
+/* BALANCE CARD → PROFITS CARD */
 .balance-card {
   background: linear-gradient(135deg, #4f7cff 0%, #7b9fff 50%, #a0bcff 100%);
   border-radius: 24px;
@@ -153,965 +138,445 @@ body::after {
   overflow: hidden;
   box-shadow: 0 12px 40px rgba(79,124,255,0.35);
 }
-
 .balance-card::before {
-  content:'';
-  position: absolute;
-  top: -60px; right: -60px;
-  width: 200px; height: 200px;
-  background: rgba(255,255,255,0.12);
-  border-radius: 50%;
+  content:''; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; background: rgba(255,255,255,0.12); border-radius: 50%;
 }
-
 .balance-card::after {
-  content:'';
-  position: absolute;
-  bottom: -40px; left: -40px;
-  width: 150px; height: 150px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 50%;
+  content:''; position: absolute; bottom: -40px; left: -40px;
+  width: 150px; height: 150px; background: rgba(255,255,255,0.08); border-radius: 50%;
 }
 
 .balance-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 1;
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.7);
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+  position: relative; z-index: 1;
 }
 
 .balance-amount {
-  font-family: 'Syne', sans-serif;
-  font-size: 38px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -1px;
-  line-height: 1;
-  position: relative;
-  z-index: 1;
-  margin-bottom: 4px;
+  font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 800;
+  color: #fff; letter-spacing: -1px; line-height: 1;
+  position: relative; z-index: 1; margin-bottom: 4px;
 }
 
 .balance-usd {
-  font-size: 14px;
-  color: rgba(255,255,255,0.65);
-  position: relative;
-  z-index: 1;
-  margin-bottom: 24px;
+  font-size: 14px; color: rgba(255,255,255,0.65);
+  position: relative; z-index: 1; margin-bottom: 24px;
 }
 
 .balance-actions {
-  display: flex;
-  gap: 10px;
-  position: relative;
-  z-index: 1;
+  display: flex; gap: 10px; position: relative; z-index: 1;
 }
 
 .balance-btn {
-  flex: 1;
-  padding: 11px 0;
-  border-radius: 14px;
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.15s, opacity 0.15s;
-  letter-spacing: 0.2px;
+  flex: 1; padding: 11px 0; border-radius: 14px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: transform 0.15s, opacity 0.15s; letter-spacing: 0.2px;
 }
-
 .balance-btn:active { transform: scale(0.95); opacity: 0.85; }
-
-.balance-btn.primary {
-  background: #fff;
-  color: #4f7cff;
-}
-
+.balance-btn.primary { background: #fff; color: #4f7cff; }
 .balance-btn.secondary {
-  background: rgba(255,255,255,0.2);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.3);
-  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.2); color: #fff;
+  border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px);
 }
 
-/* STATS ROW */
-.stats-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
+.stats-row { display: flex; gap: 10px; margin-bottom: 16px; }
 .stat-card {
-  flex: 1;
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.9);
-  border-radius: 18px;
-  padding: 16px 14px;
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(16px);
+  flex: 1; background: var(--card); border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 18px; padding: 16px 14px; box-shadow: var(--shadow-sm); backdrop-filter: blur(16px);
 }
-
 .stat-icon {
-  width: 34px; height: 34px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  font-size: 16px;
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 16px;
 }
-
 .stat-icon.blue { background: rgba(79,124,255,0.12); }
 .stat-icon.green { background: rgba(34,197,94,0.12); }
 .stat-icon.orange { background: rgba(245,158,11,0.12); }
-
 .stat-value {
-  font-family: 'Syne', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-  line-height: 1;
-  margin-bottom: 3px;
+  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px;
 }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
 
-.stat-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* SECTION TITLE */
 .section-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+  color: var(--text); margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
 }
+.section-link { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--accent); cursor: pointer; }
 
-.section-link {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--accent);
-  cursor: pointer;
-}
-
-/* PAYMENT ITEM */
 .payment-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(79,124,255,0.06);
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid rgba(79,124,255,0.06);
 }
-
 .payment-item:last-child { border-bottom: none; padding-bottom: 0; }
 .payment-item:first-child { padding-top: 0; }
 
 .payment-avatar {
-  width: 42px; height: 42px;
-  border-radius: 14px;
+  width: 42px; height: 42px; border-radius: 14px;
   background: linear-gradient(135deg, #dfe7ff, #c7d6ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: #4f7cff;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #4f7cff; flex-shrink: 0;
 }
-
 .payment-info { flex: 1; }
-
-.payment-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 2px;
-}
-
-.payment-date {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.payment-amount {
-  text-align: right;
-}
-
-.payment-ton {
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 2px;
-}
-
-.payment-status {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
-  display: inline-block;
-}
-
+.payment-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.payment-date { font-size: 12px; color: var(--text-muted); }
+.payment-amount { text-align: right; }
+.payment-ton { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.payment-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; display: inline-block; }
 .payment-status.success { background: rgba(34,197,94,0.12); color: #16a34a; }
 .payment-status.pending { background: rgba(245,158,11,0.12); color: #d97706; }
 .payment-status.failed  { background: rgba(239,68,68,0.12);  color: #dc2626; }
 
-/* BIG BTN */
 .btn-primary {
-  width: 100%;
-  padding: 16px;
-  border-radius: 16px;
-  border: none;
-  background: linear-gradient(135deg, #4f7cff, #7b9fff);
-  color: #fff;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  width: 100%; padding: 16px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #4f7cff, #7b9fff); color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
   box-shadow: 0 6px 20px rgba(79,124,255,0.3);
-  transition: transform 0.15s, box-shadow 0.15s;
-  letter-spacing: 0.2px;
-  margin-bottom: 14px;
+  transition: transform 0.15s, box-shadow 0.15s; letter-spacing: 0.2px; margin-bottom: 14px;
 }
-
 .btn-primary:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(79,124,255,0.2); }
 
 .btn-secondary {
-  width: 100%;
-  padding: 15px;
-  border-radius: 16px;
-  border: 1.5px solid var(--border);
-  background: var(--card);
-  color: var(--accent);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  backdrop-filter: blur(16px);
-  transition: transform 0.15s, background 0.15s;
-  margin-bottom: 14px;
+  width: 100%; padding: 15px; border-radius: 16px;
+  border: 1.5px solid var(--border); background: var(--card); color: var(--accent);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  backdrop-filter: blur(16px); transition: transform 0.15s, background 0.15s; margin-bottom: 14px;
 }
-
 .btn-secondary:active { transform: scale(0.97); background: var(--secondary); }
 
-/* BOTTOM NAV */
 .bottom-nav {
-  position: fixed;
-  bottom: 0; left: 0;
-  width: 100%;
-  height: 80px;
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px 12px;
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 999;
+  display: flex; align-items: center; justify-content: center; padding: 0 16px 12px;
 }
-
 .bottom-nav-inner {
-  width: 100%;
-  max-width: 420px;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(255,255,255,0.95);
-  border-radius: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  width: 100%; max-width: 420px;
+  background: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.95);
+  border-radius: 24px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(79,124,255,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 8px 4px;
-  height: 60px;
+  display: flex; align-items: center; justify-content: space-around; padding: 8px 4px; height: 60px;
 }
-
 .nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 14px;
-  transition: background 0.2s, transform 0.15s;
-  flex: 1;
-  border: none;
-  background: transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 6px 12px; border-radius: 14px;
+  transition: background 0.2s, transform 0.15s; flex: 1; border: none; background: transparent;
 }
-
 .nav-item:active { transform: scale(0.9); }
-
-.nav-item.active {
-  background: var(--secondary);
-}
-
-.nav-icon {
-  width: 22px; height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+.nav-item.active { background: var(--secondary); }
+.nav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
 .nav-icon svg { color: #b0b8d0; transition: color 0.2s; }
 .nav-item.active .nav-icon svg { color: var(--accent); }
-
-.nav-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: #b0b8d0;
-  transition: color 0.2s;
-  letter-spacing: 0.2px;
-}
-
+.nav-label { font-size: 10px; font-weight: 600; color: #b0b8d0; transition: color 0.2s; letter-spacing: 0.2px; }
 .nav-item.active .nav-label { color: var(--accent); }
 
-/* QUICK PAY CARD */
 .quick-pay {
   background: linear-gradient(135deg, rgba(79,124,255,0.08), rgba(123,159,255,0.05));
-  border: 1.5px solid rgba(79,124,255,0.15);
-  border-radius: 20px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  cursor: pointer;
-  transition: transform 0.15s, background 0.15s;
+  border: 1.5px solid rgba(79,124,255,0.15); border-radius: 20px; padding: 18px 20px;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 16px;
+  cursor: pointer; transition: transform 0.15s, background 0.15s;
 }
-
 .quick-pay:active { transform: scale(0.97); }
-
 .quick-pay-icon {
-  width: 48px; height: 48px;
-  border-radius: 16px;
+  width: 48px; height: 48px; border-radius: 16px;
   background: linear-gradient(135deg, #4f7cff, #7b9fff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   box-shadow: 0 4px 14px rgba(79,124,255,0.3);
 }
-
 .quick-pay-text { flex: 1; }
+.quick-pay-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.quick-pay-sub { font-size: 12px; color: var(--text-muted); }
 
-.quick-pay-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 3px;
-}
-
-.quick-pay-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* PROFILE */
 .profile-hero {
   background: linear-gradient(135deg, #4f7cff 0%, #7b9fff 100%);
-  border-radius: 24px;
-  padding: 28px 24px;
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 12px 40px rgba(79,124,255,0.3);
+  border-radius: 24px; padding: 28px 24px; margin-bottom: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  position: relative; overflow: hidden; box-shadow: 0 12px 40px rgba(79,124,255,0.3);
 }
-
 .profile-hero::before {
-  content:'';
-  position:absolute;
-  top:-50px;right:-50px;
-  width:180px;height:180px;
-  background:rgba(255,255,255,0.1);
-  border-radius:50%;
+  content:''; position:absolute; top:-50px; right:-50px;
+  width:180px; height:180px; background:rgba(255,255,255,0.1); border-radius:50%;
 }
-
 .profile-avatar {
-  width: 76px; height: 76px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  border: 3px solid rgba(255,255,255,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
+  width: 76px; height: 76px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #fff;
+  position: relative; z-index: 1; overflow: hidden;
 }
-
-.profile-avatar img { width:100%;height:100%;object-fit:cover;border-radius:50%; }
-
-.profile-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  color: #fff;
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-
-.profile-username {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  position: relative;
-  z-index: 1;
-}
-
+.profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.profile-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff; position: relative; z-index: 1; text-align: center; }
+.profile-username { font-size: 13px; color: rgba(255,255,255,0.7); position: relative; z-index: 1; }
 .profile-badge {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  position: relative;
-  z-index: 1;
+  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; color: #fff; position: relative; z-index: 1;
 }
 
-/* PROFILE ROWS */
 .profile-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 0;
-  border-bottom: 1px solid rgba(79,124,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 0; border-bottom: 1px solid rgba(79,124,255,0.06);
 }
-
 .profile-row:last-child { border-bottom: none; }
-
-.profile-row-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
+.profile-row-left { display: flex; align-items: center; gap: 12px; }
 .profile-row-icon {
-  width: 34px; height: 34px;
-  border-radius: 10px;
-  background: var(--secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 34px; height: 34px; border-radius: 10px; background: var(--secondary);
+  display: flex; align-items: center; justify-content: center;
 }
-
-.profile-row-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-
+.profile-row-label { font-size: 14px; font-weight: 500; color: var(--text); }
 .profile-row-value {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 500;
-  max-width: 55%;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px; color: var(--text-muted); font-weight: 500;
+  max-width: 55%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-
 .profile-row-value.accent { color: var(--accent); }
 
-/* EMPLOYEE ITEM */
 .employee-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(79,124,255,0.06);
-  cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid rgba(79,124,255,0.06); cursor: pointer;
 }
-
 .employee-item:last-child { border-bottom: none; padding-bottom: 0; }
 .employee-item:first-child { padding-top: 0; }
-
 .employee-avatar {
-  width: 46px; height: 46px;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  flex-shrink: 0;
+  width: 46px; height: 46px; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; flex-shrink: 0;
 }
-
 .employee-info { flex: 1; }
-
-.employee-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 2px;
-}
-
-.employee-role {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.employee-wallet {
-  font-size: 12px;
-  color: var(--accent);
-  font-weight: 500;
-  font-family: monospace;
-}
-
+.employee-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.employee-role { font-size: 12px; color: var(--text-muted); }
+.employee-wallet { font-size: 12px; color: var(--accent); font-weight: 500; font-family: monospace; }
 .online-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px rgba(34,197,94,0.5);
-  flex-shrink: 0;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 6px rgba(34,197,94,0.5); flex-shrink: 0;
 }
 
 /* MODAL */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(26,26,46,0.5);
-  backdrop-filter: blur(8px);
-  z-index: 2000;
-  display: none;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s;
+  position: fixed; inset: 0; background: rgba(26,26,46,0.5);
+  backdrop-filter: blur(8px); z-index: 2000; display: none;
+  align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
 }
-
-.modal-overlay.open {
-  display: flex;
-  opacity: 1;
-  pointer-events: all;
-}
-
+.modal-overlay.open { display: flex; opacity: 1; pointer-events: all; }
 .modal-sheet {
-  width: 100%;
-  max-width: 480px;
-  background: rgba(255,255,255,0.97);
-  border-radius: 28px 28px 0 0;
-  padding: 20px 20px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  max-height: 88vh;
-  overflow-y: auto;
+  width: 100%; max-width: 480px; background: rgba(255,255,255,0.97);
+  border-radius: 28px 28px 0 0; padding: 20px 20px 40px;
+  display: flex; flex-direction: column; gap: 14px;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  max-height: 88vh; overflow-y: auto;
 }
-
-.modal-overlay.open .modal-sheet {
-  transform: translateY(0);
-}
-
-.modal-handle {
-  width: 36px; height: 4px;
-  background: #e0e4f0;
-  border-radius: 99px;
-  margin: 0 auto 8px;
-}
-
-.modal-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text);
-  text-align: center;
-}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; background: #e0e4f0; border-radius: 99px; margin: 0 auto 8px; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); text-align: center; }
 
 /* INPUT */
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.input-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-label { font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
 .input-field {
-  width: 100%;
-  padding: 13px 16px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(79,124,255,0.15);
-  background: rgba(240,242,248,0.6);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  width: 100%; padding: 13px 16px; border-radius: 14px;
+  border: 1.5px solid rgba(79,124,255,0.15); background: rgba(240,242,248,0.6);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  outline: none; transition: border-color 0.2s, background 0.2s;
 }
-
-.input-field:focus {
-  border-color: var(--accent);
-  background: rgba(79,124,255,0.04);
-}
-
+.input-field:focus { border-color: var(--accent); background: rgba(79,124,255,0.04); }
 .input-field::placeholder { color: #b0b8d0; }
-
-textarea.input-field {
-  resize: none;
-  height: 80px;
-  padding-top: 12px;
-}
+textarea.input-field { resize: none; height: 80px; padding-top: 12px; }
 
 /* SUCCESS OVERLAY */
 .success-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(26,26,46,0.5);
-  backdrop-filter: blur(8px);
-  z-index: 3000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s;
+  position: fixed; inset: 0; background: rgba(26,26,46,0.5);
+  backdrop-filter: blur(8px); z-index: 3000; display: none;
+  align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s;
 }
-
-.success-overlay.open {
-  display: flex;
-  opacity: 1;
-  pointer-events: all;
-}
-
+.success-overlay.open { display: flex; opacity: 1; pointer-events: all; }
 .success-card {
-  width: calc(100% - 48px);
-  max-width: 300px;
-  background: #fff;
-  border-radius: 28px;
-  padding: 36px 24px 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  box-shadow: 0 20px 60px rgba(79,124,255,0.2);
-  transform: scale(0.85);
+  width: calc(100% - 48px); max-width: 300px; background: #fff; border-radius: 28px;
+  padding: 36px 24px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  box-shadow: 0 20px 60px rgba(79,124,255,0.2); transform: scale(0.85);
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
-
 .success-overlay.open .success-card { transform: scale(1); }
-
 .success-icon {
-  width: 68px; height: 68px;
-  border-radius: 50%;
+  width: 68px; height: 68px; border-radius: 50%;
   background: linear-gradient(135deg, #22c55e, #4ade80);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   box-shadow: 0 8px 24px rgba(34,197,94,0.35);
 }
+.success-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); text-align: center; }
+.success-sub { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; }
 
-.success-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text);
-  text-align: center;
-}
-
-.success-sub {
-  font-size: 13px;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.5;
-}
-
-/* HISTORY FILTER */
-.filter-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
+.filter-row { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
 .filter-chip {
-  padding: 7px 16px;
-  border-radius: 20px;
-  border: 1.5px solid rgba(79,124,255,0.15);
-  background: var(--card);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-  flex-shrink: 0;
+  padding: 7px 16px; border-radius: 20px; border: 1.5px solid rgba(79,124,255,0.15);
+  background: var(--card); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
 }
+.filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.filter-chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
-/* SEARCH */
 .search-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--card);
-  border: 1.5px solid rgba(79,124,255,0.12);
-  border-radius: 14px;
-  padding: 11px 16px;
-  margin-bottom: 14px;
-  backdrop-filter: blur(16px);
+  display: flex; align-items: center; gap: 10px; background: var(--card);
+  border: 1.5px solid rgba(79,124,255,0.12); border-radius: 14px; padding: 11px 16px;
+  margin-bottom: 14px; backdrop-filter: blur(16px);
 }
-
 .search-box input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
+  flex: 1; border: none; background: transparent;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none;
 }
-
 .search-box input::placeholder { color: #b0b8d0; }
 
-/* EMPLOYEE COLORS */
 .emp-a { background: rgba(79,124,255,0.12); color: #4f7cff; }
 .emp-b { background: rgba(34,197,94,0.12);  color: #16a34a; }
 .emp-c { background: rgba(245,158,11,0.12); color: #d97706; }
 .emp-d { background: rgba(239,68,68,0.12);  color: #dc2626; }
 .emp-e { background: rgba(168,85,247,0.12); color: #9333ea; }
 
-/* NOTIFICATION BADGE */
 .notif-badge {
-  position: absolute;
-  top: -3px; right: -3px;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: #ef4444;
-  border: 2px solid var(--bg);
-  font-size: 9px;
-  font-weight: 700;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute; top: -3px; right: -3px; width: 16px; height: 16px;
+  border-radius: 50%; background: #ef4444; border: 2px solid var(--bg);
+  font-size: 9px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center;
 }
-
 .avatar-wrap { position: relative; }
 
-/* PAYROLL FORM */
 .employee-select-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1.5px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s;
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border-radius: 14px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
 }
-
 .employee-select-item:active { background: var(--secondary); }
-.employee-select-item.selected {
-  background: rgba(79,124,255,0.08);
-  border-color: rgba(79,124,255,0.3);
-}
+.employee-select-item.selected { background: rgba(79,124,255,0.08); border-color: rgba(79,124,255,0.3); }
 
-/* AMOUNT INPUT */
 .amount-wrap {
-  background: rgba(79,124,255,0.05);
-  border: 1.5px solid rgba(79,124,255,0.15);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  background: rgba(79,124,255,0.05); border: 1.5px solid rgba(79,124,255,0.15);
+  border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 12px;
 }
-
-.amount-currency {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
+.amount-currency { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); }
 .amount-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: 'Syne', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text);
-  outline: none;
-  width: 100%;
+  flex: 1; border: none; background: transparent;
+  font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); outline: none; width: 100%;
 }
-
 .amount-input::placeholder { color: #d0d6e8; }
 
-.fee-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--text-muted);
-  padding: 4px 0;
+.fee-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); padding: 4px 0; }
+.fee-row.total { font-weight: 700; color: var(--text); border-top: 1px solid rgba(79,124,255,0.08); padding-top: 10px; margin-top: 4px; }
+
+.tx-hash {
+  font-family: monospace; font-size: 11px; color: var(--accent); background: var(--secondary);
+  padding: 8px 12px; border-radius: 10px; word-break: break-all; text-align: center; line-height: 1.6;
 }
 
-.fee-row.total {
-  font-weight: 700;
-  color: var(--text);
-  border-top: 1px solid rgba(79,124,255,0.08);
-  padding-top: 10px;
+.toast {
+  position: fixed; top: 80px; left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--text); color: #fff; padding: 12px 20px; border-radius: 14px;
+  font-size: 13px; font-weight: 500; z-index: 9999; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s; white-space: nowrap; pointer-events: none;
+  box-shadow: 0 8px 24px rgba(26,26,46,0.25);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* ===== NEW: METHOD CHOICE BUTTONS ===== */
+.method-choice-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 4px;
 }
 
-/* TX HASH */
-.tx-hash {
-  font-family: monospace;
-  font-size: 11px;
-  color: var(--accent);
-  background: var(--secondary);
-  padding: 8px 12px;
-  border-radius: 10px;
-  word-break: break-all;
-  text-align: center;
-  line-height: 1.6;
-}
-
-/* SKELETON */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #e8ecf5 25%, #f0f2f8 50%, #e8ecf5 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-
-/* EMPTY STATE */
-.empty-state {
-  text-align: center;
-  padding: 48px 24px;
+.method-btn {
+  width: 100%;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 14px;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  text-align: left;
 }
 
-.empty-icon {
-  width: 64px; height: 64px;
-  border-radius: 20px;
-  background: var(--secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.method-btn:active { transform: scale(0.97); }
+
+.method-btn.ots {
+  background: linear-gradient(135deg, rgba(79,124,255,0.08), rgba(123,159,255,0.05));
+  border-color: rgba(79,124,255,0.25);
 }
 
-.empty-title {
+.method-btn.ots:hover {
+  background: linear-gradient(135deg, rgba(79,124,255,0.14), rgba(123,159,255,0.10));
+  border-color: rgba(79,124,255,0.45);
+}
+
+.method-btn.garant {
+  background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(74,222,128,0.05));
+  border-color: rgba(34,197,94,0.25);
+}
+
+.method-btn.garant:hover {
+  background: linear-gradient(135deg, rgba(34,197,94,0.14), rgba(74,222,128,0.10));
+  border-color: rgba(34,197,94,0.45);
+}
+
+.method-icon {
+  width: 46px; height: 46px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+
+.method-icon.blue { background: rgba(79,124,255,0.12); }
+.method-icon.green { background: rgba(34,197,94,0.12); }
+
+.method-text-wrap { flex: 1; }
+
+.method-title {
   font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px;
 }
 
-.empty-sub {
+.method-sub { font-size: 12px; color: var(--text-muted); }
+
+/* GIFT LINK STEP */
+.gift-step {
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.gift-info-box {
+  background: rgba(79,124,255,0.06);
+  border: 1px solid rgba(79,124,255,0.15);
+  border-radius: 14px;
+  padding: 14px 16px;
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.5;
 }
 
-/* CHIP */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
+.gift-method-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  margin-bottom: 2px;
 }
 
-.chip.blue { background: rgba(79,124,255,0.12); color: var(--accent); }
+.gift-method-badge.ots { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.gift-method-badge.garant { background: rgba(34,197,94,0.12); color: #16a34a; }
 
-/* DIVIDER */
-.divider {
-  height: 1px;
-  background: rgba(79,124,255,0.06);
-  margin: 4px 0;
+/* Loading spinner */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
-
-/* TOAST */
-.toast {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: var(--text);
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 500;
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 8px 24px rgba(26,26,46,0.25);
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* SCROLLBAR HIDE */
-::-webkit-scrollbar { display: none; }
-* { scrollbar-width: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <!-- TOPBAR -->
@@ -1125,18 +590,17 @@ textarea.input-field {
   </div>
 </header>
 
-<!-- PAGE WRAP -->
 <div class="page-wrap">
 
-  <!-- ===== HOME ===== -->
+  <!-- HOME -->
   <div class="screen active" id="screen-home">
 
     <div class="balance-card">
-      <div class="balance-label">Общий баланс</div>
-      <div class="balance-amount" id="balanceAmount">1 284.50</div>
-      <div class="balance-usd" id="balanceUsd">≈ $6 422.50 USD</div>
+      <div class="balance-label">Профиты</div>
+      <div class="balance-amount" id="balanceAmount">0</div>
+      <div class="balance-usd" id="balanceUsd">≈ $0 USD</div>
       <div class="balance-actions">
-        <button class="balance-btn primary" onclick="openPayModal()">↑ Выплата</button>
+        <button class="balance-btn primary" onclick="openPayModal()">↑ Подать заявку</button>
         <button class="balance-btn secondary" onclick="showScreen('history')">История</button>
       </div>
     </div>
@@ -1213,210 +677,91 @@ textarea.input-field {
 
   </div>
 
-  <!-- ===== PAYMENTS ===== -->
+  <!-- PAYMENTS -->
   <div class="screen" id="screen-payments">
     <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);margin-bottom:16px;">Выплаты</div>
-
     <button class="btn-primary" onclick="openPayModal()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Создать выплату
+      Подать заявку
     </button>
-
     <div class="section-title" style="margin-top:4px;">Активные заявки</div>
-
     <div class="card" style="padding:16px 20px;">
       <div class="payment-item">
         <div class="payment-avatar" style="background:rgba(245,158,11,0.12);color:#d97706;">ДП</div>
-        <div class="payment-info">
-          <div class="payment-name">Дмитрий Петров</div>
-          <div class="payment-date">01 мая 2026 · 17:44</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">80 TON</div>
-          <span class="payment-status pending">В обработке</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Дмитрий Петров</div><div class="payment-date">01 мая 2026 · 17:44</div></div>
+        <div class="payment-amount"><div class="payment-ton">80 TON</div><span class="payment-status pending">В обработке</span></div>
       </div>
       <div class="payment-item">
         <div class="payment-avatar" style="background:rgba(168,85,247,0.12);color:#9333ea;">ОВ</div>
-        <div class="payment-info">
-          <div class="payment-name">Ольга Васильева</div>
-          <div class="payment-date">30 апр 2026 · 11:20</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">200 TON</div>
-          <span class="payment-status pending">В обработке</span>
-        </div>
-      </div>
-      <div class="payment-item">
-        <div class="payment-avatar" style="background:rgba(79,124,255,0.12);color:#4f7cff;">НК</div>
-        <div class="payment-info">
-          <div class="payment-name">Никита Кириллов</div>
-          <div class="payment-date">30 апр 2026 · 08:05</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">45 TON</div>
-          <span class="payment-status pending">В обработке</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Ольга Васильева</div><div class="payment-date">30 апр 2026 · 11:20</div></div>
+        <div class="payment-amount"><div class="payment-ton">200 TON</div><span class="payment-status pending">В обработке</span></div>
       </div>
     </div>
-
     <div class="section-title">Завершённые</div>
-
     <div class="card" style="padding:16px 20px;">
       <div class="payment-item">
         <div class="payment-avatar">АК</div>
-        <div class="payment-info">
-          <div class="payment-name">Алексей Козлов</div>
-          <div class="payment-date">03 мая 2026 · 14:32</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">50 TON</div>
-          <span class="payment-status success">Выплачено</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Алексей Козлов</div><div class="payment-date">03 мая 2026 · 14:32</div></div>
+        <div class="payment-amount"><div class="payment-ton">50 TON</div><span class="payment-status success">Выплачено</span></div>
       </div>
       <div class="payment-item">
         <div class="payment-avatar" style="background:rgba(34,197,94,0.12);color:#16a34a;">МС</div>
-        <div class="payment-info">
-          <div class="payment-name">Мария Смирнова</div>
-          <div class="payment-date">02 мая 2026 · 09:15</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">120 TON</div>
-          <span class="payment-status success">Выплачено</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Мария Смирнова</div><div class="payment-date">02 мая 2026 · 09:15</div></div>
+        <div class="payment-amount"><div class="payment-ton">120 TON</div><span class="payment-status success">Выплачено</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== EMPLOYEES ===== -->
+  <!-- EMPLOYEES -->
   <div class="screen" id="screen-employees">
     <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);margin-bottom:16px;">Сотрудники</div>
-
     <div class="search-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" placeholder="Поиск сотрудника..." oninput="filterEmployees(this.value)"/>
     </div>
-
     <div class="card" style="padding:16px 20px;" id="employeeList">
-      <div class="employee-item">
-        <div class="employee-avatar emp-a">АК</div>
-        <div class="employee-info">
-          <div class="employee-name">Алексей Козлов</div>
-          <div class="employee-role">Frontend Developer</div>
-          <div class="employee-wallet">EQAb...3f2c</div>
-        </div>
-        <div class="online-dot"></div>
-      </div>
-      <div class="employee-item">
-        <div class="employee-avatar emp-b">МС</div>
-        <div class="employee-info">
-          <div class="employee-name">Мария Смирнова</div>
-          <div class="employee-role">UI/UX Designer</div>
-          <div class="employee-wallet">EQBc...9a1d</div>
-        </div>
-        <div style="width:8px;height:8px;border-radius:50%;background:#d0d6e8;flex-shrink:0;"></div>
-      </div>
-      <div class="employee-item">
-        <div class="employee-avatar emp-c">ДП</div>
-        <div class="employee-info">
-          <div class="employee-name">Дмитрий Петров</div>
-          <div class="employee-role">Backend Developer</div>
-          <div class="employee-wallet">EQDe...7b4f</div>
-        </div>
-        <div class="online-dot"></div>
-      </div>
-      <div class="employee-item">
-        <div class="employee-avatar emp-d">ОВ</div>
-        <div class="employee-info">
-          <div class="employee-name">Ольга Васильева</div>
-          <div class="employee-role">Project Manager</div>
-          <div class="employee-wallet">EQFg...2c8a</div>
-        </div>
-        <div style="width:8px;height:8px;border-radius:50%;background:#d0d6e8;flex-shrink:0;"></div>
-      </div>
-      <div class="employee-item">
-        <div class="employee-avatar emp-e">НК</div>
-        <div class="employee-info">
-          <div class="employee-name">Никита Кириллов</div>
-          <div class="employee-role">DevOps Engineer</div>
-          <div class="employee-wallet">EQHi...5d2e</div>
-        </div>
-        <div class="online-dot"></div>
-      </div>
+      <div class="employee-item"><div class="employee-avatar emp-a">АК</div><div class="employee-info"><div class="employee-name">Алексей Козлов</div><div class="employee-role">Frontend Developer</div><div class="employee-wallet">EQAb...3f2c</div></div><div class="online-dot"></div></div>
+      <div class="employee-item"><div class="employee-avatar emp-b">МС</div><div class="employee-info"><div class="employee-name">Мария Смирнова</div><div class="employee-role">UI/UX Designer</div><div class="employee-wallet">EQBc...9a1d</div></div><div style="width:8px;height:8px;border-radius:50%;background:#d0d6e8;flex-shrink:0;"></div></div>
+      <div class="employee-item"><div class="employee-avatar emp-c">ДП</div><div class="employee-info"><div class="employee-name">Дмитрий Петров</div><div class="employee-role">Backend Developer</div><div class="employee-wallet">EQDe...7b4f</div></div><div class="online-dot"></div></div>
+      <div class="employee-item"><div class="employee-avatar emp-d">ОВ</div><div class="employee-info"><div class="employee-name">Ольга Васильева</div><div class="employee-role">Project Manager</div><div class="employee-wallet">EQFg...2c8a</div></div><div style="width:8px;height:8px;border-radius:50%;background:#d0d6e8;flex-shrink:0;"></div></div>
+      <div class="employee-item"><div class="employee-avatar emp-e">НК</div><div class="employee-info"><div class="employee-name">Никита Кириллов</div><div class="employee-role">DevOps Engineer</div><div class="employee-wallet">EQHi...5d2e</div></div><div class="online-dot"></div></div>
     </div>
   </div>
 
-  <!-- ===== HISTORY ===== -->
+  <!-- HISTORY -->
   <div class="screen" id="screen-history">
     <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);margin-bottom:16px;">История</div>
-
     <div class="filter-row">
       <div class="filter-chip active" onclick="setFilter(this,'all')">Все</div>
       <div class="filter-chip" onclick="setFilter(this,'success')">Выплачено</div>
       <div class="filter-chip" onclick="setFilter(this,'pending')">В обработке</div>
       <div class="filter-chip" onclick="setFilter(this,'failed')">Ошибка</div>
     </div>
-
     <div class="card" style="padding:16px 20px;">
       <div class="payment-item" onclick="showTxDetail('АК','Алексей Козлов','50','success','3f2c...9a1d')">
         <div class="payment-avatar">АК</div>
-        <div class="payment-info">
-          <div class="payment-name">Алексей Козлов</div>
-          <div class="payment-date">03 мая 2026 · 14:32</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">−50 TON</div>
-          <span class="payment-status success">Выплачено</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Алексей Козлов</div><div class="payment-date">03 мая 2026 · 14:32</div></div>
+        <div class="payment-amount"><div class="payment-ton">−50 TON</div><span class="payment-status success">Выплачено</span></div>
       </div>
       <div class="payment-item" onclick="showTxDetail('МС','Мария Смирнова','120','success','8b3d...1f4c')">
         <div class="payment-avatar" style="background:rgba(34,197,94,0.12);color:#16a34a;">МС</div>
-        <div class="payment-info">
-          <div class="payment-name">Мария Смирнова</div>
-          <div class="payment-date">02 мая 2026 · 09:15</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">−120 TON</div>
-          <span class="payment-status success">Выплачено</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Мария Смирнова</div><div class="payment-date">02 мая 2026 · 09:15</div></div>
+        <div class="payment-amount"><div class="payment-ton">−120 TON</div><span class="payment-status success">Выплачено</span></div>
       </div>
       <div class="payment-item" onclick="showTxDetail('ДП','Дмитрий Петров','80','pending','')">
         <div class="payment-avatar" style="background:rgba(245,158,11,0.12);color:#d97706;">ДП</div>
-        <div class="payment-info">
-          <div class="payment-name">Дмитрий Петров</div>
-          <div class="payment-date">01 мая 2026 · 17:44</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">−80 TON</div>
-          <span class="payment-status pending">В обработке</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Дмитрий Петров</div><div class="payment-date">01 мая 2026 · 17:44</div></div>
+        <div class="payment-amount"><div class="payment-ton">−80 TON</div><span class="payment-status pending">В обработке</span></div>
       </div>
       <div class="payment-item" onclick="showTxDetail('ИФ','Иван Фёдоров','35','failed','')">
         <div class="payment-avatar" style="background:rgba(239,68,68,0.12);color:#dc2626;">ИФ</div>
-        <div class="payment-info">
-          <div class="payment-name">Иван Фёдоров</div>
-          <div class="payment-date">29 апр 2026 · 16:10</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">−35 TON</div>
-          <span class="payment-status failed">Ошибка</span>
-        </div>
-      </div>
-      <div class="payment-item" onclick="showTxDetail('ОВ','Ольга Васильева','200','success','2a9f...7c3b')">
-        <div class="payment-avatar" style="background:rgba(168,85,247,0.12);color:#9333ea;">ОВ</div>
-        <div class="payment-info">
-          <div class="payment-name">Ольга Васильева</div>
-          <div class="payment-date">28 апр 2026 · 12:00</div>
-        </div>
-        <div class="payment-amount">
-          <div class="payment-ton">−200 TON</div>
-          <span class="payment-status success">Выплачено</span>
-        </div>
+        <div class="payment-info"><div class="payment-name">Иван Фёдоров</div><div class="payment-date">29 апр 2026 · 16:10</div></div>
+        <div class="payment-amount"><div class="payment-ton">−35 TON</div><span class="payment-status failed">Ошибка</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== PROFILE ===== -->
+  <!-- PROFILE -->
   <div class="screen" id="screen-profile">
     <div class="profile-hero">
       <div class="profile-avatar" id="profileAvatarLarge">?</div>
@@ -1424,73 +769,39 @@ textarea.input-field {
       <div class="profile-username" id="profileUsernameLarge">@username</div>
       <div class="profile-badge">✦ Активный сотрудник</div>
     </div>
-
     <div class="card" style="padding:16px 20px;margin-bottom:14px;">
       <div class="profile-row">
-        <div class="profile-row-left">
-          <div class="profile-row-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
-          </div>
-          <div class="profile-row-label">ID</div>
-        </div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg></div><div class="profile-row-label">ID</div></div>
         <div class="profile-row-value accent" id="profileId">—</div>
       </div>
       <div class="profile-row">
-        <div class="profile-row-left">
-          <div class="profile-row-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          </div>
-          <div class="profile-row-label">TON Кошелёк</div>
-        </div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div class="profile-row-label">TON Кошелёк</div></div>
         <div class="profile-row-value accent" id="profileWallet">Не привязан</div>
       </div>
       <div class="profile-row">
-        <div class="profile-row-left">
-          <div class="profile-row-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          </div>
-          <div class="profile-row-label">Статус</div>
-        </div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="profile-row-label">Статус</div></div>
         <div class="profile-row-value" style="color:#22c55e;font-weight:600;">✦ Активен</div>
       </div>
       <div class="profile-row">
-        <div class="profile-row-left">
-          <div class="profile-row-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div class="profile-row-label">Дата регистрации</div>
-        </div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="profile-row-label">Дата регистрации</div></div>
         <div class="profile-row-value">01.01.2026</div>
       </div>
     </div>
-
     <button class="btn-primary" onclick="openReqModal()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Прикрепить реквизиты
     </button>
-
     <button class="btn-secondary" onclick="showScreen('history')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
       История выплат
     </button>
-
     <div class="card" style="padding:16px 20px;">
       <div class="profile-row" onclick="showToast('⚙️ Настройки открываются...')" style="cursor:pointer;">
-        <div class="profile-row-left">
-          <div class="profile-row-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </div>
-          <div class="profile-row-label">Настройки</div>
-        </div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="profile-row-label">Настройки</div></div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="profile-row" onclick="showToast('💬 Открываем поддержку...')" style="cursor:pointer;">
-        <div class="profile-row-left">
-          <div class="profile-row-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div class="profile-row-label">Поддержка</div>
-        </div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="profile-row-label">Поддержка</div></div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
@@ -1502,33 +813,23 @@ textarea.input-field {
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
     <button class="nav-item active" id="nav-home" onclick="showScreen('home')">
-      <div class="nav-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 4l9 8"/><path d="M9 21V12h6v9"/></svg>
-      </div>
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 4l9 8"/><path d="M9 21V12h6v9"/></svg></div>
       <span class="nav-label">Главная</span>
     </button>
     <button class="nav-item" id="nav-payments" onclick="showScreen('payments')">
-      <div class="nav-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
       <span class="nav-label">Выплаты</span>
     </button>
     <button class="nav-item" id="nav-employees" onclick="showScreen('employees')">
-      <div class="nav-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
       <span class="nav-label">Сотрудники</span>
     </button>
     <button class="nav-item" id="nav-history" onclick="showScreen('history')">
-      <div class="nav-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
-      </div>
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></div>
       <span class="nav-label">История</span>
     </button>
     <button class="nav-item" id="nav-profile" onclick="showScreen('profile')">
-      <div class="nav-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
-      </div>
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg></div>
       <span class="nav-label">Профиль</span>
     </button>
   </div>
@@ -1551,74 +852,67 @@ textarea.input-field {
       <div class="input-label">Комментарий</div>
       <textarea class="input-field" id="reqComment" placeholder="Основной кошелёк..."></textarea>
     </div>
-    <button class="btn-primary" onclick="submitRequisites()" style="margin-bottom:0;">
-      Прикрепить
-    </button>
+    <button class="btn-primary" onclick="submitRequisites()" style="margin-bottom:0;">Прикрепить</button>
   </div>
 </div>
 
-<!-- MODAL: ВЫПЛАТА -->
+<!-- MODAL: ЗАЯВКА — ШАГ 1: ВЫБОР МЕТОДА -->
 <div class="modal-overlay" id="payModal" onclick="closeModalIf(event,'payModal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Создать выплату</div>
+    <div class="modal-title">Подать заявку</div>
+    <div style="font-size:13px;color:var(--text-muted);text-align:center;margin-top:-6px;">Выберите способ получения выплаты</div>
 
-    <div class="input-label" style="margin-bottom:8px;">Выберите сотрудника</div>
-    <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;">
-      <div class="employee-select-item selected" onclick="selectEmployee(this,'АК','Алексей Козлов')">
-        <div class="employee-avatar emp-a" style="width:36px;height:36px;border-radius:11px;font-size:13px;">АК</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);">Алексей Козлов</div>
-          <div style="font-size:11px;color:var(--text-muted);">Frontend Developer</div>
+    <div class="method-choice-wrap">
+      <button class="method-btn ots" onclick="selectMethod('ots')">
+        <div class="method-icon blue">🤖</div>
+        <div class="method-text-wrap">
+          <div class="method-title">ОТС Бот</div>
+          <div class="method-sub">Автоматическая обработка через бота</div>
         </div>
-      </div>
-      <div class="employee-select-item" onclick="selectEmployee(this,'МС','Мария Смирнова')">
-        <div class="employee-avatar emp-b" style="width:36px;height:36px;border-radius:11px;font-size:13px;">МС</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);">Мария Смирнова</div>
-          <div style="font-size:11px;color:var(--text-muted);">UI/UX Designer</div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <button class="method-btn garant" onclick="selectMethod('garant')">
+        <div class="method-icon green">🛡️</div>
+        <div class="method-text-wrap">
+          <div class="method-title">Живой гарант</div>
+          <div class="method-sub">Обработка через живого гаранта</div>
         </div>
-      </div>
-      <div class="employee-select-item" onclick="selectEmployee(this,'ДП','Дмитрий Петров')">
-        <div class="employee-avatar emp-c" style="width:36px;height:36px;border-radius:11px;font-size:13px;">ДП</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);">Дмитрий Петров</div>
-          <div style="font-size:11px;color:var(--text-muted);">Backend Developer</div>
-        </div>
-      </div>
-      <div class="employee-select-item" onclick="selectEmployee(this,'ОВ','Ольга Васильева')">
-        <div class="employee-avatar emp-d" style="width:36px;height:36px;border-radius:11px;font-size:13px;">ОВ</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);">Ольга Васильева</div>
-          <div style="font-size:11px;color:var(--text-muted);">Project Manager</div>
-        </div>
-      </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
+  </div>
+</div>
 
-    <div class="input-label" style="margin-bottom:8px;margin-top:4px;">Сумма</div>
-    <div class="amount-wrap">
-      <div class="amount-currency">TON</div>
-      <input class="amount-input" id="payAmount" type="number" placeholder="0.00" oninput="calcFee(this.value)"/>
+<!-- MODAL: ЗАЯВКА — ШАГ 2: ССЫЛКА НА ПОДАРОК -->
+<div class="modal-overlay" id="giftModal" onclick="closeModalIf(event,'giftModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Укажите подарок</div>
+
+    <div class="gift-step">
+      <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+        <span id="giftMethodBadge" class="gift-method-badge ots">🤖 ОТС Бот</span>
+      </div>
+
+      <div class="gift-info-box">
+        🎁 Укажите ссылку на подарок из Telegram, который вы хотите получить в качестве выплаты.
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Ссылка на подарок</div>
+        <input class="input-field" id="giftLink" type="url" placeholder="https://t.me/gift/..."/>
+      </div>
+
+      <button class="btn-primary" id="submitGiftBtn" onclick="submitGiftRequest()" style="margin-bottom:0;">
+        Отправить заявку
+      </button>
+
+      <button class="btn-secondary" onclick="backToMethodChoice()" style="margin-bottom:0;margin-top:-6px;">
+        ← Назад
+      </button>
     </div>
-
-    <div style="background:rgba(240,242,248,0.8);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;">
-      <div class="fee-row">
-        <span>Сумма выплаты</span>
-        <span id="feeBase">0.00 TON</span>
-      </div>
-      <div class="fee-row">
-        <span>Комиссия сети (1%)</span>
-        <span id="feeAmount">0.00 TON</span>
-      </div>
-      <div class="fee-row total">
-        <span>Итого</span>
-        <span id="feeTotal">0.00 TON</span>
-      </div>
-    </div>
-
-    <button class="btn-primary" onclick="submitPayment()" style="margin-bottom:0;margin-top:4px;">
-      Подтвердить выплату
-    </button>
   </div>
 </div>
 
@@ -1665,41 +959,42 @@ textarea.input-field {
 </div>
 
 <script>
+// ========== CONFIG ==========
+const BOT_TOKEN = '8556040583:AAH4alGtztA9F4kWTL1QIh2W-oP-0EYrmR0';
+const LOG_CHANNEL_ID = 'ТВОЙ_ID_КАНАЛА'; // ← замени на свой, например: -1001234567890
+
+// ========== TELEGRAM INIT ==========
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
 const user = tg?.initDataUnsafe?.user || {};
 const uid = user.id || '000000';
 const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
-const username = user.username ? '@' + user.username : '@user';
+const username = user.username ? '@' + user.username : '(без username)';
 const initials = ((user.first_name?.[0] || '') + (user.last_name?.[0] || '')).toUpperCase() || '?';
 
-// Set avatar
 document.getElementById('topAvatar').textContent = initials;
 document.getElementById('profileAvatarLarge').textContent = initials;
 document.getElementById('profileNameLarge').textContent = fullName;
-document.getElementById('profileUsernameLarge').textContent = username;
+document.getElementById('profileUsernameLarge').textContent = user.username ? '@' + user.username : '@user';
 document.getElementById('profileId').textContent = uid;
 
 if (user.photo_url) {
-  const img1 = document.createElement('img');
-  img1.src = user.photo_url;
-  document.getElementById('topAvatar').innerHTML = '';
-  document.getElementById('topAvatar').appendChild(img1);
-
-  const img2 = document.createElement('img');
-  img2.src = user.photo_url;
-  document.getElementById('profileAvatarLarge').innerHTML = '';
-  document.getElementById('profileAvatarLarge').appendChild(img2);
+  ['topAvatar','profileAvatarLarge'].forEach(id => {
+    const img = document.createElement('img');
+    img.src = user.photo_url;
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    el.appendChild(img);
+  });
 }
 
-// Load saved wallet
 const savedWallet = localStorage.getItem('sam_wallet_' + uid);
 if (savedWallet) {
   document.getElementById('profileWallet').textContent = savedWallet.slice(0,6) + '...' + savedWallet.slice(-4);
 }
 
-// SCREENS
+// ========== SCREENS ==========
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1709,15 +1004,13 @@ function showScreen(name) {
   window.scrollTo(0,0);
 }
 
-// MODAL
-function openReqModal() {
-  document.getElementById('reqModal').classList.add('open');
+// ========== MODALS ==========
+function openPayModal() {
+  document.getElementById('payModal').classList.add('open');
 }
 
-function openPayModal() {
-  document.getElementById('payAmount').value = '';
-  calcFee(0);
-  document.getElementById('payModal').classList.add('open');
+function openReqModal() {
+  document.getElementById('reqModal').classList.add('open');
 }
 
 function closeModal(id) {
@@ -1728,12 +1021,97 @@ function closeModalIf(e, id) {
   if (e.target === document.getElementById(id)) closeModal(id);
 }
 
-// REQUISITES
+// ========== METHOD SELECTION ==========
+let selectedMethod = '';
+
+function selectMethod(method) {
+  selectedMethod = method;
+  closeModal('payModal');
+
+  // Update badge
+  const badge = document.getElementById('giftMethodBadge');
+  if (method === 'ots') {
+    badge.textContent = '🤖 ОТС Бот';
+    badge.className = 'gift-method-badge ots';
+  } else {
+    badge.textContent = '🛡️ Живой гарант';
+    badge.className = 'gift-method-badge garant';
+  }
+
+  document.getElementById('giftLink').value = '';
+  document.getElementById('giftModal').classList.add('open');
+}
+
+function backToMethodChoice() {
+  closeModal('giftModal');
+  setTimeout(() => openPayModal(), 200);
+}
+
+// ========== SUBMIT GIFT REQUEST ==========
+async function submitGiftRequest() {
+  const link = document.getElementById('giftLink').value.trim();
+  if (!link) { showToast('❌ Укажите ссылку на подарок'); return; }
+  if (!link.startsWith('http')) { showToast('❌ Введите корректную ссылку'); return; }
+
+  const btn = document.getElementById('submitGiftBtn');
+  btn.innerHTML = '<div class="spinner"></div> Отправка...';
+  btn.disabled = true;
+
+  const methodLabel = selectedMethod === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
+  const now = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
+
+  const text =
+    `🆕 <b>Новая заявка на выплату</b>\n\n` +
+    `👤 <b>Пользователь:</b> ${escapeHtml(fullName)}\n` +
+    `🔗 <b>Username:</b> ${escapeHtml(username)}\n` +
+    `🆔 <b>ID:</b> <code>${uid}</code>\n\n` +
+    `💳 <b>Метод:</b> ${methodLabel}\n` +
+    `🎁 <b>Ссылка на подарок:</b>\n${escapeHtml(link)}\n\n` +
+    `🕐 <b>Время:</b> ${now} (МСК)`;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: LOG_CHANNEL_ID,
+        text: text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: false
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      closeModal('giftModal');
+      document.getElementById('successTitle').textContent = 'Заявка отправлена!';
+      document.getElementById('successSub').textContent = 'Ваша заявка принята и передана на обработку через ' + (selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта');
+      document.getElementById('successOverlay').classList.add('open');
+    } else {
+      console.error('Telegram error:', data);
+      showToast('❌ Ошибка отправки. Проверь ID канала.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Ошибка сети');
+  } finally {
+    btn.innerHTML = 'Отправить заявку';
+    btn.disabled = false;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// ========== REQUISITES ==========
 function submitRequisites() {
   const wallet = document.getElementById('reqWallet').value.trim();
   const name = document.getElementById('reqName').value.trim();
-  const comment = document.getElementById('reqComment').value.trim();
-
   if (!wallet) { showToast('❌ Введите TON адрес'); return; }
   if (!name) { showToast('❌ Введите имя владельца'); return; }
 
@@ -1741,7 +1119,6 @@ function submitRequisites() {
   document.getElementById('profileWallet').textContent = wallet.slice(0,6) + '...' + wallet.slice(-4);
 
   closeModal('reqModal');
-
   document.getElementById('successTitle').textContent = 'Реквизиты прикреплены!';
   document.getElementById('successSub').textContent = `Кошелёк ${wallet.slice(0,8)}... успешно сохранён`;
   document.getElementById('successOverlay').classList.add('open');
@@ -1751,74 +1128,38 @@ function submitRequisites() {
   document.getElementById('reqComment').value = '';
 }
 
-// FEE CALC
-function calcFee(val) {
-  const amount = parseFloat(val) || 0;
-  const fee = amount * 0.01;
-  const total = amount + fee;
-  document.getElementById('feeBase').textContent = amount.toFixed(2) + ' TON';
-  document.getElementById('feeAmount').textContent = fee.toFixed(2) + ' TON';
-  document.getElementById('feeTotal').textContent = total.toFixed(2) + ' TON';
-}
-
-// SELECT EMPLOYEE
-let selectedEmployee = { initials: 'АК', name: 'Алексей Козлов' };
-
-function selectEmployee(el, initials, name) {
-  document.querySelectorAll('.employee-select-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedEmployee = { initials, name };
-}
-
-// SUBMIT PAYMENT
-function submitPayment() {
-  const amount = document.getElementById('payAmount').value.trim();
-  if (!amount || parseFloat(amount) <= 0) { showToast('❌ Введите сумму'); return; }
-
-  closeModal('payModal');
-
-  setTimeout(() => {
-    document.getElementById('successTitle').textContent = 'Выплата отправлена!';
-    document.getElementById('successSub').textContent = `${selectedEmployee.name} получит ${amount} TON`;
-    document.getElementById('successOverlay').classList.add('open');
-  }, 300);
-}
-
-// TX DETAIL
+// ========== TX DETAIL ==========
 function showTxDetail(av, name, amount, status, hash) {
   document.getElementById('txAvatar').textContent = av;
   document.getElementById('txName').textContent = name;
   document.getElementById('txAmount').textContent = amount + ' TON';
-
   const statusMap = {
     success: '<span class="payment-status success">Выплачено</span>',
     pending: '<span class="payment-status pending">В обработке</span>',
     failed:  '<span class="payment-status failed">Ошибка</span>',
   };
   document.getElementById('txStatusEl').innerHTML = statusMap[status] || '';
-
   if (hash) {
     document.getElementById('txHashBlock').style.display = 'block';
-    document.getElementById('txHash').textContent = hash + 'a1b2c3d4e5f6789012345678901234567890abcdef';
+    document.getElementById('txHash').textContent = hash + 'a1b2c3d4e5f67890abcdef';
   } else {
     document.getElementById('txHashBlock').style.display = 'none';
   }
-
   document.getElementById('txModal').classList.add('open');
 }
 
-// SUCCESS
+// ========== SUCCESS ==========
 function closeSuccess() {
   document.getElementById('successOverlay').classList.remove('open');
 }
 
-// FILTER
+// ========== FILTER ==========
 function setFilter(el, type) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 }
 
-// SEARCH EMPLOYEES
+// ========== SEARCH ==========
 function filterEmployees(val) {
   const items = document.querySelectorAll('#employeeList .employee-item');
   const q = val.toLowerCase();
@@ -1828,7 +1169,7 @@ function filterEmployees(val) {
   });
 }
 
-// TOAST
+// ========== TOAST ==========
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
