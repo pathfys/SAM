@@ -1143,5 +1143,273 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 </script>
+
+  <!--
+=================================================================
+  ЗАГРУЗОЧНЫЙ ЭКРАН ДЛЯ SAM — БУКВА S С КРОВЬЮ
+=================================================================
+  ВСТАВЬ БЛОК А сразу после <body>
+  ВСТАВЬ БЛОК Б перед </body>
+=================================================================
+-->
+
+
+<!-- ============================================================
+  БЛОК А — вставить сразу после <body>
+============================================================= -->
+
+<div id="sam-splash" style="position:fixed;inset:0;z-index:99999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;">
+
+  <!-- фоновый красный туман -->
+  <div style="position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(229,34,34,0.08) 0%,transparent 70%);pointer-events:none;animation:samSplashGlow 3s ease-in-out infinite;"></div>
+
+  <!-- буква S -->
+  <div style="position:relative;z-index:2;margin-bottom:32px;">
+    <svg id="samLetterSvg" width="120" height="140" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;filter:drop-shadow(0 0 24px rgba(229,34,34,0.5));">
+      <!-- буква S -->
+      <text x="50%" y="118" text-anchor="middle"
+        font-family="'Bebas Neue',sans-serif"
+        font-size="130"
+        fill="url(#samLetterGrad)"
+        style="letter-spacing:0;">S</text>
+
+      <!-- градиент буквы -->
+      <defs>
+        <linearGradient id="samLetterGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff4444"/>
+          <stop offset="100%" stop-color="#8b0000"/>
+        </linearGradient>
+      </defs>
+
+      <!-- капли крови — SVG paths, позиции на букве S -->
+
+      <!-- капля 1 — слева на верхнем изгибе -->
+      <g id="drop1" style="animation:dropFall1 2.4s ease-in 0.3s infinite;">
+        <ellipse cx="34" cy="28" rx="4.5" ry="6" fill="#cc0000"/>
+        <ellipse cx="34" cy="22" rx="3" ry="3" fill="#cc0000"/>
+        <path d="M34 14 Q36 19 34 22 Q32 19 34 14Z" fill="#cc0000"/>
+      </g>
+
+      <!-- капля 2 — справа в верхней части -->
+      <g id="drop2" style="animation:dropFall2 2.8s ease-in 0.9s infinite;">
+        <ellipse cx="86" cy="38" rx="5" ry="7" fill="#bb0000"/>
+        <ellipse cx="86" cy="30" rx="3.5" ry="3.5" fill="#bb0000"/>
+        <path d="M86 20 Q88.5 26 86 30 Q83.5 26 86 20Z" fill="#bb0000"/>
+      </g>
+
+      <!-- капля 3 — середина буквы S (перегиб) -->
+      <g id="drop3" style="animation:dropFall3 3.1s ease-in 1.5s infinite;">
+        <ellipse cx="58" cy="82" rx="4" ry="5.5" fill="#dd0000"/>
+        <ellipse cx="58" cy="75" rx="2.8" ry="2.8" fill="#dd0000"/>
+        <path d="M58 66 Q60 71 58 75 Q56 71 58 66Z" fill="#dd0000"/>
+      </g>
+
+      <!-- капля 4 — нижняя правая часть -->
+      <g id="drop4" style="animation:dropFall4 2.6s ease-in 0.6s infinite;">
+        <ellipse cx="84" cy="110" rx="5.5" ry="7.5" fill="#cc0000"/>
+        <ellipse cx="84" cy="101" rx="3.8" ry="3.8" fill="#cc0000"/>
+        <path d="M84 90 Q87 96 84 101 Q81 96 84 90Z" fill="#cc0000"/>
+      </g>
+
+      <!-- капля 5 — левая нижняя -->
+      <g id="drop5" style="animation:dropFall5 3.3s ease-in 1.2s infinite;">
+        <ellipse cx="38" cy="120" rx="3.5" ry="5" fill="#bb0000"/>
+        <ellipse cx="38" cy="113" rx="2.5" ry="2.5" fill="#bb0000"/>
+        <path d="M38 104 Q40 109 38 113 Q36 109 38 104Z" fill="#bb0000"/>
+      </g>
+    </svg>
+
+    <!-- подтёки на букве (статичные) -->
+    <div style="position:absolute;top:0;left:0;width:120px;height:140px;pointer-events:none;">
+      <!-- тонкий ручеёк 1 -->
+      <svg width="120" height="140" viewBox="0 0 120 140" style="position:absolute;top:0;left:0;">
+        <path d="M34 28 Q33 50 35 70 Q36 90 34 110" stroke="rgba(180,0,0,0.55)" stroke-width="2" fill="none" stroke-linecap="round" style="stroke-dasharray:100;stroke-dashoffset:100;animation:drip1Draw 1.8s ease 0.5s forwards;"/>
+        <path d="M84 38 Q85 60 83 80" stroke="rgba(160,0,0,0.45)" stroke-width="1.5" fill="none" stroke-linecap="round" style="stroke-dasharray:60;stroke-dashoffset:60;animation:drip1Draw 1.6s ease 1.0s forwards;"/>
+        <path d="M60 82 Q59 100 61 120" stroke="rgba(190,0,0,0.4)" stroke-width="1.5" fill="none" stroke-linecap="round" style="stroke-dasharray:50;stroke-dashoffset:50;animation:drip1Draw 1.4s ease 1.6s forwards;"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- полоса загрузки с каплями -->
+  <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;">
+
+    <!-- контейнер прогресс-бара -->
+    <div style="position:relative;width:200px;">
+      <!-- сами "капли" падающие в бар -->
+      <div id="samDropsContainer" style="position:absolute;bottom:100%;left:0;width:100%;height:40px;overflow:visible;pointer-events:none;"></div>
+
+      <!-- трек бара -->
+      <div style="width:200px;height:3px;background:rgba(229,34,34,0.12);border-radius:3px;overflow:hidden;position:relative;">
+        <!-- заполнение -->
+        <div id="samProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#8b0000,#e52222,#ff6b6b);border-radius:3px;transition:width 0.08s linear;position:relative;">
+          <!-- блик на баре -->
+          <div style="position:absolute;top:0;right:0;width:20px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,150,150,0.6));border-radius:3px;"></div>
+        </div>
+      </div>
+
+      <!-- лужица крови под баром -->
+      <div style="display:flex;justify-content:center;margin-top:4px;">
+        <svg width="200" height="8" viewBox="0 0 200 8" fill="none">
+          <ellipse id="samBloodPool" cx="100" cy="5" rx="0" ry="3" fill="rgba(139,0,0,0.35)" style="transition:rx 0.1s linear;"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- лейбл -->
+    <div id="samSplashLabel" style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:rgba(229,34,34,0.5);text-transform:uppercase;margin-top:2px;">Загрузка...</div>
+  </div>
+
+</div>
+
+<style>
+@keyframes samSplashGlow {
+  0%,100% { opacity:0.6; transform:translateX(-50%) scale(1); }
+  50%      { opacity:1;   transform:translateX(-50%) scale(1.1); }
+}
+
+/* Капли падают вниз и исчезают */
+@keyframes dropFall1 {
+  0%   { transform:translateY(0);   opacity:1; }
+  60%  { transform:translateY(110px); opacity:1; }
+  80%  { transform:translateY(120px); opacity:0; }
+  100% { transform:translateY(0);   opacity:0; }
+}
+@keyframes dropFall2 {
+  0%   { transform:translateY(0);   opacity:1; }
+  60%  { transform:translateY(100px); opacity:1; }
+  80%  { transform:translateY(110px); opacity:0; }
+  100% { transform:translateY(0);   opacity:0; }
+}
+@keyframes dropFall3 {
+  0%   { transform:translateY(0);   opacity:1; }
+  60%  { transform:translateY(60px); opacity:1; }
+  80%  { transform:translateY(70px); opacity:0; }
+  100% { transform:translateY(0);   opacity:0; }
+}
+@keyframes dropFall4 {
+  0%   { transform:translateY(0);   opacity:1; }
+  60%  { transform:translateY(32px); opacity:1; }
+  80%  { transform:translateY(40px); opacity:0; }
+  100% { transform:translateY(0);   opacity:0; }
+}
+@keyframes dropFall5 {
+  0%   { transform:translateY(0);   opacity:1; }
+  60%  { transform:translateY(22px); opacity:1; }
+  80%  { transform:translateY(28px); opacity:0; }
+  100% { transform:translateY(0);   opacity:0; }
+}
+
+/* Подтёки рисуются -->
+@keyframes drip1Draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Капля летит в бар */
+@keyframes samDropToBar {
+  0%   { transform:translateY(0);   opacity:1; }
+  70%  { transform:translateY(30px); opacity:1; }
+  90%  { transform:translateY(36px); opacity:0; }
+  100% { transform:translateY(36px); opacity:0; }
+}
+
+/* Сплэш скрывается */
+#sam-splash.sam-hidden {
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transition:opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s !important;
+}
+</style>
+
+
+<!-- ============================================================
+  БЛОК Б — вставить перед </body>
+============================================================= -->
+
+<script>
+(function(){
+  var splash    = document.getElementById('sam-splash');
+  var fill      = document.getElementById('samProgressFill');
+  var pool      = document.getElementById('samBloodPool');
+  var container = document.getElementById('samDropsContainer');
+  var label     = document.getElementById('samSplashLabel');
+
+  var DURATION = 2600; // мс
+  var start    = performance.now();
+  var done     = false;
+
+  // ── ПРОГРЕСС ──
+  function tick(now) {
+    var elapsed = now - start;
+    var pct     = Math.min(100, (elapsed / DURATION) * 100);
+    fill.style.width = pct + '%';
+    // лужица растёт вместе с баром
+    if (pool) pool.setAttribute('rx', (pct * 0.98).toFixed(1));
+    if (pct < 100) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // ── КАПЛИ В БАР ──
+  // Создаём случайные капли, которые падают сверху в полосу загрузки
+  var dropColors = ['#cc0000','#bb0000','#dd0000','#aa0000','#e52222'];
+
+  function spawnDrop() {
+    if (done) return;
+    var drop  = document.createElement('div');
+    var x     = Math.random() * 180 + 10; // горизонтальное смещение внутри бара
+    var size  = Math.random() * 4 + 3;    // 3–7px
+    var color = dropColors[Math.floor(Math.random() * dropColors.length)];
+    var delay = 0;
+    drop.style.cssText = [
+      'position:absolute',
+      'bottom:0',
+      'left:' + x + 'px',
+      'width:' + size + 'px',
+      'height:' + (size * 1.6) + 'px',
+      'background:' + color,
+      'border-radius:50% 50% 50% 50% / 60% 60% 40% 40%',
+      'transform-origin:center bottom',
+      'animation:samDropToBar 0.55s ease-in ' + delay + 's forwards',
+      'pointer-events:none',
+      'opacity:1'
+    ].join(';');
+    container.appendChild(drop);
+    setTimeout(function(){ drop.remove(); }, 700);
+  }
+
+  // Запускаем капли периодически
+  var dropInterval = setInterval(function(){
+    if (done) { clearInterval(dropInterval); return; }
+    spawnDrop();
+    // иногда две сразу
+    if (Math.random() > 0.6) setTimeout(spawnDrop, 120);
+  }, 280);
+
+  // ── СКРЫТИЕ ──
+  function hideSplash() {
+    if (done) return;
+    done = true;
+    clearInterval(dropInterval);
+    label.textContent = 'Готово';
+    setTimeout(function(){
+      splash.classList.add('sam-hidden');
+      splash.addEventListener('transitionend', function(){
+        splash.remove();
+      }, { once: true });
+    }, 220);
+  }
+
+  Promise.all([
+    new Promise(function(r){ if (document.readyState === 'complete') r(); else window.addEventListener('load', r, { once:true }); }),
+    new Promise(function(r){ setTimeout(r, DURATION); })
+  ]).then(hideSplash);
+
+  // при возврате на вкладку
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible' && !done && (performance.now() - start >= DURATION)) hideSplash();
+  });
+})();
+</script>
+  
 </body>
 </html>
