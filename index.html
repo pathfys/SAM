@@ -423,7 +423,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
   <!-- CAREER -->
   <div class="screen" id="screen-career">
     <div class="career-hero">
-      <div class="rank-badge-hero" id="currentRankBadge">🌱 Новичок</div>
+      <div class="rank-badge-hero" id="currentRankBadge">Новичок</div>
       <div style="height:12px;"></div>
       <div class="career-title">Карьера</div>
       <div class="career-sub" id="careerSubText">До следующего ранга: <strong style="color:#4ade80;">5 выплат</strong>. Прогресс растёт с каждой заявкой.</div>
@@ -687,12 +687,48 @@ function saveGlobalLeaderboard(arr) {
    RANKS SYSTEM
 ============================================================ */
 const RANKS = [
-  { name:'Новичок',    emoji:'🌱', min:0,   color:'rgba(34,197,94,0.15)',  border:'rgba(34,197,94,0.25)' },
-  { name:'Стажёр',     emoji:'⭐', min:5,   color:'rgba(56,189,248,0.12)', border:'rgba(56,189,248,0.22)' },
-  { name:'Работник',   emoji:'🔥', min:15,  color:'rgba(245,158,11,0.12)', border:'rgba(245,158,11,0.22)' },
-  { name:'Специалист', emoji:'💎', min:30,  color:'rgba(139,92,246,0.12)', border:'rgba(139,92,246,0.22)' },
-  { name:'Эксперт',    emoji:'🚀', min:60,  color:'rgba(229,34,34,0.12)',  border:'rgba(229,34,34,0.22)' },
-  { name:'Мастер',     emoji:'👑', min:100, color:'rgba(255,215,0,0.12)',  border:'rgba(255,215,0,0.3)' },
+  {
+    name: 'Новичок', min: 0,
+    accent: '34,197,94',
+    desc: 'Первый шаг в команде SAM. Ты только начинаешь путь — знакомишься с платформой, подаёшь первые заявки и строишь базу.',
+    perks: ['Доступ к базовым заявкам', 'Обучающие модули', 'Поддержка куратора'],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a9 9 0 0 1 0 18"/><path d="M12 2a9 9 0 0 0 0 18"/><path d="M12 6v6l3 3"/></svg>`,
+  },
+  {
+    name: 'Стажёр', min: 5,
+    accent: '56,189,248',
+    desc: 'Ты уже сделал первые успешные заявки. Система тебе доверяет — открываются новые инструменты и приоритетная очередь.',
+    perks: ['Приоритет в очереди', 'Расширенная история', 'Доступ к аналитике заявок'],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  },
+  {
+    name: 'Работник', min: 15,
+    accent: '245,158,11',
+    desc: 'Стабильный воркер с подтверждённым опытом. Твои заявки обрабатываются быстрее, лимиты на сумму выплат увеличены.',
+    perks: ['Увеличенный лимит выплат', 'Быстрая обработка ОТС', 'Метка доверия в профиле'],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  },
+  {
+    name: 'Специалист', min: 30,
+    accent: '139,92,246',
+    desc: 'Элита платформы. Ты демонстрируешь высокую активность и качество. Доступны крупные сделки и персональный гарант.',
+    perks: ['Персональный гарант', 'VIP-очередь заявок', 'Бонус к выплатам +5%'],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  },
+  {
+    name: 'Эксперт', min: 60,
+    accent: '229,34,34',
+    desc: 'Топ-уровень команды. Твоё имя в рейтинге, ты — ориентир для новичков. Максимальные лимиты, приоритет у администраторов.',
+    perks: ['Макс. лимиты без ограничений', 'Прямой доступ к админам', 'Место в топ-рейтинге'],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  },
+  {
+    name: 'Мастер', min: 100,
+    accent: '255,200,0',
+    desc: 'Высший ранг SAM. Легенда платформы. Особый статус, персональные условия, участие в стратегических решениях команды.',
+    perks: ['Статус "Легенда SAM"', 'Индивидуальные условия', 'Участие в развитии платформы'],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg>`,
+  },
 ];
 
 function getRank(profits) {
@@ -741,8 +777,12 @@ function refreshStats() {
 
   const rank = getRank(profits);
   const next = getNextRank(profits);
-  document.getElementById('profileRankRow').textContent = rank.emoji + ' ' + rank.name;
-  document.getElementById('currentRankBadge').textContent = rank.emoji + ' ' + rank.name;
+  document.getElementById('profileRankRow').textContent = rank.name;
+  const badge = document.getElementById('currentRankBadge');
+  badge.innerHTML = `<span style="display:inline-flex;align-items:center;color:rgba(${rank.accent},0.9);margin-right:6px;">${rank.icon}</span>${rank.name}`;
+  badge.style.borderColor = `rgba(${rank.accent},0.35)`;
+  badge.style.background  = `rgba(${rank.accent},0.1)`;
+  badge.style.color       = `rgba(${rank.accent},1)`;
 
   if (next) {
     const progress = Math.min(100, ((profits - rank.min) / (next.min - rank.min)) * 100);
@@ -760,28 +800,105 @@ function refreshStats() {
 }
 
 /* ============================================================
-   RANK LIST
+   RANK LIST — expandable cards with SVG icons
 ============================================================ */
 function renderRankList(profits) {
   const list = document.getElementById('rankList');
   list.innerHTML = '';
-  RANKS.forEach(r => {
-    const isCurrent = getRank(profits).min === r.min && (getNextRank(profits)?.min !== r.min);
+  RANKS.forEach((r, idx) => {
+    const currentRank = getRank(profits);
+    const isCurrent  = currentRank.min === r.min;
     const isUnlocked = profits >= r.min;
-    const item = document.createElement('div');
-    item.className = 'rank-item' + (isCurrent ? ' current' : '') + (!isUnlocked ? ' locked-rank' : '');
-    item.innerHTML = `
-      <div class="rank-icon-wrap" style="background:${r.color};border:1px solid ${r.border};">
-        <span style="font-size:22px;">${r.emoji}</span>
-      </div>
-      <div class="rank-info">
-        <div class="rank-name">${r.name}</div>
-        <div class="rank-req">${r.min === 0 ? 'Стартовый ранг' : 'от ' + r.min + ' выплат'}</div>
-      </div>
-      ${isCurrent ? '<div class="rank-current-badge">Текущий</div>' : isUnlocked ? '<div class="rank-current-badge" style="background:rgba(100,100,100,0.1);color:#555;">Пройден</div>' : '<div class="rank-locked-badge">🔒</div>'}
+    const a = r.accent;
+
+    const card = document.createElement('div');
+    card.style.cssText = `
+      background: ${isUnlocked ? `rgba(${a},0.06)` : 'rgba(255,255,255,0.02)'};
+      border: 1px solid ${isCurrent ? `rgba(${a},0.35)` : isUnlocked ? `rgba(${a},0.15)` : 'rgba(255,255,255,0.05)'};
+      border-radius: 18px; margin-bottom: 10px;
+      overflow: hidden; transition: border-color 0.25s;
+      ${!isUnlocked ? 'opacity:0.45;' : ''}
     `;
-    list.appendChild(item);
+
+    const perkItems = r.perks.map(p => `
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+        <div style="width:5px;height:5px;border-radius:50%;background:rgba(${a},0.7);flex-shrink:0;"></div>
+        <span style="font-size:12px;color:rgba(255,255,255,0.55);">${p}</span>
+      </div>`).join('');
+
+    const progressPct = isCurrent && getNextRank(profits)
+      ? Math.min(100, ((profits - r.min) / (getNextRank(profits).min - r.min)) * 100)
+      : isUnlocked ? 100 : 0;
+
+    card.innerHTML = `
+      <div class="rank-card-header" data-idx="${idx}" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;">
+        <div style="
+          width:48px;height:48px;border-radius:14px;flex-shrink:0;
+          display:flex;align-items:center;justify-content:center;
+          background:${isUnlocked ? `rgba(${a},0.1)` : 'rgba(255,255,255,0.04)'};
+          border:1px solid ${isUnlocked ? `rgba(${a},0.2)` : 'rgba(255,255,255,0.06)'};
+          color:${isUnlocked ? `rgba(${a},1)` : '#333'};
+          transition:background 0.25s, border-color 0.25s;
+        ">${r.icon}</div>
+
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span style="font-size:15px;font-weight:700;color:${isUnlocked ? '#f0f0f0' : '#444'};">${r.name}</span>
+            ${isCurrent ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(${a},0.15);color:rgba(${a},1);letter-spacing:0.5px;text-transform:uppercase;">Текущий</span>` : ''}
+            ${!isCurrent && isUnlocked ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.05);color:#555;letter-spacing:0.5px;text-transform:uppercase;">Пройден</span>` : ''}
+            ${!isUnlocked ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.04);color:#444;letter-spacing:0.5px;">🔒 ${r.min} выплат</span>` : ''}
+          </div>
+          <div style="font-size:11px;color:#555;">${r.min === 0 ? 'Стартовый ранг' : 'от ' + r.min + ' выплат'}</div>
+          ${isCurrent ? `
+            <div style="margin-top:8px;">
+              <div style="height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;">
+                <div style="height:100%;width:${progressPct.toFixed(0)}%;background:rgba(${a},0.8);border-radius:99px;transition:width 0.6s;"></div>
+              </div>
+            </div>` : ''}
+        </div>
+
+        <div class="rank-chevron" data-idx="${idx}" style="color:#333;transition:transform 0.25s;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+
+      <div class="rank-body" data-idx="${idx}" style="max-height:0;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1);">
+        <div style="padding:0 16px 18px;">
+          <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:14px;"></div>
+          <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:14px;">${r.desc}</p>
+          <div style="font-size:10px;font-weight:700;color:rgba(${a},0.6);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Привилегии</div>
+          ${perkItems}
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
   });
+
+  /* Toggle expand */
+  list.querySelectorAll('.rank-card-header').forEach(header => {
+    header.addEventListener('click', function() {
+      const idx = this.dataset.idx;
+      const body    = list.querySelector(`.rank-body[data-idx="${idx}"]`);
+      const chevron = list.querySelector(`.rank-chevron[data-idx="${idx}"]`);
+      const isOpen  = body.style.maxHeight !== '0px' && body.style.maxHeight !== '';
+      /* close all */
+      list.querySelectorAll('.rank-body').forEach(b => { b.style.maxHeight = '0'; });
+      list.querySelectorAll('.rank-chevron').forEach(c => { c.style.transform = 'rotate(0deg)'; });
+      if (!isOpen) {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        chevron.style.transform = 'rotate(180deg)';
+      }
+    });
+  });
+
+  /* Auto-open current rank */
+  const currentIdx = RANKS.findIndex(r => r.min === getRank(profits).min);
+  setTimeout(() => {
+    const body    = list.querySelector(`.rank-body[data-idx="${currentIdx}"]`);
+    const chevron = list.querySelector(`.rank-chevron[data-idx="${currentIdx}"]`);
+    if (body) { body.style.maxHeight = body.scrollHeight + 'px'; }
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }, 80);
 }
 
 /* ============================================================
@@ -858,7 +975,7 @@ function renderLeaderboard() {
       <div class="leader-avatar" style="${style}">${entry.initials || '?'}</div>
       <div class="leader-info">
         <div class="leader-name">${entry.name}${isMe ? ' <span style="font-size:9px;color:#e52222;font-weight:700;">ВЫ</span>' : ''}</div>
-        <div class="leader-meta">${rankEmoji} ${getRank(entry.profits).name} · ${entry.profits} заявок</div>
+        <div class="leader-meta">${getRank(entry.profits).name} · ${entry.profits} заявок</div>
       </div>
       <div class="leader-right">
         <div class="leader-ton">${entry.totalTon.toFixed(1)} TON</div>
