@@ -8,566 +8,279 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  --bg:        #0a0a0a;
-  --bg2:       #111111;
-  --bg3:       #181818;
-  --card:      rgba(20,20,20,0.9);
-  --accent:    #e52222;
-  --accent2:   #ff4444;
-  --accent3:   #ff6b6b;
-  --dim-red:   rgba(229,34,34,0.10);
-  --dim-red2:  rgba(229,34,34,0.18);
-  --border:    rgba(229,34,34,0.14);
-  --border2:   rgba(255,255,255,0.07);
-  --text:      #f0f0f0;
-  --text-muted:#888;
-  --text-dim:  #555;
-  --green:     #22c55e;
-  --orange:    #f59e0b;
-  --red-err:   #ef4444;
-  --shadow:    0 8px 32px rgba(0,0,0,0.6);
-  --shadow-red:0 8px 28px rgba(229,34,34,0.22);
-  --glow:      0 0 40px rgba(229,34,34,0.12);
+  --bg:#0a0a0a;--bg2:#111111;--bg3:#181818;--card:rgba(20,20,20,0.9);
+  --accent:#e52222;--accent2:#ff4444;--accent3:#ff6b6b;
+  --dim-red:rgba(229,34,34,0.10);--dim-red2:rgba(229,34,34,0.18);
+  --border:rgba(229,34,34,0.14);--border2:rgba(255,255,255,0.07);
+  --text:#f0f0f0;--text-muted:#888;--text-dim:#555;
+  --green:#22c55e;--orange:#f59e0b;--red-err:#ef4444;
+  --shadow:0 8px 32px rgba(0,0,0,0.6);--shadow-red:0 8px 28px rgba(229,34,34,0.22);
 }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:96px;position:relative;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+body::after{content:'';position:fixed;top:-30%;right:-20%;width:70vw;height:70vw;max-width:500px;max-height:500px;background:radial-gradient(circle,rgba(229,34,34,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;animation:blobPulse 8s ease-in-out infinite;}
+@keyframes blobPulse{0%,100%{transform:scale(1) translate(0,0);opacity:0.7;}50%{transform:scale(1.15) translate(-3%,4%);opacity:1;}}
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+.topbar{position:fixed;top:0;left:0;width:100%;height:60px;background:rgba(10,10,10,0.88);border-bottom:1px solid var(--border);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:999;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;background:linear-gradient(135deg,#e52222 0%,#ff6b6b 50%,#ff9999 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 14px rgba(229,34,34,0.5));}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.avatar-wrap{position:relative;}
+.avatar-btn{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e52222,#8b0000);border:1px solid rgba(229,34,34,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;transition:transform 0.2s;box-shadow:0 0 14px rgba(229,34,34,0.25);}
+.avatar-btn:active{transform:scale(0.9);}
+.avatar-btn img{width:100%;height:100%;object-fit:cover;border-radius:9px;}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#e52222;border:2px solid var(--bg);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(229,34,34,0.6);}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-  padding-bottom: 96px;
-  position: relative;
-}
+.page-wrap{padding:74px 14px 0;position:relative;z-index:1;}
+.screen{display:none;animation:fadeUp 0.3s ease both;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
-body::before {
-  content:'';
-  position:fixed; inset:0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none; z-index:0; opacity:0.4;
-}
+.card{background:var(--card);border:1px solid var(--border2);border-radius:18px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);transition:transform 0.15s;}
+.card:active{transform:scale(0.985);}
 
-body::after {
-  content:'';
-  position:fixed; top:-30%; right:-20%;
-  width:70vw; height:70vw; max-width:500px; max-height:500px;
-  background: radial-gradient(circle, rgba(229,34,34,0.07) 0%, transparent 65%);
-  pointer-events:none; z-index:0;
-  animation: blobPulse 8s ease-in-out infinite;
-}
+.balance-card{background:linear-gradient(145deg,#1a0505 0%,#200808 40%,#160202 100%);border:1px solid rgba(229,34,34,0.28);border-radius:22px;padding:26px 22px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:var(--shadow-red),inset 0 1px 0 rgba(255,100,100,0.08);}
+.balance-card::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(229,34,34,0.04) 0px,rgba(229,34,34,0.04) 1px,transparent 1px,transparent 24px);pointer-events:none;}
+.balance-card::after{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(229,34,34,0.15) 0%,transparent 70%);pointer-events:none;}
+.balance-eyebrow{font-size:10px;font-weight:600;color:rgba(229,34,34,0.7);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px;position:relative;z-index:1;display:flex;align-items:center;gap:6px;}
+.balance-eyebrow::before{content:'';width:18px;height:1px;background:rgba(229,34,34,0.5);}
+.balance-amount{font-family:'Bebas Neue',sans-serif;font-size:52px;color:#fff;letter-spacing:1px;line-height:1;position:relative;z-index:1;margin-bottom:4px;}
+.balance-amount span{font-size:24px;color:rgba(255,255,255,0.45);}
+.balance-usd{font-size:13px;color:var(--text-muted);position:relative;z-index:1;margin-bottom:22px;}
+.balance-actions{display:flex;gap:10px;position:relative;z-index:1;}
 
-@keyframes blobPulse {
-  0%,100% { transform: scale(1) translate(0,0); opacity:0.7; }
-  50%      { transform: scale(1.15) translate(-3%,4%); opacity:1; }
-}
+.btn-hero-primary{flex:1;padding:12px 0;border-radius:12px;border:none;background:linear-gradient(135deg,#e52222,#c01c1c);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 4px 16px rgba(229,34,34,0.4);letter-spacing:0.3px;}
+.btn-hero-primary:active{transform:scale(0.95);}
+.btn-hero-secondary{flex:1;padding:12px 0;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.75);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:transform 0.15s;letter-spacing:0.3px;backdrop-filter:blur(8px);}
+.btn-hero-secondary:active{transform:scale(0.95);}
 
-.topbar {
-  position:fixed; top:0; left:0; width:100%; height:60px;
-  background: rgba(10,10,10,0.88);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 0 18px; z-index:999;
-}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.section-link{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;text-transform:none;letter-spacing:0;}
 
-.logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px; letter-spacing: 2px;
-  background: linear-gradient(135deg, #e52222 0%, #ff6b6b 50%, #ff9999 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  filter: drop-shadow(0 0 14px rgba(229,34,34,0.5));
-}
+.quick-pay{background:var(--dim-red);border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform 0.15s,background 0.15s;position:relative;overflow:hidden;}
+.quick-pay::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(229,34,34,0.06) 100%);}
+.quick-pay:active{transform:scale(0.97);background:var(--dim-red2);}
+.quick-pay-icon{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#e52222,#8b0000);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(229,34,34,0.35);}
+.quick-pay-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.quick-pay-sub{font-size:12px;color:var(--text-muted);}
 
-.topbar-right { display:flex; align-items:center; gap:10px; }
+.payment-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.payment-item:last-child{border-bottom:none;padding-bottom:0;}
+.payment-item:first-child{padding-top:0;}
+.payment-avatar{width:40px;height:40px;border-radius:12px;background:rgba(229,34,34,0.1);border:1px solid rgba(229,34,34,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.payment-info{flex:1;}
+.payment-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.payment-date{font-size:11px;color:var(--text-muted);}
+.payment-amount{text-align:right;}
+.payment-ton{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--text);margin-bottom:3px;letter-spacing:0.5px;}
+.payment-status{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;display:inline-block;letter-spacing:0.5px;text-transform:uppercase;}
+.payment-status.success{background:rgba(34,197,94,0.12);color:#4ade80;}
+.payment-status.pending{background:rgba(245,158,11,0.12);color:#fbbf24;}
+.payment-status.failed{background:rgba(239,68,68,0.12);color:#f87171;}
 
-.avatar-wrap { position:relative; }
-.avatar-btn {
-  width:36px; height:36px; border-radius:10px;
-  background: linear-gradient(135deg, #e52222, #8b0000);
-  border: 1px solid rgba(229,34,34,0.4);
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; overflow:hidden;
-  font-family:'Bebas Neue',sans-serif; font-size:16px; font-weight:400; color:#fff;
-  transition:transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 0 14px rgba(229,34,34,0.25);
-}
-.avatar-btn:active { transform:scale(0.9); }
-.avatar-btn img { width:100%; height:100%; object-fit:cover; border-radius:9px; }
+.btn-primary{width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#e52222 0%,#b01818 100%);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(229,34,34,0.32);transition:transform 0.15s;letter-spacing:0.3px;margin-bottom:12px;}
+.btn-primary:active{transform:scale(0.97);}
+.btn-secondary{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(12px);transition:transform 0.15s;margin-bottom:12px;}
+.btn-secondary:active{transform:scale(0.97);}
 
-.notif-badge {
-  position:absolute; top:-4px; right:-4px; width:16px; height:16px;
-  border-radius:50%; background:#e52222; border:2px solid var(--bg);
-  font-size:9px; font-weight:700; color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow: 0 0 8px rgba(229,34,34,0.6);
-}
+/* === BOTTOM NAV === */
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;height:82px;z-index:999;display:flex;align-items:center;justify-content:center;padding:0 10px 14px;}
+.bottom-nav-inner{width:100%;max-width:480px;background:rgba(15,15,15,0.92);border:1px solid rgba(229,34,34,0.18);border-radius:22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 8px 32px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-around;padding:6px 2px;height:58px;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 6px;border-radius:12px;transition:background 0.2s,transform 0.15s;flex:1;border:none;background:transparent;}
+.nav-item:active{transform:scale(0.88);}
+.nav-item.active{background:rgba(229,34,34,0.12);}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{color:#444;transition:color 0.2s;}
+.nav-item.active .nav-icon svg{color:#e52222;}
+.nav-label{font-size:8px;font-weight:700;color:#444;transition:color 0.2s;letter-spacing:0.5px;text-transform:uppercase;}
+.nav-item.active .nav-label{color:#e52222;}
 
-.page-wrap {
-  padding: 74px 14px 0;
-  position:relative; z-index:1;
-}
+/* === PROFILE === */
+.profile-hero{background:linear-gradient(145deg,#1a0505,#200808);border:1px solid rgba(229,34,34,0.25);border-radius:22px;padding:28px 22px;margin-bottom:14px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;overflow:hidden;box-shadow:var(--shadow-red);}
+.profile-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(229,34,34,0.04) 0px,rgba(229,34,34,0.04) 1px,transparent 1px,transparent 24px);}
+.profile-avatar{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,rgba(229,34,34,0.3),rgba(139,0,0,0.3));border:2px solid rgba(229,34,34,0.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff;position:relative;z-index:1;overflow:hidden;box-shadow:0 0 28px rgba(229,34,34,0.25);}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.profile-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:#fff;position:relative;z-index:1;text-align:center;}
+.profile-username{font-size:13px;color:rgba(255,255,255,0.45);position:relative;z-index:1;}
+.profile-badge{background:rgba(229,34,34,0.15);border:1px solid rgba(229,34,34,0.3);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:var(--accent3);letter-spacing:0.5px;position:relative;z-index:1;}
 
-.screen { display:none; animation: fadeUp 0.3s ease both; }
-.screen.active { display:block; }
+.profile-stats-row{display:flex;gap:10px;margin-bottom:12px;}
+.profile-stat-card{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:14px 10px;text-align:center;box-shadow:var(--shadow);}
+.profile-stat-emoji{font-size:18px;margin-bottom:6px;}
+.profile-stat-value{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);letter-spacing:0.5px;line-height:1;margin-bottom:3px;}
+.profile-stat-label{font-size:10px;color:var(--text-muted);line-height:1.3;letter-spacing:0.3px;}
 
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(12px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.profile-row:last-child{border-bottom:none;}
+.profile-row-left{display:flex;align-items:center;gap:11px;}
+.profile-row-icon{width:32px;height:32px;border-radius:9px;background:rgba(229,34,34,0.08);border:1px solid rgba(229,34,34,0.1);display:flex;align-items:center;justify-content:center;}
+.profile-row-label{font-size:13px;font-weight:500;color:var(--text);}
+.profile-row-value{font-size:12px;color:var(--text-muted);font-weight:500;max-width:55%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.profile-row-value.accent{color:var(--accent3);}
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: 18px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 18px;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow);
-  transition: transform 0.15s;
-}
-.card:active { transform:scale(0.985); }
+/* === INPUT / MODAL === */
+.search-box{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:11px 14px;margin-bottom:12px;backdrop-filter:blur(12px);}
+.search-box input{flex:1;border:none;background:transparent;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--text);outline:none;}
+.search-box input::placeholder{color:var(--text-dim);}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;}
+.filter-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--card);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0;letter-spacing:0.3px;}
+.filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(229,34,34,0.3);}
 
-.balance-card {
-  background: linear-gradient(145deg, #1a0505 0%, #200808 40%, #160202 100%);
-  border: 1px solid rgba(229,34,34,0.28);
-  border-radius: 22px;
-  padding: 26px 22px;
-  margin-bottom: 14px;
-  position:relative; overflow:hidden;
-  box-shadow: var(--shadow-red), inset 0 1px 0 rgba(255,100,100,0.08);
-}
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-16px);background:#1a1a1a;color:var(--text);border:1px solid rgba(255,255,255,0.08);padding:11px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s,transform 0.25s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.6);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-.balance-card::before {
-  content:'';
-  position:absolute; inset:0;
-  background-image:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(229,34,34,0.04) 0px,
-      rgba(229,34,34,0.04) 1px,
-      transparent 1px,
-      transparent 24px
-    );
-  pointer-events:none;
-}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:2000;display:none;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.modal-overlay.open{display:flex;opacity:1;pointer-events:all;}
+.modal-sheet{width:100%;max-width:480px;background:#141414;border:1px solid rgba(229,34,34,0.15);border-radius:26px 26px 0 0;padding:18px 18px 38px;display:flex;flex-direction:column;gap:13px;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);max-height:88vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,0.6);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:#2a2a2a;border-radius:99px;margin:0 auto 6px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--text);text-align:center;}
 
-.balance-card::after {
-  content:'';
-  position:absolute; top:-50px; right:-50px;
-  width:180px; height:180px;
-  background: radial-gradient(circle, rgba(229,34,34,0.15) 0%, transparent 70%);
-  pointer-events:none;
-}
+.input-group{display:flex;flex-direction:column;gap:5px;}
+.input-label{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;}
+.input-field{width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s;}
+.input-field:focus{border-color:rgba(229,34,34,0.45);background:rgba(229,34,34,0.04);}
+.input-field::placeholder{color:var(--text-dim);}
+textarea.input-field{resize:none;padding-top:12px;line-height:1.6;}
+textarea.input-field.big{height:200px;font-size:13px;}
 
-.balance-eyebrow {
-  font-size:10px; font-weight:600; color:rgba(229,34,34,0.7);
-  letter-spacing:2.5px; text-transform:uppercase;
-  margin-bottom:10px; position:relative; z-index:1;
-  display:flex; align-items:center; gap:6px;
-}
-.balance-eyebrow::before {
-  content:''; width:18px; height:1px; background:rgba(229,34,34,0.5);
-}
+.method-choice-wrap{display:flex;flex-direction:column;gap:10px;margin-top:2px;}
+.method-btn{width:100%;padding:16px 18px;border-radius:16px;border:1px solid transparent;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.2s;font-family:'Space Grotesk',sans-serif;text-align:left;}
+.method-btn:active{transform:scale(0.97);}
+.method-btn.ots{background:rgba(229,34,34,0.06);border-color:rgba(229,34,34,0.2);}
+.method-btn.garant{background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.2);}
+.method-icon{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.method-icon.red{background:rgba(229,34,34,0.12);}
+.method-icon.green{background:rgba(34,197,94,0.12);}
+.method-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.method-sub{font-size:12px;color:var(--text-muted);}
 
-.balance-amount {
-  font-family:'Bebas Neue',sans-serif; font-size:52px; color:#fff;
-  letter-spacing:1px; line-height:1; position:relative; z-index:1; margin-bottom:4px;
-}
-.balance-amount span { font-size:24px; color:rgba(255,255,255,0.45); }
+.gift-info-box{background:rgba(229,34,34,0.05);border:1px solid rgba(229,34,34,0.12);border-radius:12px;padding:13px 14px;font-size:12px;color:var(--text-muted);line-height:1.6;}
+.gift-method-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:2px;}
+.gift-method-badge.ots{background:rgba(229,34,34,0.12);color:var(--accent3);}
+.gift-method-badge.garant{background:rgba(34,197,94,0.12);color:#4ade80;}
+.ton-hint{font-size:11px;color:var(--accent3);margin-top:-6px;padding:0 2px;}
 
-.balance-usd {
-  font-size:13px; color:var(--text-muted); position:relative; z-index:1; margin-bottom:22px;
-}
+.tx-hash{font-family:monospace;font-size:11px;color:var(--accent3);background:rgba(229,34,34,0.07);border:1px solid rgba(229,34,34,0.12);padding:10px 12px;border-radius:10px;word-break:break-all;text-align:center;line-height:1.7;}
 
-.balance-actions { display:flex; gap:10px; position:relative; z-index:1; }
+.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:3000;display:none;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.success-overlay.open{display:flex;opacity:1;pointer-events:all;}
+.success-card{width:calc(100% - 48px);max-width:300px;background:#141414;border:1px solid rgba(229,34,34,0.2);border-radius:24px;padding:34px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,0.7);transform:scale(0.85);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.success-overlay.open .success-card{transform:scale(1);}
+.success-icon{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#4ade80);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(34,197,94,0.35);}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--text);text-align:center;}
+.success-sub{font-size:12px;color:var(--text-muted);text-align:center;line-height:1.6;}
 
-.btn-hero-primary {
-  flex:1; padding:12px 0; border-radius:12px; border:none;
-  background: linear-gradient(135deg, #e52222, #c01c1c);
-  color:#fff; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700;
-  cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 4px 16px rgba(229,34,34,0.4);
-  letter-spacing:0.3px;
-}
-.btn-hero-primary:active { transform:scale(0.95); box-shadow:0 2px 8px rgba(229,34,34,0.3); }
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-.btn-hero-secondary {
-  flex:1; padding:12px 0; border-radius:12px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.05);
-  color:rgba(255,255,255,0.75); font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600;
-  cursor:pointer; transition:transform 0.15s, background 0.15s; letter-spacing:0.3px;
-  backdrop-filter: blur(8px);
-}
-.btn-hero-secondary:active { transform:scale(0.95); background:rgba(255,255,255,0.09); }
+.screen-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--text);margin-bottom:14px;line-height:1;}
 
-.section-title {
-  font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700;
-  color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase;
-  margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;
-}
-.section-link { font-size:12px; font-weight:600; color:var(--accent); cursor:pointer; text-transform:none; letter-spacing:0; }
+/* ==================== TRAINING ==================== */
+.training-hero{background:linear-gradient(145deg,#050d1a,#08142a);border:1px solid rgba(34,100,229,0.25);border-radius:22px;padding:24px 20px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(34,100,229,0.12);}
+.training-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(34,100,229,0.04) 0px,rgba(34,100,229,0.04) 1px,transparent 1px,transparent 24px);}
+.training-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(34,100,229,0.15) 0%,transparent 70%);pointer-events:none;}
+.training-eyebrow{font-size:10px;font-weight:600;color:rgba(100,150,255,0.7);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px;position:relative;z-index:1;display:flex;align-items:center;gap:6px;}
+.training-eyebrow::before{content:'';width:18px;height:1px;background:rgba(100,150,255,0.5);}
+.training-title{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff;letter-spacing:1px;position:relative;z-index:1;margin-bottom:6px;}
+.training-sub{font-size:12px;color:rgba(255,255,255,0.45);position:relative;z-index:1;margin-bottom:16px;line-height:1.6;}
+.training-progress-bar{height:5px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;position:relative;z-index:1;margin-bottom:6px;}
+.training-progress-fill{height:100%;background:linear-gradient(90deg,#2264e5,#60a5fa);border-radius:99px;transition:width 0.6s ease;}
+.training-progress-label{font-size:11px;color:rgba(255,255,255,0.4);position:relative;z-index:1;}
 
-.quick-pay {
-  background: var(--dim-red);
-  border: 1px solid var(--border);
-  border-radius:18px; padding:16px 18px;
-  margin-bottom:12px; display:flex; align-items:center; gap:14px;
-  cursor:pointer; transition:transform 0.15s, background 0.15s;
-  position:relative; overflow:hidden;
-}
-.quick-pay::before {
-  content:''; position:absolute; inset:0;
-  background: linear-gradient(90deg, transparent 60%, rgba(229,34,34,0.06) 100%);
-}
-.quick-pay:active { transform:scale(0.97); background:var(--dim-red2); }
+.module-card{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s,border-color 0.15s;}
+.module-card:active{transform:scale(0.97);}
+.module-card.done{border-color:rgba(34,197,94,0.2);}
+.module-card.locked{opacity:0.45;cursor:default;}
+.module-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.module-icon.blue{background:rgba(34,100,229,0.12);border:1px solid rgba(34,100,229,0.2);}
+.module-icon.green{background:rgba(34,197,94,0.10);border:1px solid rgba(34,197,94,0.15);}
+.module-icon.gold{background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.15);}
+.module-icon.purple{background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.15);}
+.module-info{flex:1;}
+.module-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.module-desc{font-size:11px;color:var(--text-muted);margin-bottom:6px;line-height:1.5;}
+.module-meta{display:flex;gap:8px;align-items:center;}
+.module-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.module-tag.blue{background:rgba(34,100,229,0.12);color:#60a5fa;}
+.module-tag.green{background:rgba(34,197,94,0.12);color:#4ade80;}
+.module-tag.gold{background:rgba(245,158,11,0.12);color:#fbbf24;}
+.module-check{margin-left:auto;flex-shrink:0;}
 
-.quick-pay-icon {
-  width:46px; height:46px; border-radius:14px;
-  background: linear-gradient(135deg, #e52222, #8b0000);
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; box-shadow:0 4px 14px rgba(229,34,34,0.35);
-}
-.quick-pay-title { font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
-.quick-pay-sub   { font-size:12px; color:var(--text-muted); }
+/* lesson modal */
+.lesson-content{font-size:13px;color:var(--text-muted);line-height:1.8;margin-bottom:4px;}
+.lesson-content strong{color:var(--text);font-weight:600;}
+.lesson-rule{background:rgba(34,100,229,0.06);border:1px solid rgba(34,100,229,0.15);border-radius:12px;padding:12px 14px;font-size:12px;color:rgba(150,190,255,0.9);line-height:1.7;margin-top:4px;}
 
-.payment-item {
-  display:flex; align-items:center; gap:12px;
-  padding:13px 0; border-bottom:1px solid rgba(255,255,255,0.04);
-}
-.payment-item:last-child { border-bottom:none; padding-bottom:0; }
-.payment-item:first-child { padding-top:0; }
+/* ==================== CAREER ==================== */
+.career-hero{background:linear-gradient(145deg,#0a0f05,#111a07);border:1px solid rgba(34,197,94,0.2);border-radius:22px;padding:24px 20px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(34,197,94,0.08);}
+.career-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(34,197,94,0.03) 0px,rgba(34,197,94,0.03) 1px,transparent 1px,transparent 24px);}
+.career-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(34,197,94,0.12) 0%,transparent 70%);pointer-events:none;}
 
-.payment-avatar {
-  width:40px; height:40px; border-radius:12px;
-  background:rgba(229,34,34,0.1); border:1px solid rgba(229,34,34,0.15);
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px; flex-shrink:0;
-}
-.payment-info { flex:1; }
-.payment-name { font-size:14px; font-weight:600; color:var(--text); margin-bottom:2px; }
-.payment-date { font-size:11px; color:var(--text-muted); }
-.payment-amount { text-align:right; }
-.payment-ton { font-family:'Bebas Neue',sans-serif; font-size:17px; color:var(--text); margin-bottom:3px; letter-spacing:0.5px; }
+.rank-badge-hero{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;color:#4ade80;position:relative;z-index:1;}
+.career-title{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#fff;letter-spacing:1px;position:relative;z-index:1;margin-bottom:4px;}
+.career-sub{font-size:12px;color:rgba(255,255,255,0.4);position:relative;z-index:1;margin-bottom:16px;line-height:1.6;}
+.career-xp-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;position:relative;z-index:1;margin-bottom:5px;}
+.career-xp-fill{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:99px;transition:width 0.6s ease;}
+.career-xp-label{font-size:11px;color:rgba(255,255,255,0.35);position:relative;z-index:1;}
 
-.payment-status {
-  font-size:10px; font-weight:700; padding:3px 9px; border-radius:6px;
-  display:inline-block; letter-spacing:0.5px; text-transform:uppercase;
-}
-.payment-status.success { background:rgba(34,197,94,0.12); color:#4ade80; }
-.payment-status.pending { background:rgba(245,158,11,0.12); color:#fbbf24; }
-.payment-status.failed  { background:rgba(239,68,68,0.12);  color:#f87171; }
+.rank-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.rank-item{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;transition:border-color 0.2s;}
+.rank-item.current{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);}
+.rank-item.locked-rank{opacity:0.4;}
+.rank-icon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.rank-info{flex:1;}
+.rank-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.rank-req{font-size:11px;color:var(--text-muted);}
+.rank-current-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(34,197,94,0.12);color:#4ade80;letter-spacing:0.5px;}
+.rank-locked-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(255,255,255,0.06);color:#555;letter-spacing:0.5px;}
 
-.btn-primary {
-  width:100%; padding:15px; border-radius:14px; border:none;
-  background: linear-gradient(135deg, #e52222 0%, #b01818 100%);
-  color:#fff; font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;
-  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-  box-shadow: 0 6px 20px rgba(229,34,34,0.32);
-  transition:transform 0.15s, box-shadow 0.15s; letter-spacing:0.3px; margin-bottom:12px;
-}
-.btn-primary:active { transform:scale(0.97); box-shadow:0 3px 10px rgba(229,34,34,0.2); }
+/* ==================== TOP ==================== */
+.top-hero{background:linear-gradient(145deg,#0f0a00,#1a1200);border:1px solid rgba(245,158,11,0.25);border-radius:22px;padding:24px 20px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(245,158,11,0.08);}
+.top-hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(245,158,11,0.03) 0px,rgba(245,158,11,0.03) 1px,transparent 1px,transparent 24px);}
+.top-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(245,158,11,0.12) 0%,transparent 70%);}
+.top-eyebrow{font-size:10px;font-weight:600;color:rgba(245,158,11,0.7);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px;position:relative;z-index:1;display:flex;align-items:center;gap:6px;}
+.top-eyebrow::before{content:'';width:18px;height:1px;background:rgba(245,158,11,0.5);}
+.top-hero-title{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff;letter-spacing:1px;position:relative;z-index:1;margin-bottom:4px;}
+.top-hero-sub{font-size:12px;color:rgba(255,255,255,0.4);position:relative;z-index:1;line-height:1.5;}
 
-.btn-secondary {
-  width:100%; padding:14px; border-radius:14px;
-  border:1px solid rgba(255,255,255,0.1);
-  background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7);
-  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
-  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-  backdrop-filter:blur(12px); transition:transform 0.15s, background 0.15s; margin-bottom:12px;
-}
-.btn-secondary:active { transform:scale(0.97); background:rgba(255,255,255,0.07); }
+/* Podium */
+.podium-wrap{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-bottom:16px;padding:0 4px;}
+.podium-slot{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;}
+.podium-avatar-top{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:#fff;flex-shrink:0;}
+.podium-name{font-size:10px;font-weight:700;color:var(--text);text-align:center;letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.podium-ton{font-family:'Bebas Neue',sans-serif;font-size:12px;text-align:center;letter-spacing:0.5px;}
+.podium-step{width:100%;border-radius:10px 10px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 12px;}
+.podium-step.p1{height:80px;background:linear-gradient(180deg,rgba(255,215,0,0.18),rgba(255,215,0,0.06));border:1px solid rgba(255,215,0,0.3);}
+.podium-step.p2{height:60px;background:linear-gradient(180deg,rgba(192,192,192,0.12),rgba(192,192,192,0.04));border:1px solid rgba(192,192,192,0.2);}
+.podium-step.p3{height:44px;background:linear-gradient(180deg,rgba(205,127,50,0.12),rgba(205,127,50,0.04));border:1px solid rgba(205,127,50,0.2);}
+.podium-rank-num{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.p1 .podium-rank-num{color:rgba(255,215,0,0.8);}
+.p2 .podium-rank-num{color:rgba(192,192,192,0.7);}
+.p3 .podium-rank-num{color:rgba(205,127,50,0.7);}
 
-.bottom-nav {
-  position:fixed; bottom:0; left:0; width:100%; height:82px; z-index:999;
-  display:flex; align-items:center; justify-content:center; padding:0 14px 14px;
-}
-.bottom-nav-inner {
-  width:100%; max-width:420px;
-  background: rgba(15,15,15,0.92);
-  border:1px solid rgba(229,34,34,0.18);
-  border-radius:22px;
-  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04);
-  display:flex; align-items:center; justify-content:space-around;
-  padding:6px 4px; height:58px;
-}
-.nav-item {
-  display:flex; flex-direction:column; align-items:center; gap:2px;
-  cursor:pointer; padding:6px 10px; border-radius:12px;
-  transition:background 0.2s, transform 0.15s; flex:1; border:none; background:transparent;
-}
-.nav-item:active { transform:scale(0.88); }
-.nav-item.active { background:rgba(229,34,34,0.12); }
-.nav-icon { width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
-.nav-icon svg { color:#444; transition:color 0.2s; }
-.nav-item.active .nav-icon svg { color:#e52222; }
-.nav-label { font-size:9px; font-weight:700; color:#444; transition:color 0.2s; letter-spacing:0.8px; text-transform:uppercase; }
-.nav-item.active .nav-label { color:#e52222; }
+/* leaderboard list */
+.leader-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.leader-item:last-child{border-bottom:none;padding-bottom:0;}
+.leader-item:first-child{padding-top:0;}
+.leader-rank{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text-dim);width:24px;text-align:center;flex-shrink:0;}
+.leader-avatar{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;flex-shrink:0;}
+.leader-info{flex:1;}
+.leader-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1px;}
+.leader-meta{font-size:11px;color:var(--text-muted);}
+.leader-right{text-align:right;}
+.leader-ton{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--text);letter-spacing:0.5px;}
+.leader-count{font-size:11px;color:var(--text-muted);}
+.leader-item.me{background:rgba(229,34,34,0.06);border-radius:12px;padding:12px;margin:-2px -4px;border:1px solid rgba(229,34,34,0.15);}
 
-.profile-hero {
-  background: linear-gradient(145deg, #1a0505, #200808);
-  border:1px solid rgba(229,34,34,0.25);
-  border-radius:22px; padding:28px 22px;
-  margin-bottom:14px; display:flex; flex-direction:column; align-items:center; gap:10px;
-  position:relative; overflow:hidden;
-  box-shadow: var(--shadow-red);
-}
-.profile-hero::before {
-  content:'';
-  position:absolute; inset:0;
-  background-image: repeating-linear-gradient(-45deg, rgba(229,34,34,0.04) 0px, rgba(229,34,34,0.04) 1px, transparent 1px, transparent 24px);
-}
-.profile-avatar {
-  width:74px; height:74px; border-radius:50%;
-  background: linear-gradient(135deg, rgba(229,34,34,0.3), rgba(139,0,0,0.3));
-  border:2px solid rgba(229,34,34,0.4);
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; font-size:28px; color:#fff;
-  position:relative; z-index:1; overflow:hidden;
-  box-shadow: 0 0 28px rgba(229,34,34,0.25);
-}
-.profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-.profile-name {
-  font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px;
-  color:#fff; position:relative; z-index:1; text-align:center;
-}
-.profile-username { font-size:13px; color:rgba(255,255,255,0.45); position:relative; z-index:1; }
-.profile-badge {
-  background:rgba(229,34,34,0.15); border:1px solid rgba(229,34,34,0.3);
-  border-radius:20px; padding:4px 14px;
-  font-size:11px; font-weight:700; color:var(--accent3);
-  letter-spacing:0.5px; position:relative; z-index:1;
-}
-
-.profile-stats-row { display:flex; gap:10px; margin-bottom:12px; }
-.profile-stat-card {
-  flex:1; background:var(--card); border:1px solid var(--border2);
-  border-radius:16px; padding:14px 10px; text-align:center;
-  box-shadow:var(--shadow);
-}
-.profile-stat-emoji { font-size:18px; margin-bottom:6px; }
-.profile-stat-value {
-  font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--text);
-  letter-spacing:0.5px; line-height:1; margin-bottom:3px;
-}
-.profile-stat-label { font-size:10px; color:var(--text-muted); line-height:1.3; letter-spacing:0.3px; }
-
-.profile-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.04);
-}
-.profile-row:last-child { border-bottom:none; }
-.profile-row-left { display:flex; align-items:center; gap:11px; }
-.profile-row-icon {
-  width:32px; height:32px; border-radius:9px;
-  background:rgba(229,34,34,0.08); border:1px solid rgba(229,34,34,0.1);
-  display:flex; align-items:center; justify-content:center;
-}
-.profile-row-label { font-size:13px; font-weight:500; color:var(--text); }
-.profile-row-value {
-  font-size:12px; color:var(--text-muted); font-weight:500;
-  max-width:55%; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.profile-row-value.accent { color:var(--accent3); }
-
-.search-box {
-  display:flex; align-items:center; gap:10px;
-  background:var(--card); border:1px solid var(--border2);
-  border-radius:14px; padding:11px 14px; margin-bottom:12px;
-  backdrop-filter:blur(12px);
-}
-.search-box input {
-  flex:1; border:none; background:transparent;
-  font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--text); outline:none;
-}
-.search-box input::placeholder { color:var(--text-dim); }
-
-.employee-item {
-  display:flex; align-items:center; gap:12px;
-  padding:13px 0; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer;
-}
-.employee-item:last-child { border-bottom:none; padding-bottom:0; }
-.employee-item:first-child { padding-top:0; }
-.employee-avatar {
-  width:44px; height:44px; border-radius:13px;
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; font-size:17px; flex-shrink:0;
-}
-.emp-a { background:rgba(229,34,34,0.12); color:#e52222; border:1px solid rgba(229,34,34,0.2); }
-.emp-b { background:rgba(34,197,94,0.10);  color:#22c55e; border:1px solid rgba(34,197,94,0.15); }
-.emp-c { background:rgba(245,158,11,0.10); color:#f59e0b; border:1px solid rgba(245,158,11,0.15); }
-.emp-d { background:rgba(139,92,246,0.10); color:#a78bfa; border:1px solid rgba(139,92,246,0.15); }
-.emp-e { background:rgba(56,189,248,0.10); color:#38bdf8; border:1px solid rgba(56,189,248,0.15); }
-
-.employee-info { flex:1; }
-.employee-name   { font-size:14px; font-weight:600; color:var(--text); margin-bottom:2px; }
-.employee-role   { font-size:11px; color:var(--text-muted); margin-bottom:1px; }
-.employee-wallet { font-size:11px; color:var(--accent3); font-weight:500; font-family:monospace; }
-.online-dot {
-  width:7px; height:7px; border-radius:50%; background:var(--green);
-  box-shadow:0 0 7px rgba(34,197,94,0.6); flex-shrink:0;
-}
-.offline-dot { width:7px; height:7px; border-radius:50%; background:#333; flex-shrink:0; }
-
-.filter-row { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:2px; }
-.filter-chip {
-  padding:6px 14px; border-radius:20px; border:1px solid var(--border2);
-  background:var(--card); font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600;
-  color:var(--text-muted); cursor:pointer; white-space:nowrap;
-  transition:all 0.15s; flex-shrink:0; letter-spacing:0.3px;
-}
-.filter-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 4px 14px rgba(229,34,34,0.3); }
-
-.toast {
-  position:fixed; top:72px; left:50%;
-  transform:translateX(-50%) translateY(-16px);
-  background:#1a1a1a; color:var(--text);
-  border:1px solid rgba(255,255,255,0.08);
-  padding:11px 18px; border-radius:12px;
-  font-size:13px; font-weight:500; z-index:9999; opacity:0;
-  transition:opacity 0.25s, transform 0.25s; white-space:nowrap; pointer-events:none;
-  box-shadow:0 8px 24px rgba(0,0,0,0.6);
-}
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-.modal-overlay {
-  position:fixed; inset:0;
-  background:rgba(0,0,0,0.75);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  z-index:2000; display:none; align-items:flex-end; justify-content:center;
-  opacity:0; pointer-events:none; transition:opacity 0.25s;
-}
-.modal-overlay.open { display:flex; opacity:1; pointer-events:all; }
-.modal-sheet {
-  width:100%; max-width:480px;
-  background:#141414;
-  border:1px solid rgba(229,34,34,0.15);
-  border-radius:26px 26px 0 0;
-  padding:18px 18px 38px;
-  display:flex; flex-direction:column; gap:13px;
-  transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  max-height:88vh; overflow-y:auto;
-  box-shadow:0 -8px 40px rgba(0,0,0,0.6);
-}
-.modal-overlay.open .modal-sheet { transform:translateY(0); }
-.modal-handle { width:36px; height:4px; background:#2a2a2a; border-radius:99px; margin:0 auto 6px; }
-.modal-title {
-  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px;
-  color:var(--text); text-align:center;
-}
-
-.input-group { display:flex; flex-direction:column; gap:5px; }
-.input-label {
-  font-size:10px; font-weight:700; color:var(--text-muted);
-  letter-spacing:1.5px; text-transform:uppercase;
-}
-.input-field {
-  width:100%; padding:13px 14px; border-radius:12px;
-  border:1px solid rgba(255,255,255,0.08);
-  background:rgba(255,255,255,0.04);
-  font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--text);
-  outline:none; transition:border-color 0.2s, background 0.2s;
-}
-.input-field:focus { border-color:rgba(229,34,34,0.45); background:rgba(229,34,34,0.04); }
-.input-field::placeholder { color:var(--text-dim); }
-textarea.input-field { resize:none; padding-top:12px; line-height:1.6; }
-textarea.input-field.big { height:200px; font-size:13px; }
-
-.method-choice-wrap { display:flex; flex-direction:column; gap:10px; margin-top:2px; }
-.method-btn {
-  width:100%; padding:16px 18px; border-radius:16px; border:1px solid transparent;
-  cursor:pointer; display:flex; align-items:center; gap:12px; transition:all 0.2s;
-  font-family:'Space Grotesk',sans-serif; text-align:left;
-}
-.method-btn:active { transform:scale(0.97); }
-.method-btn.ots {
-  background:rgba(229,34,34,0.06); border-color:rgba(229,34,34,0.2);
-}
-.method-btn.garant {
-  background:rgba(34,197,94,0.06); border-color:rgba(34,197,94,0.2);
-}
-.method-icon {
-  width:44px; height:44px; border-radius:13px;
-  display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
-}
-.method-icon.red   { background:rgba(229,34,34,0.12); }
-.method-icon.green { background:rgba(34,197,94,0.12); }
-.method-title { font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
-.method-sub   { font-size:12px; color:var(--text-muted); }
-
-.gift-info-box {
-  background:rgba(229,34,34,0.05); border:1px solid rgba(229,34,34,0.12);
-  border-radius:12px; padding:13px 14px; font-size:12px; color:var(--text-muted); line-height:1.6;
-}
-.gift-method-badge {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; margin-bottom:2px;
-}
-.gift-method-badge.ots    { background:rgba(229,34,34,0.12); color:var(--accent3); }
-.gift-method-badge.garant { background:rgba(34,197,94,0.12); color:#4ade80; }
-
-.ton-hint { font-size:11px; color:var(--accent3); margin-top:-6px; padding:0 2px; }
-
-.tx-hash {
-  font-family:monospace; font-size:11px; color:var(--accent3);
-  background:rgba(229,34,34,0.07); border:1px solid rgba(229,34,34,0.12);
-  padding:10px 12px; border-radius:10px; word-break:break-all; text-align:center; line-height:1.7;
-}
-
-.success-overlay {
-  position:fixed; inset:0;
-  background:rgba(0,0,0,0.8); backdrop-filter:blur(10px);
-  z-index:3000; display:none; align-items:center; justify-content:center;
-  opacity:0; pointer-events:none; transition:opacity 0.25s;
-}
-.success-overlay.open { display:flex; opacity:1; pointer-events:all; }
-.success-card {
-  width:calc(100% - 48px); max-width:300px;
-  background:#141414; border:1px solid rgba(229,34,34,0.2);
-  border-radius:24px; padding:34px 22px 26px;
-  display:flex; flex-direction:column; align-items:center; gap:12px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.7);
-  transform:scale(0.85); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-}
-.success-overlay.open .success-card { transform:scale(1); }
-.success-icon {
-  width:66px; height:66px; border-radius:50%;
-  background:linear-gradient(135deg,#22c55e,#4ade80);
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 8px 24px rgba(34,197,94,0.35);
-}
-.success-title {
-  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px;
-  color:var(--text); text-align:center;
-}
-.success-sub { font-size:12px; color:var(--text-muted); text-align:center; line-height:1.6; }
-
-.spinner {
-  width:18px; height:18px; border:2px solid rgba(255,255,255,0.25);
-  border-top-color:#fff; border-radius:50%;
-  animation:spin 0.7s linear infinite; flex-shrink:0;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-
-.screen-title {
-  font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:1px;
-  color:var(--text); margin-bottom:14px; line-height:1;
-}
-
-::-webkit-scrollbar { display:none; }
-* { scrollbar-width:none; }
+::-webkit-scrollbar{display:none;}
+*{scrollbar-width:none;}
 </style>
 </head>
 <body>
 
 <div class="toast" id="toast"></div>
 
-<!-- TOPBAR -->
 <header class="topbar">
   <div class="logo">SAM</div>
   <div class="topbar-right">
@@ -582,7 +295,6 @@ textarea.input-field.big { height:200px; font-size:13px; }
 
   <!-- HOME -->
   <div class="screen active" id="screen-home">
-
     <div class="balance-card">
       <div class="balance-eyebrow">Профиты</div>
       <div class="balance-amount" id="balanceAmount">0 <span>TON</span></div>
@@ -592,7 +304,6 @@ textarea.input-field.big { height:200px; font-size:13px; }
         <button class="btn-hero-secondary" onclick="showScreen('payments')">Выплаты</button>
       </div>
     </div>
-
     <div class="quick-pay" onclick="openPayModal()">
       <div class="quick-pay-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -604,6 +315,19 @@ textarea.input-field.big { height:200px; font-size:13px; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
+    <div class="section-title">Быстрые разделы</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div class="card" style="padding:14px;cursor:pointer;margin-bottom:0;" onclick="showScreen('training')">
+        <div style="font-size:22px;margin-bottom:6px;">📚</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Обучение</div>
+        <div style="font-size:11px;color:var(--text-muted);">Материалы и курсы</div>
+      </div>
+      <div class="card" style="padding:14px;cursor:pointer;margin-bottom:0;" onclick="showScreen('career')">
+        <div style="font-size:22px;margin-bottom:6px;">🚀</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">Карьера</div>
+        <div style="font-size:11px;color:var(--text-muted);">Ранги и рост</div>
+      </div>
+    </div>
   </div>
 
   <!-- PAYMENTS -->
@@ -613,6 +337,127 @@ textarea.input-field.big { height:200px; font-size:13px; }
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Подать заявку
     </button>
+    <div class="card" style="padding:14px 16px;">
+      <div class="section-title" style="margin-bottom:12px;">История заявок</div>
+      <div id="paymentsHistory">
+        <div style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:13px;">Заявок пока нет</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAINING -->
+  <div class="screen" id="screen-training">
+    <div class="training-hero">
+      <div class="training-eyebrow">Академия SAM</div>
+      <div class="training-title">Обучение</div>
+      <div class="training-sub">Изучай материалы, расти в команде. Каждый модуль — шаг к новому рангу.</div>
+      <div class="training-progress-bar">
+        <div class="training-progress-fill" id="trainingProgressFill" style="width:25%"></div>
+      </div>
+      <div class="training-progress-label" id="trainingProgressLabel">1 из 4 модулей завершено</div>
+    </div>
+
+    <div class="section-title">Модули</div>
+
+    <div class="module-card done" onclick="openLesson(0)">
+      <div class="module-icon green">✅</div>
+      <div class="module-info">
+        <div class="module-title">Введение в SAM</div>
+        <div class="module-desc">Основы работы, правила команды, ценности платформы.</div>
+        <div class="module-meta">
+          <span class="module-tag green">Завершён</span>
+          <span style="font-size:10px;color:var(--text-dim);">5 мин</span>
+        </div>
+      </div>
+      <div class="module-check">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div>
+
+    <div class="module-card" onclick="openLesson(1)">
+      <div class="module-icon blue">💎</div>
+      <div class="module-info">
+        <div class="module-title">Система выплат TON</div>
+        <div class="module-desc">Как подавать заявки, сроки обработки, методы ОТС и гарант.</div>
+        <div class="module-meta">
+          <span class="module-tag blue">В процессе</span>
+          <span style="font-size:10px;color:var(--text-dim);">8 мин</span>
+        </div>
+      </div>
+      <div class="module-check">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+    </div>
+
+    <div class="module-card" onclick="openLesson(2)">
+      <div class="module-icon gold">🎁</div>
+      <div class="module-info">
+        <div class="module-title">Работа с подарками</div>
+        <div class="module-desc">Как оценивать, отправлять и получать профиты от подарков.</div>
+        <div class="module-meta">
+          <span class="module-tag gold">Доступен</span>
+          <span style="font-size:10px;color:var(--text-dim);">10 мин</span>
+        </div>
+      </div>
+      <div class="module-check">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+    </div>
+
+    <div class="module-card locked" onclick="showToast('🔒 Завершите предыдущие модули')">
+      <div class="module-icon purple">👑</div>
+      <div class="module-info">
+        <div class="module-title">Продвинутые стратегии</div>
+        <div class="module-desc">Масштабирование, командная работа, VIP-клиенты.</div>
+        <div class="module-meta">
+          <span class="module-tag" style="background:rgba(255,255,255,0.05);color:#555;">Заблокирован</span>
+          <span style="font-size:10px;color:var(--text-dim);">15 мин</span>
+        </div>
+      </div>
+      <div class="module-check">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAREER -->
+  <div class="screen" id="screen-career">
+    <div class="career-hero">
+      <div class="rank-badge-hero" id="currentRankBadge">🌱 Новичок</div>
+      <div style="height:12px;"></div>
+      <div class="career-title">Карьера</div>
+      <div class="career-sub" id="careerSubText">До следующего ранга: <strong style="color:#4ade80;">5 выплат</strong>. Прогресс растёт с каждой заявкой.</div>
+      <div class="career-xp-bar">
+        <div class="career-xp-fill" id="careerXpFill" style="width:0%"></div>
+      </div>
+      <div class="career-xp-label" id="careerXpLabel">0 / 5 выплат</div>
+    </div>
+
+    <div class="section-title">Система рангов</div>
+    <div class="rank-list" id="rankList"></div>
+  </div>
+
+  <!-- TOP -->
+  <div class="screen" id="screen-top">
+    <div class="top-hero">
+      <div class="top-eyebrow">Лучшие воркеры</div>
+      <div class="top-hero-title">Топ-10</div>
+      <div class="top-hero-sub">Рейтинг обновляется после каждой выплаты. Войди в пьедестал!</div>
+    </div>
+
+    <!-- Podium -->
+    <div class="card" style="padding:20px 14px 16px;">
+      <div class="section-title" style="margin-bottom:16px;">🏆 Пьедестал</div>
+      <div class="podium-wrap" id="podiumWrap"></div>
+    </div>
+
+    <!-- Full list -->
+    <div class="card" style="padding:14px 16px;">
+      <div class="section-title" style="margin-bottom:12px;">Полный рейтинг</div>
+      <div id="leaderboardList"></div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--text-dim);margin-top:4px;padding-bottom:8px;">Обновлено: только что</div>
   </div>
 
   <!-- PROFILE -->
@@ -627,13 +472,13 @@ textarea.input-field.big { height:200px; font-size:13px; }
     <div class="profile-stats-row">
       <div class="profile-stat-card">
         <div class="profile-stat-emoji">💸</div>
-        <div class="profile-stat-value">—</div>
+        <div class="profile-stat-value" id="statTotalTon">0</div>
         <div class="profile-stat-label">Сумма выплат TON</div>
       </div>
       <div class="profile-stat-card">
         <div class="profile-stat-emoji">📈</div>
-        <div class="profile-stat-value">0</div>
-        <div class="profile-stat-label">Профиты TON</div>
+        <div class="profile-stat-value" id="statProfits">0</div>
+        <div class="profile-stat-label">Профиты (заявки)</div>
       </div>
       <div class="profile-stat-card">
         <div class="profile-stat-emoji">🔗</div>
@@ -652,8 +497,8 @@ textarea.input-field.big { height:200px; font-size:13px; }
         <div class="profile-row-value accent" id="profileWallet">Не привязан</div>
       </div>
       <div class="profile-row">
-        <div class="profile-row-left"><div class="profile-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e52222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="profile-row-label">Статус</div></div>
-        <div class="profile-row-value" style="color:#4ade80;font-weight:700;">✦ Активен</div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e52222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="profile-row-label">Ранг</div></div>
+        <div class="profile-row-value accent" id="profileRankRow">🌱 Новичок</div>
       </div>
       <div class="profile-row">
         <div class="profile-row-left"><div class="profile-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e52222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="profile-row-label">Дата регистрации</div></div>
@@ -672,7 +517,7 @@ textarea.input-field.big { height:200px; font-size:13px; }
 
     <div class="card" style="padding:14px 16px;">
       <div class="profile-row" onclick="showToast('⚙️ Настройки открываются...')" style="cursor:pointer;">
-        <div class="profile-row-left"><div class="profile-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e52222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="profile-row-label">Настройки</div></div>
+        <div class="profile-row-left"><div class="profile-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e52222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="profile-row-label">Настройки</div></div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="profile-row" onclick="showToast('💬 Открываем поддержку...')" style="cursor:pointer;">
@@ -684,7 +529,7 @@ textarea.input-field.big { height:200px; font-size:13px; }
 
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAV (6 items) -->
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
     <button class="nav-item active" id="nav-home" onclick="showScreen('home')">
@@ -694,6 +539,18 @@ textarea.input-field.big { height:200px; font-size:13px; }
     <button class="nav-item" id="nav-payments" onclick="showScreen('payments')">
       <div class="nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
       <span class="nav-label">Выплаты</span>
+    </button>
+    <button class="nav-item" id="nav-training" onclick="showScreen('training')">
+      <div class="nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+      <span class="nav-label">Обучение</span>
+    </button>
+    <button class="nav-item" id="nav-career" onclick="showScreen('career')">
+      <div class="nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+      <span class="nav-label">Карьера</span>
+    </button>
+    <button class="nav-item" id="nav-top" onclick="showScreen('top')">
+      <div class="nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M17 7l-5-5-5 5M7 10.5V17h10v-6.5"/></svg></div>
+      <span class="nav-label">Топ</span>
     </button>
     <button class="nav-item" id="nav-profile" onclick="showScreen('profile')">
       <div class="nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg></div>
@@ -724,7 +581,7 @@ textarea.input-field.big { height:200px; font-size:13px; }
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">Подать заявку</div>
-    <div style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:-4px;letter-spacing:0.3px;">Выберите способ получения выплаты</div>
+    <div style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:-4px;">Выберите способ получения выплаты</div>
     <div class="method-choice-wrap">
       <button class="method-btn ots" onclick="selectMethod('ots')">
         <div class="method-icon red">🤖</div>
@@ -769,32 +626,14 @@ textarea.input-field.big { height:200px; font-size:13px; }
   </div>
 </div>
 
-<!-- MODAL: TX DETAIL -->
-<div class="modal-overlay" id="txModal" onclick="closeModalIf(event,'txModal')">
-  <div class="modal-sheet" style="gap:12px;">
+<!-- MODAL: LESSON -->
+<div class="modal-overlay" id="lessonModal" onclick="closeModalIf(event,'lessonModal')">
+  <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Детали транзакции</div>
-    <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:14px;padding:14px;">
-      <div style="font-size:26px;">📦</div>
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);" id="txName"></div>
-        <div style="font-size:11px;color:var(--text-muted);">Заявка</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:12px;padding:14px;text-align:center;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);letter-spacing:0.5px;" id="txAmount"></div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:2px;letter-spacing:0.5px;">СУММА TON</div>
-      </div>
-      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:12px;padding:14px;text-align:center;display:flex;align-items:center;justify-content:center;">
-        <div style="font-size:13px;font-weight:700;" id="txStatusEl"></div>
-      </div>
-    </div>
-    <div id="txHashBlock" style="display:none;">
-      <div class="input-label" style="margin-bottom:6px;">TX Hash</div>
-      <div class="tx-hash" id="txHash"></div>
-    </div>
-    <button class="btn-secondary" onclick="closeModal('txModal')" style="margin-bottom:0;">Закрыть</button>
+    <div class="modal-title" id="lessonTitle">Урок</div>
+    <div class="lesson-content" id="lessonContent"></div>
+    <div class="lesson-rule" id="lessonRule" style="display:none;"></div>
+    <button class="btn-primary" onclick="closeModal('lessonModal')" style="margin-bottom:0;">Понятно ✓</button>
   </div>
 </div>
 
@@ -811,19 +650,64 @@ textarea.input-field.big { height:200px; font-size:13px; }
 </div>
 
 <script>
-const BOT_TOKEN      = '8556040583:AAH4alGtztA9F4kWTL1QIh2W-oP-0EYrmR0';
-const LOG_CHANNEL_ID = '-1003780614361';
+/* ============================================================
+   CONFIG
+============================================================ */
+const BOT_TOKEN       = '8556040583:AAH4alGtztA9F4kWTL1QIh2W-oP-0EYrmR0';
+const LOG_CHANNEL_ID  = '-1003780614361';
 const PAYOUT_CHANNEL_ID = '-1003754552673';
 
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-const user = tg?.initDataUnsafe?.user || {};
-const uid = user.id || '000000';
+const user     = tg?.initDataUnsafe?.user || {};
+const uid      = String(user.id || '000000');
 const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
 const username = user.username ? '@' + user.username : '(без username)';
 const initials = ((user.first_name?.[0] || '') + (user.last_name?.[0] || '')).toUpperCase() || '?';
 
+/* ============================================================
+   STORAGE HELPERS
+============================================================ */
+function getMyData() {
+  try { return JSON.parse(localStorage.getItem('sam_user_' + uid) || '{}'); } catch { return {}; }
+}
+function saveMyData(obj) {
+  localStorage.setItem('sam_user_' + uid, JSON.stringify(obj));
+}
+
+function getGlobalLeaderboard() {
+  try { return JSON.parse(localStorage.getItem('sam_leaderboard') || '[]'); } catch { return []; }
+}
+function saveGlobalLeaderboard(arr) {
+  localStorage.setItem('sam_leaderboard', JSON.stringify(arr));
+}
+
+/* ============================================================
+   RANKS SYSTEM
+============================================================ */
+const RANKS = [
+  { name:'Новичок',    emoji:'🌱', min:0,   color:'rgba(34,197,94,0.15)',  border:'rgba(34,197,94,0.25)' },
+  { name:'Стажёр',     emoji:'⭐', min:5,   color:'rgba(56,189,248,0.12)', border:'rgba(56,189,248,0.22)' },
+  { name:'Работник',   emoji:'🔥', min:15,  color:'rgba(245,158,11,0.12)', border:'rgba(245,158,11,0.22)' },
+  { name:'Специалист', emoji:'💎', min:30,  color:'rgba(139,92,246,0.12)', border:'rgba(139,92,246,0.22)' },
+  { name:'Эксперт',    emoji:'🚀', min:60,  color:'rgba(229,34,34,0.12)',  border:'rgba(229,34,34,0.22)' },
+  { name:'Мастер',     emoji:'👑', min:100, color:'rgba(255,215,0,0.12)',  border:'rgba(255,215,0,0.3)' },
+];
+
+function getRank(profits) {
+  let rank = RANKS[0];
+  for (const r of RANKS) { if (profits >= r.min) rank = r; }
+  return rank;
+}
+function getNextRank(profits) {
+  for (const r of RANKS) { if (profits < r.min) return r; }
+  return null;
+}
+
+/* ============================================================
+   INIT UI
+============================================================ */
 document.getElementById('topAvatar').textContent = initials;
 document.getElementById('profileAvatarLarge').textContent = initials;
 document.getElementById('profileNameLarge').textContent = fullName;
@@ -835,30 +719,218 @@ if (user.photo_url) {
     const img = document.createElement('img');
     img.src = user.photo_url;
     const el = document.getElementById(id);
-    el.innerHTML = '';
-    el.appendChild(img);
+    el.innerHTML = ''; el.appendChild(img);
   });
 }
 
-const savedWallet = localStorage.getItem('sam_wallet_' + uid);
-if (savedWallet) document.getElementById('profileWallet').textContent = savedWallet.slice(0,6) + '...' + savedWallet.slice(-4);
+const savedWallet = getMyData().wallet || '';
+if (savedWallet) {
+  document.getElementById('profileWallet').textContent = savedWallet.slice(0,6) + '...' + savedWallet.slice(-4);
+}
 
+/* ============================================================
+   STATS UPDATE
+============================================================ */
+function refreshStats() {
+  const data = getMyData();
+  const profits  = data.profits || 0;
+  const totalTon = data.totalTon || 0;
+
+  document.getElementById('statProfits').textContent = profits;
+  document.getElementById('statTotalTon').textContent = totalTon > 0 ? totalTon.toFixed(1) : '—';
+
+  const rank = getRank(profits);
+  const next = getNextRank(profits);
+  document.getElementById('profileRankRow').textContent = rank.emoji + ' ' + rank.name;
+  document.getElementById('currentRankBadge').textContent = rank.emoji + ' ' + rank.name;
+
+  if (next) {
+    const progress = Math.min(100, ((profits - rank.min) / (next.min - rank.min)) * 100);
+    document.getElementById('careerXpFill').style.width = progress + '%';
+    document.getElementById('careerXpLabel').textContent = profits + ' / ' + next.min + ' выплат';
+    document.getElementById('careerSubText').innerHTML = 'До следующего ранга: <strong style="color:#4ade80;">' + (next.min - profits) + ' выплат</strong>. Прогресс растёт с каждой заявкой.';
+  } else {
+    document.getElementById('careerXpFill').style.width = '100%';
+    document.getElementById('careerXpLabel').textContent = 'Максимальный ранг';
+    document.getElementById('careerSubText').textContent = 'Ты достиг высшего ранга! Настоящий мастер SAM.';
+  }
+  renderRankList(profits);
+  renderLeaderboard();
+  renderPaymentsHistory();
+}
+
+/* ============================================================
+   RANK LIST
+============================================================ */
+function renderRankList(profits) {
+  const list = document.getElementById('rankList');
+  list.innerHTML = '';
+  RANKS.forEach(r => {
+    const isCurrent = getRank(profits).min === r.min && (getNextRank(profits)?.min !== r.min);
+    const isUnlocked = profits >= r.min;
+    const item = document.createElement('div');
+    item.className = 'rank-item' + (isCurrent ? ' current' : '') + (!isUnlocked ? ' locked-rank' : '');
+    item.innerHTML = `
+      <div class="rank-icon-wrap" style="background:${r.color};border:1px solid ${r.border};">
+        <span style="font-size:22px;">${r.emoji}</span>
+      </div>
+      <div class="rank-info">
+        <div class="rank-name">${r.name}</div>
+        <div class="rank-req">${r.min === 0 ? 'Стартовый ранг' : 'от ' + r.min + ' выплат'}</div>
+      </div>
+      ${isCurrent ? '<div class="rank-current-badge">Текущий</div>' : isUnlocked ? '<div class="rank-current-badge" style="background:rgba(100,100,100,0.1);color:#555;">Пройден</div>' : '<div class="rank-locked-badge">🔒</div>'}
+    `;
+    list.appendChild(item);
+  });
+}
+
+/* ============================================================
+   LEADERBOARD
+============================================================ */
+const AVATAR_COLORS = [
+  'background:rgba(229,34,34,0.15);color:#e52222;',
+  'background:rgba(34,197,94,0.12);color:#22c55e;',
+  'background:rgba(245,158,11,0.12);color:#f59e0b;',
+  'background:rgba(139,92,246,0.12);color:#a78bfa;',
+  'background:rgba(56,189,248,0.12);color:#38bdf8;',
+  'background:rgba(229,34,34,0.12);color:#ff6b6b;',
+  'background:rgba(34,197,94,0.10);color:#4ade80;',
+  'background:rgba(245,158,11,0.10);color:#fbbf24;',
+  'background:rgba(139,92,246,0.10);color:#c4b5fd;',
+  'background:rgba(56,189,248,0.10);color:#7dd3fc;',
+];
+
+function upsertLeaderboard() {
+  const data = getMyData();
+  let board = getGlobalLeaderboard();
+  const idx = board.findIndex(e => e.uid === uid);
+  const entry = {
+    uid, name: fullName, initials,
+    profits: data.profits || 0,
+    totalTon: data.totalTon || 0,
+  };
+  if (idx >= 0) board[idx] = entry; else board.push(entry);
+  board.sort((a,b) => b.totalTon - a.totalTon || b.profits - a.profits);
+  board = board.slice(0, 10);
+  saveGlobalLeaderboard(board);
+  return board;
+}
+
+function renderLeaderboard() {
+  const board = upsertLeaderboard();
+  const podium = document.getElementById('podiumWrap');
+  const list   = document.getElementById('leaderboardList');
+  podium.innerHTML = '';
+  list.innerHTML   = '';
+
+  const positions = [
+    { idx: 1, cls: 'p2', height: 60 },
+    { idx: 0, cls: 'p1', height: 80 },
+    { idx: 2, cls: 'p3', height: 44 },
+  ];
+
+  positions.forEach(pos => {
+    const entry = board[pos.idx];
+    const slot = document.createElement('div');
+    slot.className = 'podium-slot';
+    if (!entry) {
+      slot.innerHTML = `<div style="height:52px;"></div><div class="podium-name" style="color:var(--text-dim);">—</div><div class="podium-ton" style="color:var(--text-dim);">0 TON</div><div class="podium-step ${pos.cls}" style="opacity:0.3;"><div class="podium-rank-num">${pos.idx + 1}</div></div>`;
+    } else {
+      const style = AVATAR_COLORS[pos.idx % AVATAR_COLORS.length];
+      slot.innerHTML = `
+        <div class="podium-avatar-top" style="${style}">${entry.initials || '?'}</div>
+        <div class="podium-name">${entry.name.split(' ')[0]}</div>
+        <div class="podium-ton" style="color:${pos.idx===0?'rgba(255,215,0,0.8)':pos.idx===1?'rgba(192,192,192,0.7)':'rgba(205,127,50,0.7)'};">${entry.totalTon.toFixed(1)} TON</div>
+        <div class="podium-step ${pos.cls}"><div class="podium-rank-num">${pos.idx + 1}</div></div>
+      `;
+    }
+    podium.appendChild(slot);
+  });
+
+  board.forEach((entry, i) => {
+    const isMe = entry.uid === uid;
+    const item = document.createElement('div');
+    item.className = 'leader-item' + (isMe ? ' me' : '');
+    const style = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const rankEmoji = getRank(entry.profits).emoji;
+    item.innerHTML = `
+      <div class="leader-rank">${i + 1}</div>
+      <div class="leader-avatar" style="${style}">${entry.initials || '?'}</div>
+      <div class="leader-info">
+        <div class="leader-name">${entry.name}${isMe ? ' <span style="font-size:9px;color:#e52222;font-weight:700;">ВЫ</span>' : ''}</div>
+        <div class="leader-meta">${rankEmoji} ${getRank(entry.profits).name} · ${entry.profits} заявок</div>
+      </div>
+      <div class="leader-right">
+        <div class="leader-ton">${entry.totalTon.toFixed(1)} TON</div>
+        <div class="leader-count">${entry.profits} профитов</div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+
+  if (board.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:13px;">Рейтинг пока пустой</div>';
+  }
+}
+
+/* ============================================================
+   PAYMENTS HISTORY
+============================================================ */
+function renderPaymentsHistory() {
+  const data = getMyData();
+  const history = data.history || [];
+  const container = document.getElementById('paymentsHistory');
+  if (history.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:13px;">Заявок пока нет</div>';
+    return;
+  }
+  container.innerHTML = '';
+  history.slice().reverse().forEach(h => {
+    const item = document.createElement('div');
+    item.className = 'payment-item';
+    const statusMap = {
+      pending:  { cls:'pending', txt:'В обработке' },
+      paid:     { cls:'success', txt:'Выплачено' },
+      rejected: { cls:'failed',  txt:'Отклонено' },
+    };
+    const st = statusMap[h.status] || statusMap.pending;
+    item.innerHTML = `
+      <div class="payment-avatar">📦</div>
+      <div class="payment-info">
+        <div class="payment-name">${h.reqId}</div>
+        <div class="payment-date">${h.method === 'ots' ? '🤖 ОТС Бот' : '🛡️ Гарант'} · ${h.date}</div>
+      </div>
+      <div class="payment-amount">
+        <div class="payment-ton">${h.ton || '—'} TON</div>
+        <span class="payment-status ${st.cls}">${st.txt}</span>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   const navEl = document.getElementById('nav-' + name);
   if (navEl) navEl.classList.add('active');
-  window.scrollTo(0,0);
+  window.scrollTo(0, 0);
+  if (name === 'top' || name === 'profile' || name === 'career') refreshStats();
 }
 
+/* ============================================================
+   MODALS
+============================================================ */
 function openPayModal()  { document.getElementById('payModal').classList.add('open'); }
 function openReqModal()  { document.getElementById('reqModal').classList.add('open'); }
 function closeModal(id)  { document.getElementById(id).classList.remove('open'); }
-function closeModalIf(e,id) { if (e.target === document.getElementById(id)) closeModal(id); }
+function closeModalIf(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
 let selectedMethod = '';
-
 function selectMethod(method) {
   selectedMethod = method;
   closeModal('payModal');
@@ -875,7 +947,14 @@ function backToMethodChoice() {
   setTimeout(() => openPayModal(), 200);
 }
 
+/* ============================================================
+   SUBMIT GIFT REQUEST
+============================================================ */
 function genReqId() { return 'REQ-' + Date.now().toString(36).toUpperCase(); }
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 async function submitGiftRequest() {
   const linksRaw = document.getElementById('giftLinks').value.trim();
@@ -888,200 +967,242 @@ async function submitGiftRequest() {
 
   const btn = document.getElementById('submitGiftBtn');
   btn.innerHTML = '<div class="spinner"></div> Отправка...';
-  btn.disabled = true;
+  btn.disabled  = true;
 
   const methodLabel = selectedMethod === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
-  const now = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
-  const reqId = genReqId();
+  const now    = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
+  const reqId  = genReqId();
   const linksFormatted = links.map((l,i) => `${i+1}. ${escapeHtml(l)}`).join('\n');
-  const inlineKeyboard = { inline_keyboard: [[{ text:'✅ Выплатить', callback_data:`payout_${reqId}_${uid}_${encodeURIComponent(tonAddr)}` },{ text:'❌ Отклонить', callback_data:`reject_${reqId}_${uid}` }]] };
-  const text = `🆕 <b>Новая заявка на выплату</b>\n🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n👤 <b>Пользователь:</b> ${escapeHtml(fullName)}\n🔗 <b>Username:</b> ${escapeHtml(username)}\n🆔 <b>TG ID:</b> <code>${uid}</code>\n\n💳 <b>Метод:</b> ${methodLabel}\n💎 <b>TON Адрес:</b>\n<code>${escapeHtml(tonAddr)}</code>\n\n🎁 <b>Ссылки на подарки (${links.length} шт.):</b>\n${linksFormatted}\n\n🕐 <b>Время:</b> ${now} (МСК)`;
+
+  const inlineKeyboard = {
+    inline_keyboard: [[
+      { text: '✅ Выплатить', callback_data: `payout_${reqId}_${uid}_${encodeURIComponent(tonAddr)}` },
+      { text: '❌ Отклонить', callback_data: `reject_${reqId}_${uid}` }
+    ]]
+  };
+
+  const text = `🆕 <b>Новая заявка на выплату</b>
+🆔 <b>Заявка:</b> <code>${reqId}</code>
+
+👤 <b>Пользователь:</b> ${escapeHtml(fullName)}
+🔗 <b>Username:</b> ${escapeHtml(username)}
+🆔 <b>TG ID:</b> <code>${uid}</code>
+
+💳 <b>Метод:</b> ${methodLabel}
+💎 <b>TON Адрес:</b>
+<code>${escapeHtml(tonAddr)}</code>
+
+🎁 <b>Ссылки на подарки (${links.length} шт.):</b>
+${linksFormatted}
+
+🕐 <b>Время:</b> ${now} (МСК)`;
 
   try {
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id:LOG_CHANNEL_ID, text, parse_mode:'HTML', disable_web_page_preview:true, reply_markup:inlineKeyboard })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: LOG_CHANNEL_ID, text,
+        parse_mode: 'HTML', disable_web_page_preview: true,
+        reply_markup: inlineKeyboard
+      })
     });
     const data = await res.json();
     if (data.ok) {
+      /* Save to local history */
+      const myData = getMyData();
+      myData.history = myData.history || [];
+      myData.history.push({
+        reqId, method: selectedMethod,
+        date: new Date().toLocaleDateString('ru-RU'),
+        status: 'pending', ton: null
+      });
+      saveMyData(myData);
+      renderPaymentsHistory();
+
       closeModal('giftModal');
       document.getElementById('successTitle').textContent = 'Заявка отправлена!';
-      document.getElementById('successSub').textContent = `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
+      document.getElementById('successSub').textContent   = `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
       document.getElementById('successOverlay').classList.add('open');
     } else { showToast('❌ Ошибка отправки'); }
-  } catch(err) { showToast('❌ Ошибка сети'); }
+  } catch (err) { showToast('❌ Ошибка сети'); }
   finally { btn.innerHTML = 'Отправить заявку'; btn.disabled = false; }
 }
 
-function escapeHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* ============================================================
+   PAYOUT WEBHOOK (callback from bot)
+   When admin presses ✅ Выплатить, bot calls this function
+   via Telegram Mini App postMessage or deep link:
+   Expected format: sam_payout|<reqId>|<uid>|<ton_amount>
+============================================================ */
+window.addEventListener('message', function(e) {
+  try {
+    const msg = typeof e.data === 'string' ? e.data : JSON.stringify(e.data);
+    if (!msg.startsWith('sam_payout|')) return;
+    const parts = msg.split('|');
+    const reqId = parts[1], targetUid = parts[2], tonAmount = parseFloat(parts[3]) || 0;
+    if (targetUid !== uid) return;
+    registerPayout(reqId, tonAmount);
+  } catch {}
+});
+
+/* Also listen for Telegram WebApp events */
+if (tg) {
+  tg.onEvent('web_app_data_received', function(data) {
+    try {
+      const obj = JSON.parse(data);
+      if (obj.type === 'payout' && String(obj.uid) === uid) {
+        registerPayout(obj.reqId, parseFloat(obj.ton) || 0);
+      }
+    } catch {}
+  });
 }
 
+/* ============================================================
+   REGISTER PAYOUT — called after admin confirms
+   You can also call this manually for testing:
+   registerPayout('REQ-TEST', 5.5)
+============================================================ */
+function registerPayout(reqId, tonAmount) {
+  const myData   = getMyData();
+  myData.profits  = (myData.profits  || 0) + 1;
+  myData.totalTon = (myData.totalTon || 0) + tonAmount;
+  myData.history  = myData.history || [];
+
+  const idx = myData.history.findIndex(h => h.reqId === reqId);
+  if (idx >= 0) {
+    myData.history[idx].status = 'paid';
+    myData.history[idx].ton    = tonAmount;
+  }
+  saveMyData(myData);
+  refreshStats();
+  showToast('✅ Выплата зачтена: +' + tonAmount + ' TON · профит #' + myData.profits);
+}
+
+/* ============================================================
+   REQUISITES
+============================================================ */
 function submitRequisites() {
   const wallet = document.getElementById('reqWallet').value.trim();
   if (!wallet) { showToast('❌ Введите TON адрес'); return; }
-  localStorage.setItem('sam_wallet_' + uid, wallet);
+  const myData = getMyData();
+  myData.wallet = wallet;
+  saveMyData(myData);
   document.getElementById('profileWallet').textContent = wallet.slice(0,6) + '...' + wallet.slice(-4);
   closeModal('reqModal');
   document.getElementById('successTitle').textContent = 'Реквизиты прикреплены!';
-  document.getElementById('successSub').textContent = `Кошелёк ${wallet.slice(0,8)}... успешно сохранён`;
+  document.getElementById('successSub').textContent   = `Кошелёк ${wallet.slice(0,8)}... успешно сохранён`;
   document.getElementById('successOverlay').classList.add('open');
-  document.getElementById('reqWallet').value = '';
-  document.getElementById('reqComment').value = '';
+  document.getElementById('reqWallet').value   = '';
+  document.getElementById('reqComment').value  = '';
 }
 
-function showTxDetail(name, amount, status, hash) {
-  document.getElementById('txName').textContent = name;
-  document.getElementById('txAmount').textContent = amount + ' TON';
-  const statusMap = {
-    success:'<span class="payment-status success">Выплачено</span>',
-    pending:'<span class="payment-status pending">В обработке</span>',
-    failed: '<span class="payment-status failed">Ошибка</span>',
-  };
-  document.getElementById('txStatusEl').innerHTML = statusMap[status] || '';
-  if (hash) {
-    document.getElementById('txHashBlock').style.display = 'block';
-    document.getElementById('txHash').textContent = hash + 'a1b2c3d4e5f67890abcdef';
-  } else { document.getElementById('txHashBlock').style.display = 'none'; }
-  document.getElementById('txModal').classList.add('open');
+/* ============================================================
+   LESSONS
+============================================================ */
+const LESSONS = [
+  {
+    title: 'Введение в SAM',
+    content: '<strong>SAM</strong> — это профессиональная платформа для воркеров. Здесь ты работаешь с подарками Telegram, получаешь выплаты в TON и растёшь в карьере.<br><br>Основные правила: честность, скорость, качество. Каждая выполненная заявка = 1 профит в твоём профиле.',
+    rule: '📌 Правило: Подавай заявки только с реальными подарками. Фейковые ссылки приводят к блокировке.',
+  },
+  {
+    title: 'Система выплат TON',
+    content: '<strong>ОТС Бот</strong> — автоматическая обработка. Быстрее, но есть ограничения по сумме.<br><br><strong>Живой гарант</strong> — обработка вручную. Подходит для крупных сделок и нестандартных случаев.<br><br>После отправки заявки администратор нажимает "Выплатить" — и TON поступает на твой адрес автоматически.',
+    rule: '💡 Всегда указывай правильный TON-адрес. Ошибка в адресе = потеря средств.',
+  },
+  {
+    title: 'Работа с подарками',
+    content: '<strong>Подарки Telegram</strong> — уникальные цифровые активы. Каждый подарок имеет свою рыночную стоимость в TON.<br><br>Для подачи заявки: скопируй ссылку на подарок из Telegram, вставь в форму. Можно добавить до <strong>20 ссылок</strong> за одну заявку.',
+    rule: '🎁 Ссылка формата: https://t.me/gift/... Убедись, что подарок не заблокирован.',
+  },
+  {
+    title: 'Продвинутые стратегии',
+    content: 'Этот модуль доступен после завершения предыдущих.',
+    rule: '🔒 Заблокировано.',
+  },
+];
+
+function openLesson(idx) {
+  const lesson = LESSONS[idx];
+  document.getElementById('lessonTitle').textContent  = lesson.title;
+  document.getElementById('lessonContent').innerHTML  = lesson.content;
+  const ruleEl = document.getElementById('lessonRule');
+  if (lesson.rule) { ruleEl.textContent = lesson.rule; ruleEl.style.display = 'block'; }
+  else { ruleEl.style.display = 'none'; }
+  document.getElementById('lessonModal').classList.add('open');
 }
 
+/* ============================================================
+   UTILS
+============================================================ */
 function closeSuccess() { document.getElementById('successOverlay').classList.remove('open'); }
-function setFilter(el)  { document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+/* ============================================================
+   BOOT
+============================================================ */
+refreshStats();
 </script>
 
+<!-- SPLASH -->
 <div id="sam-splash" style="position:fixed;inset:0;z-index:99999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;">
   <div style="position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(229,34,34,0.07) 0%,transparent 70%);pointer-events:none;animation:samGlow 3s ease-in-out infinite;"></div>
   <div style="position:relative;z-index:2;margin-bottom:36px;">
     <svg width="110" height="150" viewBox="0 0 110 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;filter:drop-shadow(0 0 22px rgba(229,34,34,0.45));">
-      <defs>
-        <linearGradient id="sGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ff4444"/>
-          <stop offset="100%" stop-color="#7a0000"/>
-        </linearGradient>
-      </defs>
+      <defs><linearGradient id="sGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff4444"/><stop offset="100%" stop-color="#7a0000"/></linearGradient></defs>
       <text x="55" y="128" text-anchor="middle" font-family="'Bebas Neue', sans-serif" font-size="128" fill="url(#sGrad)" style="letter-spacing:0;">S</text>
       <path d="M 78 18 Q 79 35 77 52 Q 76 60 75 72" stroke="rgba(160,0,0,0.6)" stroke-width="2.2" fill="none" stroke-linecap="round" style="stroke-dasharray:80;stroke-dashoffset:80;animation:dripDraw 1.6s ease 0.4s forwards;"/>
       <path d="M 30 22 Q 29 38 31 55 Q 32 64 30 75" stroke="rgba(140,0,0,0.5)" stroke-width="1.8" fill="none" stroke-linecap="round" style="stroke-dasharray:70;stroke-dashoffset:70;animation:dripDraw 1.5s ease 0.9s forwards;"/>
       <path d="M 55 68 Q 54 80 56 92" stroke="rgba(180,0,0,0.55)" stroke-width="2" fill="none" stroke-linecap="round" style="stroke-dasharray:40;stroke-dashoffset:40;animation:dripDraw 1.2s ease 1.4s forwards;"/>
-      <path d="M 76 98 Q 77 112 75 128" stroke="rgba(150,0,0,0.5)" stroke-width="1.8" fill="none" stroke-linecap="round" style="stroke-dasharray:45;stroke-dashoffset:45;animation:dripDraw 1.3s ease 0.7s forwards;"/>
-      <path d="M 34 105 Q 33 118 35 132" stroke="rgba(130,0,0,0.45)" stroke-width="1.6" fill="none" stroke-linecap="round" style="stroke-dasharray:40;stroke-dashoffset:40;animation:dripDraw 1.2s ease 1.1s forwards;"/>
       <g style="animation:dropA 2.6s ease-in 0.5s infinite;"><path d="M77 52 Q79.5 57 77 62 Q74.5 57 77 52Z" fill="#cc0000"/><ellipse cx="77" cy="64" rx="4.5" ry="6" fill="#cc0000"/></g>
       <g style="animation:dropB 3.0s ease-in 1.1s infinite;"><path d="M30 55 Q32.5 60 30 65 Q27.5 60 30 55Z" fill="#bb0000"/><ellipse cx="30" cy="67" rx="4" ry="5.5" fill="#bb0000"/></g>
-      <g style="animation:dropC 2.8s ease-in 1.7s infinite;"><path d="M55 88 Q57 92 55 96 Q53 92 55 88Z" fill="#dd0000"/><ellipse cx="55" cy="98" rx="3.8" ry="5" fill="#dd0000"/></g>
-      <g style="animation:dropD 2.5s ease-in 0.8s infinite;"><path d="M75 122 Q77.5 127 75 132 Q72.5 127 75 122Z" fill="#cc0000"/><ellipse cx="75" cy="134" rx="4.2" ry="5.5" fill="#cc0000"/></g>
-      <g style="animation:dropE 3.2s ease-in 1.4s infinite;"><path d="M35 126 Q37 130 35 134 Q33 130 35 126Z" fill="#b50000"/><ellipse cx="35" cy="136" rx="3.5" ry="4.8" fill="#b50000"/></g>
     </svg>
   </div>
   <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;">
-    <div style="position:relative;width:200px;">
-      <div id="samDropsContainer" style="position:absolute;bottom:100%;left:0;width:100%;height:40px;overflow:visible;pointer-events:none;"></div>
-      <div style="width:200px;height:3px;background:rgba(229,34,34,0.12);border-radius:3px;overflow:hidden;">
-        <div id="samProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#7a0000,#e52222,#ff6b6b);border-radius:3px;transition:width 0.08s linear;position:relative;">
-          <div style="position:absolute;top:0;right:0;width:20px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,150,150,0.5));"></div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:center;margin-top:3px;">
-        <svg width="200" height="8" viewBox="0 0 200 8">
-          <ellipse id="samBloodPool" cx="100" cy="5" rx="0" ry="2.5" fill="rgba(120,0,0,0.4)" style="transition:rx 0.1s linear;"/>
-        </svg>
-      </div>
+    <div style="width:200px;height:3px;background:rgba(229,34,34,0.12);border-radius:3px;overflow:hidden;">
+      <div id="samProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#7a0000,#e52222,#ff6b6b);border-radius:3px;transition:width 0.08s linear;"></div>
     </div>
     <div id="samSplashLabel" style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:rgba(229,34,34,0.45);margin-top:1px;">Загрузка...</div>
   </div>
 </div>
 
 <style>
-@keyframes samGlow {
-  0%,100%{opacity:0.6;transform:translateX(-50%) scale(1);}
-  50%{opacity:1;transform:translateX(-50%) scale(1.08);}
-}
-@keyframes dripDraw { to { stroke-dashoffset:0; } }
-@keyframes dropA {
-  0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(96px);opacity:1;}72%{transform:translateY(106px);opacity:0;}100%{transform:translateY(0);opacity:0;}
-}
-@keyframes dropB {
-  0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(90px);opacity:1;}72%{transform:translateY(100px);opacity:0;}100%{transform:translateY(0);opacity:0;}
-}
-@keyframes dropC {
-  0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(58px);opacity:1;}72%{transform:translateY(66px);opacity:0;}100%{transform:translateY(0);opacity:0;}
-}
-@keyframes dropD {
-  0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(24px);opacity:1;}72%{transform:translateY(32px);opacity:0;}100%{transform:translateY(0);opacity:0;}
-}
-@keyframes dropE {
-  0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(20px);opacity:1;}72%{transform:translateY(28px);opacity:0;}100%{transform:translateY(0);opacity:0;}
-}
-@keyframes samDropToBar {
-  0%{transform:translateY(0);opacity:1;}70%{transform:translateY(32px);opacity:1;}90%{transform:translateY(38px);opacity:0;}100%{transform:translateY(38px);opacity:0;}
-}
-#sam-splash.sam-hidden {
-  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
-  transition:opacity 0.6s ease,visibility 0.6s!important;
-}
+@keyframes samGlow{0%,100%{opacity:0.6;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.08);}}
+@keyframes dripDraw{to{stroke-dashoffset:0;}}
+@keyframes dropA{0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(96px);opacity:1;}72%{transform:translateY(106px);opacity:0;}100%{transform:translateY(0);opacity:0;}}
+@keyframes dropB{0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(90px);opacity:1;}72%{transform:translateY(100px);opacity:0;}100%{transform:translateY(0);opacity:0;}}
+#sam-splash.sam-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity 0.6s ease,visibility 0.6s!important;}
 </style>
 
 <script>
 (function(){
-  var splash    = document.getElementById('sam-splash');
-  var fill      = document.getElementById('samProgressFill');
-  var pool      = document.getElementById('samBloodPool');
-  var container = document.getElementById('samDropsContainer');
-  var label     = document.getElementById('samSplashLabel');
-  var DURATION  = 2600;
-  var start     = performance.now();
-  var done      = false;
-
+  var splash = document.getElementById('sam-splash');
+  var fill   = document.getElementById('samProgressFill');
+  var label  = document.getElementById('samSplashLabel');
+  var DURATION = 2200, start = performance.now(), done = false;
   function tick(now){
-    var pct = Math.min(100,((now-start)/DURATION)*100);
-    fill.style.width = pct+'%';
-    if(pool) pool.setAttribute('rx',(pct*0.96).toFixed(1));
-    if(pct<100) requestAnimationFrame(tick);
+    var pct = Math.min(100, ((now - start) / DURATION) * 100);
+    fill.style.width = pct + '%';
+    if (pct < 100) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-
-  var colors=['#cc0000','#bb0000','#dd0000','#aa0000','#e52222'];
-  function spawnDrop(){
-    if(done) return;
-    var drop=document.createElement('div');
-    var x=Math.random()*170+15;
-    var sz=Math.random()*4+3;
-    drop.style.cssText='position:absolute;bottom:0;left:'+x+'px;width:'+sz+'px;height:'+(sz*1.6)+'px;background:'+colors[Math.floor(Math.random()*colors.length)]+';border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:samDropToBar 0.55s ease-in forwards;pointer-events:none;';
-    container.appendChild(drop);
-    setTimeout(function(){drop.remove();},700);
-  }
-
-  var iv=setInterval(function(){
-    if(done){clearInterval(iv);return;}
-    spawnDrop();
-    if(Math.random()>0.82) setTimeout(spawnDrop,180);
-  },520);
-
   function hideSplash(){
-    if(done) return;
-    done=true;
-    clearInterval(iv);
-    label.textContent='Готово';
+    if (done) return; done = true;
+    label.textContent = 'Готово';
     setTimeout(function(){
       splash.classList.add('sam-hidden');
-      splash.addEventListener('transitionend',function(){splash.remove();},{once:true});
-    },220);
+      splash.addEventListener('transitionend', function(){ splash.remove(); }, { once: true });
+    }, 200);
   }
-
   Promise.all([
-    new Promise(function(r){if(document.readyState==='complete')r();else window.addEventListener('load',r,{once:true});}),
-    new Promise(function(r){setTimeout(r,DURATION);})
+    new Promise(function(r){ if (document.readyState === 'complete') r(); else window.addEventListener('load', r, { once: true }); }),
+    new Promise(function(r){ setTimeout(r, DURATION); })
   ]).then(hideSplash);
-
-  document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState==='visible'&&!done&&(performance.now()-start>=DURATION)) hideSplash();
-  });
 })();
 </script>
 
