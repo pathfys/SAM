@@ -1289,11 +1289,12 @@ ${linksFormatted}
 🕐 <b>Время:</b> ${now} (МСК)`;
 
 try {
-    const res  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify({ chat_id: LOG_CHANNEL_ID, text, parse_mode: 'HTML',
-  disable_web_page_preview: true })
-    const data = await res.json();
+   const res  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+  method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ chat_id: LOG_CHANNEL_ID, text, parse_mode: 'HTML',
+    disable_web_page_preview: true })
+});
+const data = await res.json();
     showToast(JSON.stringify(data)); // временно — покажет точную ошибку
     if (data.ok) {
       const myData = getMyData();
