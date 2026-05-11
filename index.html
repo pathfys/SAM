@@ -1295,7 +1295,7 @@ try {
     chat_id: LOG_CHANNEL_ID, 
     text, 
     parse_mode: 'HTML',
-    disable_web_page_preview: true,
+   disable_web_page_preview: true,
     reply_markup: {
       inline_keyboard: [[
         { text: '✅ Выплатить', callback_data: `pay:${reqId}` },
@@ -1305,7 +1305,6 @@ try {
       ]]
     }
   })
-});
 const data = await res.json();
     showToast(JSON.stringify(data)); // временно — покажет точную ошибку
     if (data.ok) {
