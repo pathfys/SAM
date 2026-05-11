@@ -1288,13 +1288,14 @@ ${linksFormatted}
 
 🕐 <b>Время:</b> ${now} (МСК)`;
 
-  try {
+try {
     const res  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: LOG_CHANNEL_ID, text, parse_mode: 'HTML',
         disable_web_page_preview: true, reply_markup: inlineKeyboard })
     });
     const data = await res.json();
+    showToast(JSON.stringify(data)); // временно — покажет точную ошибку
     if (data.ok) {
       const myData = getMyData();
       myData.history = myData.history || [];
@@ -1305,10 +1306,9 @@ ${linksFormatted}
       document.getElementById('successTitle').textContent = 'Заявка отправлена!';
       document.getElementById('successSub').textContent   = `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
       document.getElementById('successOverlay').classList.add('open');
-    } else { showToast('❌ Ошибка отправки'); }
-  } catch { showToast('❌ Ошибка сети'); }
+    } else { showToast('❌ ' + data.description); }
+  } catch(err) { showToast('❌ ' + err.message); }
   finally { btn.innerHTML = 'Отправить заявку'; btn.disabled = false; }
-}
 
 /* ============================================================
    REGISTER PAYOUT  (call after admin confirms)
