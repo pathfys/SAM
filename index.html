@@ -1267,10 +1267,10 @@ async function submitGiftRequest() {
   const reqId          = genReqId();
   const linksFormatted = links.map((l,i) => `${i+1}. ${escapeHtml(l)}`).join('\n');
 
-  const inlineKeyboard = { inline_keyboard: [[
-    { text: '✅ Выплатить', callback_data: `payout_${reqId}_${uid}_${encodeURIComponent(tonAddr)}` },
-    { text: '❌ Отклонить', callback_data: `reject_${reqId}_${uid}` }
-  ]]};
+ const inlineKeyboard = { inline_keyboard: [[
+    { text: '✅ Выплатить', callback_data: `pay_${reqId}` },
+    { text: '❌ Отклонить', callback_data: `rej_${reqId}` }
+]]};
 
   const text = `🆕 <b>Новая заявка на выплату</b>
 🆔 <b>Заявка:</b> <code>${reqId}</code>
