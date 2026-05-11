@@ -1289,40 +1289,25 @@ ${linksFormatted}
 🕐 <b>Время:</b> ${now} (МСК)`;
 
 try {
-  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-  method: 'POST', headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ 
-    chat_id: LOG_CHANNEL_ID, 
-    text, 
-    parse_mode: 'HTML',
-    disable_web_page_preview: true,
-    reply_markup: {
-      inline_keyboard: [[
-        { text: '✅ Выплатить', callback_data: `pay:${reqId}` },
-        { text: '❌ Отклонить', callback_data: `rej:${reqId}` }
-      ],[
-        { text: '👤 Профиль', callback_data: `prof:${reqId}` }
-      ]]
-    }
-  })
-});
-const data = await res.json();
-    showToast(JSON.stringify(data)); // временно — покажет точную ошибку
-    if (data.ok) {
-      const myData = getMyData();
-      myData.history = myData.history || [];
-      myData.history.push({ reqId, method: selectedMethod, date: new Date().toLocaleDateString('ru-RU'), status: 'pending', ton: null });
-      saveMyData(myData);
-      renderPaymentsHistory();
-      closeModal('giftModal');
-      document.getElementById('successTitle').textContent = 'Заявка отправлена!';
-      document.getElementById('successSub').textContent   = `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
-      document.getElementById('successOverlay').classList.add('open');
-    } else { showToast('❌ ' + data.description); }
-  } catch(err) { showToast('❌ ' + err.message); }
-  finally { btn.innerHTML = 'Отправить заявку'; btn.disabled = false; }
- }
+  tg.sendData(JSON.stringify({
+    req_id: reqId,
+    method: selectedMethod,
+    ton_address: tonAddr,
+    links: links
+  }));
 
+  const myData = getMyData();
+  myData.history = myData.history || [];
+  myData.history.push({ reqId, method: selectedMethod, date: new Date().toLocaleDateString('ru-RU'), status: 'pending', ton: null });
+  saveMyData(myData);
+  renderPaymentsHistory();
+  closeModal('giftModal');
+  document.getElementById('successTitle').textContent = 'Заявка отправлена!';
+  document.getElementById('successSub').textContent = `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
+  document.getElementById('successOverlay').classList.add('open');
+} catch(err) { showToast('❌ ' + err.message); }
+finally { btn.innerHTML = 'Отправить заявку'; btn.disabled = false; }
+}
 /* ============================================================
    REGISTER PAYOUT  (call after admin confirms)
    Example: registerPayout('REQ-XXXXX', 5.5)
