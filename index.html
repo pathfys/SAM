@@ -1314,32 +1314,33 @@ try {
    REGISTER PAYOUT  (call after admin confirms)
    Example: registerPayout('REQ-XXXXX', 5.5)
 ============================================================ */
-function registerPayout(reqId, tonAmount) {
+async function registerPayout(reqId, tonAmount) {
   const myData    = getMyData();
   myData.profits  = (myData.profits  || 0) + 1;
   myData.totalTon = (myData.totalTon || 0) + tonAmount;
   myData.history  = myData.history || [];
   const idx = myData.history.findIndex(h => h.reqId === reqId);
+  const method = idx >= 0 ? myData.history[idx].method : selectedMethod;
   if (idx >= 0) { myData.history[idx].status = 'paid'; myData.history[idx].ton = tonAmount; }
   saveMyData(myData);
+
+  const rank = getRank(myData.profits);
+  const methodLabel = method === 'ots' ? 'ОТС Бот' : 'Живой гарант';
+
+  const text = `✅ <b>Успешная выплата!</b>
+
+<blockquote>👤 Воркер: скрыт
+🔧 Инструмент: ${methodLabel}
+💎 Сумма: ${tonAmount} TON
+⭐️ Уровень: ${rank.name}</blockquote>`;
+
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: PAYOUT_CHANNEL_ID, text, parse_mode: 'HTML' })
+  });
+
   refreshStats();
   showToast('✅ Выплата зачтена: +' + tonAmount + ' TON · профит #' + myData.profits);
-}
-
-window.addEventListener('message', function(e) {
-  try {
-    const msg = typeof e.data === 'string' ? e.data : JSON.stringify(e.data);
-    if (!msg.startsWith('sam_payout|')) return;
-    const parts = msg.split('|');
-    if (parts[2] !== uid) return;
-    registerPayout(parts[1], parseFloat(parts[3]) || 0);
-  } catch {}
-});
-
-if (tg) {
-  tg.onEvent('web_app_data_received', function(d) {
-    try { const o = JSON.parse(d); if (o.type === 'payout' && String(o.uid) === uid) registerPayout(o.reqId, parseFloat(o.ton) || 0); } catch {}
-  });
 }
 
 /* ============================================================
