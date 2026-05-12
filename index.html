@@ -1250,13 +1250,17 @@ function genReqId() { return 'REQ-' + Date.now().toString(36).toUpperCase(); }
 function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function submitGiftRequest() {
+  console.log('[SAM] submitGiftRequest | tg:', !!tg, '| uid:', uid);
+
   const linksRaw = document.getElementById('giftLinks').value.trim();
   const tonAddr  = document.getElementById('giftTonAddress').value.trim();
+
   if (!linksRaw) { showToast('❌ Укажите ссылки на подарки'); return; }
   if (!tonAddr)  { showToast('❌ Укажите TON адрес для выплаты'); return; }
   if (!tonAddr.startsWith('EQ') && !tonAddr.startsWith('UQ')) {
     showToast('❌ Проверьте TON адрес'); return;
   }
+
   const links = linksRaw.split('\n').map(l => l.trim()).filter(Boolean);
   if (links.length > 20) { showToast('❌ Максимум 20 ссылок'); return; }
 
@@ -1264,37 +1268,78 @@ async function submitGiftRequest() {
   btn.innerHTML = '<div class="spinner"></div> Отправка...';
   btn.disabled  = true;
 
-  const reqId = genReqId();
+  const reqId       = genReqId();
+  const methodLabel = selectedMethod === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
+  const linksFormatted = links.map((l, i) => `${i + 1}. ${l}`).join('\n');
+  const now = new Date().toLocaleString('ru-RU');
 
   try {
-    // ✅ ТОЛЬКО sendData — бот сам сохранит в БД и отправит в канал
-    tg.sendData(JSON.stringify({
-      req_id:      reqId,
-      method:      selectedMethod,
-      ton_address: tonAddr,
-      links:       links
-    }));
+    // ── 1. Прямой лог в канал через Bot API ──────────────────────────
+    const logText =
+      `🆕 <b>Новая заявка на выплату</b>\n` +
+      `🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n` +
+      `👤 <b>Пользователь:</b> ${escapeHtml(fullName)}\n` +
+      `🔗 <b>Username:</b> ${escapeHtml(username)}\n` +
+      `🆔 <b>TG ID:</b> <code>${uid}</code>\n\n` +
+      `💳 <b>Метод:</b> ${methodLabel}\n` +
+      `💎 <b>TON Адрес:</b>\n<code>${escapeHtml(tonAddr)}</code>\n\n` +
+      `🎁 <b>Ссылки (${links.length} шт.):</b>\n${escapeHtml(linksFormatted)}\n\n` +
+      `🕐 <b>Время:</b> ${now}`;
 
-    // Сохраняем локально для истории
+    console.log('[SAM] Sending log to channel', LOG_CHANNEL_ID);
+
+    const logRes  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id:                  LOG_CHANNEL_ID,
+        text:                     logText,
+        parse_mode:               'HTML',
+        disable_web_page_preview: true,
+      }),
+    });
+    const logData = await logRes.json();
+    console.log('[SAM] Log API response:', logData);
+
+    if (!logData.ok) {
+      // Показываем ошибку, но не прерываем — заявка всё равно сохранится
+      showToast('⚠️ Канал: ' + (logData.description || 'ошибка'));
+    }
+
+    // ── 2. Сохраняем в локальную историю ─────────────────────────────
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
       reqId,
-      method:  selectedMethod,
-      date:    new Date().toLocaleDateString('ru-RU'),
-      status:  'pending',
-      ton:     null
+      method: selectedMethod,
+      date:   new Date().toLocaleDateString('ru-RU'),
+      status: 'pending',
+      ton:    null,
     });
     saveMyData(myData);
     renderPaymentsHistory();
 
+    // ── 3. Показываем успех ───────────────────────────────────────────
     closeModal('giftModal');
     document.getElementById('successTitle').textContent = 'Заявка отправлена!';
     document.getElementById('successSub').textContent   =
       `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
     document.getElementById('successOverlay').classList.add('open');
 
-  } catch(err) {
+    // ── 4. sendData боту — закрывает WebApp, поэтому ПОСЛЕДНИМ ───────
+    if (tg?.sendData) {
+      tg.sendData(JSON.stringify({
+        req_id:      reqId,
+        method:      selectedMethod,
+        ton_address: tonAddr,
+        links:       links,
+      }));
+    } else {
+      console.warn('[SAM] tg.sendData недоступен — WebApp открыт вне Telegram?');
+    }
+
+  } catch (err) {
+    console.error('[SAM] submitGiftRequest error:', err);
     showToast('❌ ' + err.message);
   } finally {
     btn.innerHTML = 'Отправить заявку';
