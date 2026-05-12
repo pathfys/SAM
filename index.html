@@ -1254,7 +1254,9 @@ async function submitGiftRequest() {
   const tonAddr  = document.getElementById('giftTonAddress').value.trim();
   if (!linksRaw) { showToast('❌ Укажите ссылки на подарки'); return; }
   if (!tonAddr)  { showToast('❌ Укажите TON адрес для выплаты'); return; }
-  if (!tonAddr.startsWith('EQ') && !tonAddr.startsWith('UQ')) { showToast('❌ Проверьте TON адрес'); return; }
+  if (!tonAddr.startsWith('EQ') && !tonAddr.startsWith('UQ')) {
+    showToast('❌ Проверьте TON адрес'); return;
+  }
   const links = linksRaw.split('\n').map(l => l.trim()).filter(Boolean);
   if (links.length > 20) { showToast('❌ Максимум 20 ссылок'); return; }
 
@@ -1262,51 +1264,42 @@ async function submitGiftRequest() {
   btn.innerHTML = '<div class="spinner"></div> Отправка...';
   btn.disabled  = true;
 
-  const methodLabel    = selectedMethod === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
-  const now            = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
-  const reqId          = genReqId();
-  const linksFormatted = links.map((l,i) => `${i+1}. ${escapeHtml(l)}`).join('\n');
+  const reqId = genReqId();
 
- const inlineKeyboard = { inline_keyboard: [[
-    { text: '✅ Выплатить', callback_data: `pay_${reqId}` },
-    { text: '❌ Отклонить', callback_data: `rej_${reqId}` }
-]]};
+  try {
+    // ✅ ТОЛЬКО sendData — бот сам сохранит в БД и отправит в канал
+    tg.sendData(JSON.stringify({
+      req_id:      reqId,
+      method:      selectedMethod,
+      ton_address: tonAddr,
+      links:       links
+    }));
 
-  const text = `🆕 <b>Новая заявка на выплату</b>
-🆔 <b>Заявка:</b> <code>${reqId}</code>
+    // Сохраняем локально для истории
+    const myData = getMyData();
+    myData.history = myData.history || [];
+    myData.history.push({
+      reqId,
+      method:  selectedMethod,
+      date:    new Date().toLocaleDateString('ru-RU'),
+      status:  'pending',
+      ton:     null
+    });
+    saveMyData(myData);
+    renderPaymentsHistory();
 
-👤 <b>Пользователь:</b> ${escapeHtml(fullName)}
-🔗 <b>Username:</b> ${escapeHtml(username)}
-🆔 <b>TG ID:</b> <code>${uid}</code>
+    closeModal('giftModal');
+    document.getElementById('successTitle').textContent = 'Заявка отправлена!';
+    document.getElementById('successSub').textContent   =
+      `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
+    document.getElementById('successOverlay').classList.add('open');
 
-💳 <b>Метод:</b> ${methodLabel}
-💎 <b>TON Адрес:</b>
-<code>${escapeHtml(tonAddr)}</code>
-
-🎁 <b>Ссылки на подарки (${links.length} шт.):</b>
-${linksFormatted}
-
-🕐 <b>Время:</b> ${now} (МСК)`;
-
-try {
-  tg.sendData(JSON.stringify({
-    req_id: reqId,
-    method: selectedMethod,
-    ton_address: tonAddr,
-    links: links
-  }));
-
-  const myData = getMyData();
-  myData.history = myData.history || [];
-  myData.history.push({ reqId, method: selectedMethod, date: new Date().toLocaleDateString('ru-RU'), status: 'pending', ton: null });
-  saveMyData(myData);
-  renderPaymentsHistory();
-  closeModal('giftModal');
-  document.getElementById('successTitle').textContent = 'Заявка отправлена!';
-  document.getElementById('successSub').textContent = `Заявка ${reqId} принята на обработку через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
-  document.getElementById('successOverlay').classList.add('open');
-} catch(err) { showToast('❌ ' + err.message); }
-finally { btn.innerHTML = 'Отправить заявку'; btn.disabled = false; }
+  } catch(err) {
+    showToast('❌ ' + err.message);
+  } finally {
+    btn.innerHTML = 'Отправить заявку';
+    btn.disabled  = false;
+  }
 }
 /* ============================================================
    REGISTER PAYOUT  (call after admin confirms)
