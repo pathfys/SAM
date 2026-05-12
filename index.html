@@ -1288,24 +1288,32 @@ async function submitGiftRequest() {
 
     console.log('[SAM] Sending log to channel', LOG_CHANNEL_ID);
 
-    const logRes  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id:                  LOG_CHANNEL_ID,
-        text:                     logText,
-        parse_mode:               'HTML',
-        disable_web_page_preview: true,
-      }),
-    });
-    const logData = await logRes.json();
-    console.log('[SAM] Log API response:', logData);
+   const logData = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+  method:  'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    chat_id:                  LOG_CHANNEL_ID,
+    text:                     logText,
+    parse_mode:               'HTML',
+    disable_web_page_preview: true,
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '✅ Выплатить', callback_data: `pay:${reqId}` },
+          { text: '❌ Отклонить', callback_data: `rej:${reqId}` },
+        ],
+        [
+          { text: '👤 Профиль', callback_data: `prof:${reqId}` },
+        ],
+      ],
+    },
+  }),
+}).then(r => r.json());
 
-    if (!logData.ok) {
-      // Показываем ошибку, но не прерываем — заявка всё равно сохранится
-      showToast('⚠️ Канал: ' + (logData.description || 'ошибка'));
-    }
-
+console.log('[SAM] Log API response:', logData);
+if (!logData.ok) {
+  showToast('⚠️ Канал: ' + (logData.description || 'ошибка'));
+}
     // ── 2. Сохраняем в локальную историю ─────────────────────────────
     const myData = getMyData();
     myData.history = myData.history || [];
