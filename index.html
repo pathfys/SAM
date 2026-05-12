@@ -1262,57 +1262,19 @@ async function submitGiftRequest() {
   const links = linksRaw.split('\n').map(l => l.trim()).filter(Boolean);
   if (links.length > 20) { showToast('❌ Максимум 20 ссылок'); return; }
 
+  if (!tg?.sendData) {
+    showToast('⚠️ Открой в Telegram для отправки заявки');
+    return;
+  }
+
   const btn = document.getElementById('submitGiftBtn');
   btn.innerHTML = '<div class="spinner"></div> Отправка...';
   btn.disabled  = true;
 
-  const reqId        = genReqId();
-  const methodLabel  = selectedMethod === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
-  const linksFormatted = links.map((l, i) => `${i + 1}. ${l}`).join('\n');
-  const now = new Date().toLocaleString('ru-RU');
+  const reqId = genReqId();
 
   try {
-    // ── 1. Отправляем сообщение с кнопками в канал через Bot API ─────
-    const logText =
-      `🆕 <b>Новая заявка на выплату</b>\n` +
-      `🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n` +
-      `👤 <b>Пользователь:</b> ${escapeHtml(fullName)}\n` +
-      `🔗 <b>Username:</b> ${escapeHtml(username)}\n` +
-      `🆔 <b>TG ID:</b> <code>${uid}</code>\n\n` +
-      `💳 <b>Метод:</b> ${methodLabel}\n` +
-      `💎 <b>TON Адрес:</b>\n<code>${escapeHtml(tonAddr)}</code>\n\n` +
-      `🎁 <b>Ссылки (${links.length} шт.):</b>\n${escapeHtml(linksFormatted)}\n\n` +
-      `🕐 <b>Время:</b> ${now}`;
-
-    const logData = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id:                  LOG_CHANNEL_ID,
-        text:                     logText,
-        parse_mode:               'HTML',
-        disable_web_page_preview: true,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: '✅ Выплатить', callback_data: `pay:${reqId}` },
-              { text: '❌ Отклонить', callback_data: `rej:${reqId}` },
-            ],
-            [
-              { text: '👤 Профиль', callback_data: `prof:${reqId}` },
-            ],
-          ],
-        },
-      }),
-    }).then(r => r.json());
-
-    if (!logData.ok) {
-      // Не блокируем флоу, но предупреждаем
-      console.warn('[SAM] Канал: ошибка отправки лога:', logData.description);
-      showToast('⚠️ Канал: ' + (logData.description || 'ошибка'));
-    }
-
-    // ── 2. Сохраняем в локальную историю ─────────────────────────────
+    // Сохраняем в локальную историю
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
@@ -1325,24 +1287,20 @@ async function submitGiftRequest() {
     saveMyData(myData);
     renderPaymentsHistory();
 
-    // ── 3. Показываем успех ───────────────────────────────────────────
+    // Показываем успех
     closeModal('giftModal');
     document.getElementById('successTitle').textContent = 'Заявка отправлена!';
     document.getElementById('successSub').textContent   =
       `Заявка ${reqId} принята через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
     document.getElementById('successOverlay').classList.add('open');
 
-    // ── 4. sendData боту — закрывает WebApp, поэтому ПОСЛЕДНИМ ───────
-    if (tg?.sendData) {
-      tg.sendData(JSON.stringify({
-        req_id:      reqId,
-        method:      selectedMethod,
-        ton_address: tonAddr,
-        links:       links,
-      }));
-    } else {
-      console.warn('[SAM] tg.sendData недоступен — WebApp открыт вне Telegram?');
-    }
+    // Отправляем боту — он сам пишет в канал и сохраняет в БД
+    tg.sendData(JSON.stringify({
+      req_id:      reqId,
+      method:      selectedMethod,
+      ton_address: tonAddr,
+      links:       links,
+    }));
 
   } catch (err) {
     console.error('[SAM] submitGiftRequest error:', err);
