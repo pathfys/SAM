@@ -364,7 +364,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
 
 <div class="page-wrap">
 
-  <!-- ═══════════════ HOME ═══════════════ -->
+ <!-- ═══════════════ HOME ═══════════════ -->
 <div class="screen active" id="screen-home">
 
   <!-- Карточка Amex -->
@@ -378,17 +378,114 @@ textarea.input-field.big{height:200px;font-size:13px;}
     aspect-ratio:1.586;
     box-shadow:0 12px 40px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.06);
   ">
-    <div style="position:absolute;inset:0;background-image:
-      repeating-linear-gradient(0deg,rgba(229,34,34,0.03) 0px,rgba(229,34,34,0.03) 1px,transparent 1px,transparent 6px),
-      repeating-linear-gradient(90deg,rgba(229,34,34,0.03) 0px,rgba(229,34,34,0.03) 1px,transparent 1px,transparent 6px);
-      pointer-events:none;"></div>
+
+    <!-- Фон: надписи SAM по диагонали -->
+    <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:0.055;">
+      <div style="
+        position:absolute;inset:-40px;
+        font-family:'Bebas Neue',sans-serif;
+        font-size:18px;
+        letter-spacing:10px;
+        color:#e52222;
+        line-height:2.6;
+        transform:rotate(-20deg);
+        white-space:nowrap;
+        user-select:none;
+      ">SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM SAM</div>
+    </div>
+
+    <!-- Воин (гравюра в красных тонах) -->
+    <div style="position:absolute;right:0;top:0;width:55%;height:100%;pointer-events:none;opacity:0.18;">
+      <svg viewBox="0 0 220 280" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Овал как на Amex -->
+        <ellipse cx="110" cy="140" rx="95" ry="128" stroke="#e52222" stroke-width="1.5" fill="rgba(229,34,34,0.03)"/>
+        <ellipse cx="110" cy="140" rx="88" ry="121" stroke="#cc2222" stroke-width="0.6" fill="none" opacity="0.4"/>
+
+        <!-- Гребень шлема - перья вверх -->
+        <path d="M75 88 Q78 55 88 35 Q96 18 108 14 Q120 10 130 18 Q144 28 142 52 Q140 68 134 78" stroke="#cc2222" stroke-width="2.2" fill="rgba(160,20,20,0.12)" stroke-linecap="round"/>
+        <!-- Перья -->
+        <path d="M88 35 Q82 18 78 4"  stroke="#cc2222" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M96 22 Q92 6 90 -6"  stroke="#cc2222" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M106 15 Q104 -2 103 -12" stroke="#cc2222" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M116 16 Q118 0 121 -10" stroke="#bb1111" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M126 22 Q131 7 136 -3" stroke="#bb1111" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M134 32 Q141 18 148 8"  stroke="#aa1111" stroke-width="1.2" stroke-linecap="round"/>
+        <!-- Доп перья для густоты -->
+        <path d="M92 28 Q87 12 84 0"   stroke="#cc2222" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+        <path d="M100 18 Q98 2 97 -8"  stroke="#bb1111" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+        <path d="M111 14 Q110 -3 110 -14" stroke="#bb1111" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+        <path d="M121 17 Q124 1 128 -9" stroke="#aa1111" stroke-width="1.0" stroke-linecap="round" opacity="0.6"/>
+        <path d="M130 26 Q136 11 142 0" stroke="#991111" stroke-width="1.0" stroke-linecap="round" opacity="0.6"/>
+
+        <!-- Шлем - левая сторона -->
+        <path d="M75 88 Q72 100 74 114 Q76 122 80 128" stroke="#cc2222" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Шлем - правая сторона -->
+        <path d="M134 78 Q140 90 138 106 Q136 116 130 122" stroke="#cc2222" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Козырек -->
+        <path d="M74 112 Q82 107 95 105 Q108 103 120 106 Q128 109 136 112" stroke="#e52222" stroke-width="1.8" fill="rgba(229,34,34,0.06)" stroke-linecap="round"/>
+        <!-- Гравировка шлема -->
+        <path d="M78 95 Q88 91 100 92"  stroke="#991111" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <path d="M120 91 Q130 90 138 94" stroke="#991111" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <path d="M77 103 Q87 99 99 100"  stroke="#881111" stroke-width="0.7" fill="none" opacity="0.4"/>
+        <path d="M118 99 Q129 98 137 102" stroke="#881111" stroke-width="0.7" fill="none" opacity="0.4"/>
+
+        <!-- Лицо - профиль смотрит вправо -->
+        <path d="M80 128 Q76 140 77 152 Q78 164 84 172 Q90 181 100 186 Q108 190 114 188 Q126 185 132 176 Q138 166 138 154 Q138 142 133 132 Q130 125 130 122" stroke="#cc2222" stroke-width="1.8" fill="rgba(160,20,20,0.08)" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Лоб линии (штриховка гравюры) -->
+        <path d="M82 132 Q85 130 88 131" stroke="#991111" stroke-width="0.7" fill="none" opacity="0.4"/>
+        <path d="M81 137 Q85 135 89 136" stroke="#991111" stroke-width="0.7" fill="none" opacity="0.4"/>
+        <path d="M80 142 Q84 140 88 141" stroke="#991111" stroke-width="0.7" fill="none" opacity="0.4"/>
+        <!-- Нос -->
+        <path d="M108 188 Q115 192 118 198 Q115 202 110 200" stroke="#bb1111" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- Рот -->
+        <path d="M100 204 Q107 201 114 202" stroke="#991111" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Подбородок -->
+        <path d="M86 210 Q96 218 106 216" stroke="#881111" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Глаз -->
+        <ellipse cx="118" cy="156" rx="5.5" ry="4.5" fill="rgba(200,20,20,0.18)" stroke="#cc2222" stroke-width="1.2"/>
+        <ellipse cx="119" cy="156" rx="2.8" ry="2.8" fill="rgba(160,20,20,0.3)"/>
+        <!-- Бровь -->
+        <path d="M113 149 Q118 146 124 147" stroke="#cc2222" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- Ухо -->
+        <path d="M80 150 Q74 154 74 162 Q74 168 80 170" stroke="#bb1111" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- Скула штриховка -->
+        <path d="M84 162 Q88 160 93 161" stroke="#881111" stroke-width="0.7" fill="none" opacity="0.35"/>
+        <path d="M83 167 Q87 165 92 166" stroke="#881111" stroke-width="0.7" fill="none" opacity="0.35"/>
+        <path d="M84 172 Q88 170 92 171" stroke="#881111" stroke-width="0.6" fill="none" opacity="0.3"/>
+
+        <!-- Шея -->
+        <path d="M86 186 Q84 198 85 210" stroke="#cc2222" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M108 188 Q112 200 112 210" stroke="#cc2222" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- Шея детали -->
+        <path d="M88 193 Q96 191 106 192" stroke="#991111" stroke-width="0.7" fill="none" opacity="0.4"/>
+        <path d="M87 200 Q96 198 107 199" stroke="#881111" stroke-width="0.7" fill="none" opacity="0.35"/>
+
+        <!-- Наплечник/доспех -->
+        <path d="M72 210 Q66 222 70 238 Q74 252 90 257 Q100 261 112 258 Q126 253 130 238 Q134 222 128 210 Q120 202 100 200 Q82 200 72 210Z" stroke="#cc2222" stroke-width="1.8" fill="rgba(160,20,20,0.1)"/>
+        <!-- Детали доспеха - горизонтальные линии -->
+        <path d="M74 220 Q82 216 100 215 Q118 216 126 220" stroke="#aa1111" stroke-width="0.9" fill="none" opacity="0.6"/>
+        <path d="M72 230 Q80 226 100 225 Q120 226 128 230" stroke="#991111" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <path d="M73 240 Q81 237 100 236 Q119 237 127 240" stroke="#881111" stroke-width="0.8" fill="none" opacity="0.45"/>
+        <path d="M76 250 Q84 248 100 247 Q116 248 124 250" stroke="#771111" stroke-width="0.7" fill="none" opacity="0.4"/>
+        <!-- Центральный декор доспеха -->
+        <path d="M96 215 Q98 230 98 245" stroke="#cc2222" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M104 215 Q102 230 102 245" stroke="#cc2222" stroke-width="1" fill="none" opacity="0.4"/>
+        <circle cx="100" cy="228" r="4" stroke="#cc2222" stroke-width="1" fill="rgba(180,20,20,0.15)" opacity="0.5"/>
+      </svg>
+    </div>
+
+    <!-- Красное свечение справа -->
     <div style="position:absolute;top:-30%;right:-10%;width:60%;height:160%;
-      background:radial-gradient(ellipse,rgba(229,34,34,0.12) 0%,transparent 65%);pointer-events:none;"></div>
+      background:radial-gradient(ellipse,rgba(229,34,34,0.1) 0%,transparent 65%);pointer-events:none;"></div>
+
+    <!-- Металлический блик сверху -->
     <div style="position:absolute;top:0;left:0;right:0;height:40%;
       background:linear-gradient(180deg,rgba(255,255,255,0.04) 0%,transparent 100%);pointer-events:none;"></div>
 
+    <!-- Контент поверх -->
     <div style="position:relative;z-index:1;padding:20px 22px;height:100%;display:flex;flex-direction:column;justify-content:space-between;">
-      <!-- Верх -->
+
+      <!-- Верх: SAM CHAT + чип -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
           background:linear-gradient(135deg,#e52222 0%,#ff6b6b 50%,#c0c0c0 100%);
@@ -407,7 +504,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
         </div>
       </div>
 
-      <!-- Середина -->
+      <!-- Середина: баланс -->
       <div style="text-align:center;">
         <div style="font-size:10px;font-weight:600;color:rgba(229,34,34,0.6);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px;">Профиты</div>
         <div id="balanceAmount" style="font-family:'Bebas Neue',sans-serif;font-size:42px;
@@ -417,7 +514,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
         <div id="balanceUsd" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">≈ $0 USD</div>
       </div>
 
-      <!-- Низ -->
+      <!-- Низ: никнейм + NFC -->
       <div style="display:flex;align-items:flex-end;justify-content:space-between;">
         <div>
           <div style="font-size:9px;color:rgba(229,34,34,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">MEMBER</div>
@@ -437,6 +534,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -507,12 +605,6 @@ textarea.input-field.big{height:200px;font-size:13px;}
   </div>
 
 </div><!-- конец screen-home -->
-
-<!-- Кнопки вынесены под карточку -->
-<div style="display:flex;gap:10px;margin-bottom:14px;">
-  <button class="btn-hero-primary" onclick="openPayModal()">↑ Подать заявку</button>
-  <button class="btn-hero-secondary" onclick="showScreen('payments')">Выплаты</button>
-</div>
 
   <!-- ═══════════════ PAYMENTS ═══════════════ -->
   <div class="screen" id="screen-payments">
