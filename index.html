@@ -366,79 +366,98 @@ textarea.input-field.big{height:200px;font-size:13px;}
 
   <!-- ═══════════════ HOME ═══════════════ -->
   <div class="screen active" id="screen-home">
-    <div class="balance-card">
-      <div class="balance-eyebrow">Профиты</div>
-      <div class="balance-amount" id="balanceAmount">0 <span>TON</span></div>
-      <div class="balance-usd" id="balanceUsd">≈ $0 USD</div>
-      <div class="balance-actions">
-        <button class="btn-hero-primary" onclick="openPayModal()">↑ Подать заявку</button>
-        <button class="btn-hero-secondary" onclick="showScreen('payments')">Выплаты</button>
+   <div class="balance-card" style="
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 40%, #1a1a1a 100%);
+  border: 1px solid rgba(229,34,34,0.35);
+  border-radius: 20px;
+  padding: 0;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.586;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06);
+">
+  <!-- Фоновая гравюра как на Amex -->
+  <div style="position:absolute;inset:0;background-image:
+    repeating-linear-gradient(0deg, rgba(229,34,34,0.03) 0px, rgba(229,34,34,0.03) 1px, transparent 1px, transparent 6px),
+    repeating-linear-gradient(90deg, rgba(229,34,34,0.03) 0px, rgba(229,34,34,0.03) 1px, transparent 1px, transparent 6px);
+    pointer-events:none;"></div>
+
+  <!-- Красное свечение справа -->
+  <div style="position:absolute;top:-30%;right:-10%;width:60%;height:160%;
+    background:radial-gradient(ellipse, rgba(229,34,34,0.12) 0%, transparent 65%);
+    pointer-events:none;"></div>
+
+  <!-- Металлический блик сверху -->
+  <div style="position:absolute;top:0;left:0;right:0;height:40%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+    pointer-events:none;"></div>
+
+  <!-- Контент карточки -->
+  <div style="position:relative;z-index:1;padding:20px 22px;height:100%;display:flex;flex-direction:column;justify-content:space-between;">
+
+    <!-- Верх: надпись SAM CHAT + чип -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
+        background:linear-gradient(135deg,#e52222 0%,#ff6b6b 50%,#c0c0c0 100%);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        filter:drop-shadow(0 0 8px rgba(229,34,34,0.4));">SAM CHAT</div>
+      <!-- Чип -->
+      <div style="width:36px;height:28px;border-radius:4px;
+        background:linear-gradient(135deg,#8a7a5a,#c4a95a,#8a7a5a);
+        border:1px solid rgba(255,200,80,0.3);
+        display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <div style="width:100%;display:flex;flex-direction:column;gap:3px;padding:4px 2px;">
+          <div style="height:1.5px;background:rgba(80,60,20,0.5);border-radius:1px;"></div>
+          <div style="height:1.5px;background:rgba(80,60,20,0.5);border-radius:1px;"></div>
+          <div style="height:1.5px;background:rgba(80,60,20,0.5);border-radius:1px;"></div>
+          <div style="height:1.5px;background:rgba(80,60,20,0.5);border-radius:1px;"></div>
+        </div>
       </div>
-    </div>
-    <div class="quick-pay" onclick="openPayModal()">
-      <div class="quick-pay-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </div>
-      <div class="quick-pay-text">
-        <div class="quick-pay-title">Быстрая выплата</div>
-        <div class="quick-pay-sub">Отправить TON сотруднику</div>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
 
-    <div class="section-title">Быстрые разделы</div>
-    <div class="home-quick-grid">
-      <!-- Обучение -->
-      <div class="home-quick-card training-card" onclick="showScreen('training')">
-        <div class="hq-icon-wrap blue-wrap">
-          <!-- animated book icon -->
-          <div style="position:relative;width:26px;height:26px;">
-            <div class="book-spine"></div>
-            <div class="book-pages"></div>
-            <div class="book-line1"></div>
-            <div class="book-line2"></div>
-            <div class="book-line3"></div>
-          </div>
-        </div>
-        <div>
-          <div class="hq-label">Обучение</div>
-          <div class="hq-sub">Материалы и курсы</div>
-        </div>
-        <!-- decorative dots -->
-        <svg width="40" height="40" viewBox="0 0 40 40" style="position:absolute;bottom:8px;right:8px;opacity:0.08;" fill="none">
-          <circle cx="8" cy="8" r="2" fill="#60a5fa"/><circle cx="20" cy="8" r="2" fill="#60a5fa"/>
-          <circle cx="32" cy="8" r="2" fill="#60a5fa"/><circle cx="8" cy="20" r="2" fill="#60a5fa"/>
-          <circle cx="20" cy="20" r="2" fill="#60a5fa"/><circle cx="32" cy="20" r="2" fill="#60a5fa"/>
-          <circle cx="8" cy="32" r="2" fill="#60a5fa"/><circle cx="20" cy="32" r="2" fill="#60a5fa"/>
-        </svg>
+    <!-- Середина: баланс TON -->
+    <div style="text-align:center;">
+      <div style="font-size:10px;font-weight:600;color:rgba(229,34,34,0.6);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px;">Профиты</div>
+      <div id="balanceAmount" style="font-family:'Bebas Neue',sans-serif;font-size:42px;
+        background:linear-gradient(135deg,#ffffff 0%,#cccccc 100%);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        line-height:1;letter-spacing:1px;">0 <span style="font-size:20px;">TON</span></div>
+      <div id="balanceUsd" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">≈ $0 USD</div>
+    </div>
+
+    <!-- Низ: никнейм слева, ранг + NFC справа -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+      <div>
+        <div style="font-size:9px;color:rgba(229,34,34,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">MEMBER</div>
+        <div id="cardUsername" style="font-family:'Bebas Neue',sans-serif;font-size:16px;
+          letter-spacing:2px;color:rgba(255,255,255,0.85);text-transform:uppercase;">@USER</div>
+        <div id="cardRank" style="font-size:9px;color:rgba(229,34,34,0.6);letter-spacing:1.5px;margin-top:1px;">НОВИЧОК</div>
       </div>
-      <!-- Карьера -->
-      <div class="home-quick-card career-card" onclick="showScreen('career')">
-        <div class="hq-icon-wrap green-wrap">
-          <!-- animated rocket icon -->
-          <div style="position:relative;width:26px;height:26px;">
-            <div class="rocket-icon" style="position:absolute;inset:0;">
-              <div class="rocket-body"></div>
-              <div class="rocket-window"></div>
-              <div class="rocket-fin-l"></div>
-              <div class="rocket-fin-r"></div>
-              <div class="rocket-flame"></div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="hq-label">Карьера</div>
-          <div class="hq-sub">Ранги и рост</div>
-        </div>
-        <!-- decorative grid -->
-        <svg width="40" height="40" viewBox="0 0 40 40" style="position:absolute;bottom:8px;right:8px;opacity:0.07;" fill="none" stroke="#4ade80" stroke-width="0.8">
-          <line x1="0" y1="10" x2="40" y2="10"/><line x1="0" y1="20" x2="40" y2="20"/>
-          <line x1="0" y1="30" x2="40" y2="30"/><line x1="10" y1="0" x2="10" y2="40"/>
-          <line x1="20" y1="0" x2="20" y2="40"/><line x1="30" y1="0" x2="30" y2="40"/>
+
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <!-- NFC иконка -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="opacity:0.5;">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="rgba(229,34,34,0.6)" stroke-width="1"/>
+          <path d="M8 12c0-2.21 1.79-4 4-4" stroke="rgba(229,34,34,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M6 12c0-3.31 2.69-6 6-6" stroke="rgba(229,34,34,0.5)" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
+        <!-- SINCE -->
+        <div style="text-align:right;">
+          <div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:1px;">SINCE</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:1px;">2026</div>
+        </div>
       </div>
     </div>
+
   </div>
+</div>
+
+<!-- Кнопки вынесены под карточку -->
+<div style="display:flex;gap:10px;margin-bottom:14px;">
+  <button class="btn-hero-primary" onclick="openPayModal()">↑ Подать заявку</button>
+  <button class="btn-hero-secondary" onclick="showScreen('payments')">Выплаты</button>
+</div>
 
   <!-- ═══════════════ PAYMENTS ═══════════════ -->
   <div class="screen" id="screen-payments">
@@ -921,20 +940,55 @@ if (user.photo_url) {
 const savedWallet = getMyData().wallet || '';
 if (savedWallet) document.getElementById('profileWallet').textContent = savedWallet.slice(0,6) + '...' + savedWallet.slice(-4);
 
+  /* карточка: никнейм и ранг */
+function updateCardUI() {
+  const el = document.getElementById('cardUsername');
+  const er = document.getElementById('cardRank');
+  if (el) el.textContent = user.username ? '@' + user.username.toUpperCase() : fullName.toUpperCase().slice(0,12);
+  if (er) er.textContent = getRank(getMyData().profits || 0).name.toUpperCase();
+}
+updateCardUI();
+
 /* ============================================================
    REFRESH STATS
 ============================================================ */
 function refreshStats() {
-  const data    = getMyData();
+  const data     = getMyData();
   const profits  = data.profits  || 0;
   const totalTon = data.totalTon || 0;
+  const history  = data.history  || [];
+  const pending  = history.filter(h => h.status === 'pending').length;
 
+  /* ── ГЛАВНАЯ ── */
+  const elHP = document.getElementById('homeProfits');
+  const elHT = document.getElementById('homeTotalTon');
+  if (elHP) elHP.textContent = profits;
+  if (elHT) elHT.innerHTML  = (totalTon > 0 ? totalTon.toFixed(2) : '0') +
+    ' <span style="font-size:16px;color:rgba(255,255,255,0.35);">TON</span>';
+
+  /* баланс-карточка */
+  document.getElementById('balanceAmount').innerHTML =
+    (totalTon > 0 ? totalTon.toFixed(2) : '0') + ' <span>TON</span>';
+  document.getElementById('balanceUsd').textContent =
+    '≈ $' + (totalTon * 5.8).toFixed(2) + ' USD';
+
+  /* ── ВЫПЛАТЫ ── */
+  const elPS = document.getElementById('payStatProfits');
+  const elPT = document.getElementById('payStatTon');
+  const elPP = document.getElementById('payStatPending');
+  if (elPS) elPS.textContent = profits;
+  if (elPT) elPT.textContent = totalTon > 0 ? totalTon.toFixed(2) : '0';
+  if (elPP) elPP.textContent = pending;
+
+  /* ── ПРОФИЛЬ ── */
   document.getElementById('statProfits').textContent  = profits;
-  document.getElementById('statTotalTon').textContent = totalTon > 0 ? totalTon.toFixed(1) : '—';
+  document.getElementById('statTotalTon').textContent = totalTon > 0 ? totalTon.toFixed(2) : '—';
+  const elSPend = document.getElementById('statPending');
+  if (elSPend) elSPend.textContent = pending;
 
+  /* ── РАНГ ── */
   const rank = getRank(profits);
   const next = getNextRank(profits);
-
   document.getElementById('profileRankRow').textContent = rank.name;
 
   const badge = document.getElementById('currentRankBadge');
@@ -947,7 +1001,8 @@ function refreshStats() {
     const pct = Math.min(100, ((profits - rank.min) / (next.min - rank.min)) * 100);
     document.getElementById('careerXpFill').style.width  = pct + '%';
     document.getElementById('careerXpLabel').textContent = profits + ' / ' + next.min + ' выплат';
-    document.getElementById('careerSubText').innerHTML   = 'До следующего ранга: <strong style="color:#4ade80;">' + (next.min - profits) + ' выплат</strong>. Прогресс растёт с каждой заявкой.';
+    document.getElementById('careerSubText').innerHTML   =
+      'До следующего ранга: <strong style="color:#4ade80;">' + (next.min - profits) + ' выплат</strong>. Прогресс растёт с каждой заявкой.';
   } else {
     document.getElementById('careerXpFill').style.width  = '100%';
     document.getElementById('careerXpLabel').textContent = 'Максимальный ранг достигнут';
@@ -1220,7 +1275,7 @@ function showScreen(name) {
   const nav = document.getElementById('nav-' + name);
   if (nav) nav.classList.add('active');
   window.scrollTo(0, 0);
-  if (['top','profile','career'].includes(name)) refreshStats();
+ if (['top','profile','career','payments','home'].includes(name)) refreshStats();
 }
 
 /* ============================================================
