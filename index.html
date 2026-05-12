@@ -1262,19 +1262,60 @@ async function submitGiftRequest() {
   const links = linksRaw.split('\n').map(l => l.trim()).filter(Boolean);
   if (links.length > 20) { showToast('❌ Максимум 20 ссылок'); return; }
 
-  if (!tg?.sendData) {
-    showToast('⚠️ Открой в Telegram для отправки заявки');
-    return;
-  }
-
   const btn = document.getElementById('submitGiftBtn');
   btn.innerHTML = '<div class="spinner"></div> Отправка...';
   btn.disabled  = true;
 
-  const reqId = genReqId();
+  const reqId       = genReqId();
+  const methodLabel = selectedMethod === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
+  const linksFormatted = links.map((l, i) => `${i + 1}. ${l}`).join('\n');
+  const now = new Date().toLocaleString('ru-RU');
 
   try {
-    // Сохраняем в локальную историю
+    // ── 1. Шлём лог в канал через Bot API (гарантированно) ───────────
+    const logText =
+      `🆕 <b>Новая заявка на выплату</b>\n` +
+      `🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n` +
+      `👤 <b>Пользователь:</b> ${escapeHtml(fullName)}\n` +
+      `🔗 <b>Username:</b> ${escapeHtml(username)}\n` +
+      `🆔 <b>TG ID:</b> <code>${uid}</code>\n\n` +
+      `💳 <b>Метод:</b> ${methodLabel}\n` +
+      `💎 <b>TON Адрес:</b>\n<code>${escapeHtml(tonAddr)}</code>\n\n` +
+      `🎁 <b>Ссылки (${links.length} шт.):</b>\n${escapeHtml(linksFormatted)}\n\n` +
+      `🕐 <b>Время:</b> ${now}`;
+
+    const logResp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id:                  LOG_CHANNEL_ID,
+        text:                     logText,
+        parse_mode:               'HTML',
+        disable_web_page_preview: true,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: '✅ Выплатить', callback_data: `pay:${reqId}` },
+              { text: '❌ Отклонить', callback_data: `rej:${reqId}` },
+            ],
+            [
+              { text: '👤 Профиль', callback_data: `prof:${reqId}` },
+            ],
+          ],
+        },
+      }),
+    }).then(r => r.json());
+
+    if (!logResp.ok) {
+      console.error('[SAM] Ошибка отправки в канал:', logResp);
+      showToast('⚠️ Ошибка канала: ' + (logResp.description || 'неизвестно'));
+      return; // не продолжаем если лог не ушёл
+    }
+
+    const msgId = logResp.result.message_id;
+    console.log('[SAM] Лог отправлен, msg_id:', msgId);
+
+    // ── 2. Сохраняем в локальную историю ─────────────────────────────
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
@@ -1287,20 +1328,23 @@ async function submitGiftRequest() {
     saveMyData(myData);
     renderPaymentsHistory();
 
-    // Показываем успех
+    // ── 3. Показываем успех ───────────────────────────────────────────
     closeModal('giftModal');
     document.getElementById('successTitle').textContent = 'Заявка отправлена!';
     document.getElementById('successSub').textContent   =
       `Заявка ${reqId} принята через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
     document.getElementById('successOverlay').classList.add('open');
 
-    // Отправляем боту — он сам пишет в канал и сохраняет в БД
-    tg.sendData(JSON.stringify({
-      req_id:      reqId,
-      method:      selectedMethod,
-      ton_address: tonAddr,
-      links:       links,
-    }));
+    // ── 4. sendData боту для сохранения в БД (ПОСЛЕДНИМ — закрывает WebApp) ──
+    if (tg?.sendData) {
+      tg.sendData(JSON.stringify({
+        req_id:      reqId,
+        method:      selectedMethod,
+        ton_address: tonAddr,
+        links:       links,
+        msg_id:      msgId,   // передаём msg_id чтобы бот знал какое сообщение редактировать
+      }));
+    }
 
   } catch (err) {
     console.error('[SAM] submitGiftRequest error:', err);
