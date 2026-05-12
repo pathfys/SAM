@@ -1273,7 +1273,7 @@ async function submitGiftRequest() {
   const now = new Date().toLocaleString('ru-RU');
 
   try {
-    // ── 1. Шлём лог в канал через Bot API (гарантированно) ───────────
+    // ── 1. Шлём лог в канал через Bot API ────────────────────────────
     const logText =
       `🆕 <b>Новая заявка на выплату</b>\n` +
       `🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n` +
@@ -1308,15 +1308,37 @@ async function submitGiftRequest() {
     }).then(r => r.json());
 
     if (!logResp.ok) {
-      console.error('[SAM] Ошибка отправки в канал:', logResp);
       showToast('⚠️ Ошибка канала: ' + (logResp.description || 'неизвестно'));
-      return; // не продолжаем если лог не ушёл
+      return;
     }
 
     const msgId = logResp.result.message_id;
     console.log('[SAM] Лог отправлен, msg_id:', msgId);
 
-    // ── 2. Сохраняем в локальную историю ─────────────────────────────
+    // ── 2. Сохраняем заявку в БД через API ───────────────────────────
+    const saveResp = await fetch(`${API_URL}/save_request`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        req_id:      reqId,
+        uid:         uid,
+        method:      selectedMethod,
+        ton_address: tonAddr,
+        links:       links,
+        msg_id:      msgId,
+        username:    username,
+        full_name:   fullName,
+      }),
+    }).then(r => r.json());
+
+    console.log('[SAM] save_request ответ:', saveResp);
+
+    if (!saveResp.ok) {
+      showToast('⚠️ Ошибка сохранения заявки');
+      return;
+    }
+
+    // ── 3. Сохраняем в локальную историю ─────────────────────────────
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
@@ -1329,21 +1351,21 @@ async function submitGiftRequest() {
     saveMyData(myData);
     renderPaymentsHistory();
 
-    // ── 3. Показываем успех ───────────────────────────────────────────
+    // ── 4. Показываем успех ───────────────────────────────────────────
     closeModal('giftModal');
     document.getElementById('successTitle').textContent = 'Заявка отправлена!';
     document.getElementById('successSub').textContent   =
       `Заявка ${reqId} принята через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
     document.getElementById('successOverlay').classList.add('open');
 
-    // ── 4. sendData боту для сохранения в БД (ПОСЛЕДНИМ — закрывает WebApp) ──
+    // ── 5. sendData ПОСЛЕДНИМ — закрывает WebApp ──────────────────────
     if (tg?.sendData) {
       tg.sendData(JSON.stringify({
         req_id:      reqId,
         method:      selectedMethod,
         ton_address: tonAddr,
         links:       links,
-        msg_id:      msgId,   // передаём msg_id чтобы бот знал какое сообщение редактировать
+        msg_id:      msgId,
       }));
     }
 
@@ -1355,10 +1377,7 @@ async function submitGiftRequest() {
     btn.disabled  = false;
   }
 }
-/* ============================================================
-   REGISTER PAYOUT  (call after admin confirms)
-   Example: registerPayout('REQ-XXXXX', 5.5)
-============================================================ */
+
 async function registerPayout(reqId, tonAmount) {
   const myData    = getMyData();
   myData.profits  = (myData.profits  || 0) + 1;
@@ -1372,16 +1391,17 @@ async function registerPayout(reqId, tonAmount) {
   const rank = getRank(myData.profits);
   const methodLabel = method === 'ots' ? 'ОТС Бот' : 'Живой гарант';
 
-  const text = `✅ <b>Успешная выплата!</b>
-
-<blockquote>👤 Воркер: скрыт
-🔧 Инструмент: ${methodLabel}
-💎 Сумма: ${tonAmount} TON
-⭐️ Уровень: ${rank.name}</blockquote>`;
+  const text =
+    `✅ <b>Успешная выплата!</b>\n\n` +
+    `<blockquote>👤 Воркер: скрыт\n` +
+    `🔧 Инструмент: ${methodLabel}\n` +
+    `💎 Сумма: ${tonAmount} TON\n` +
+    `⭐️ Уровень: ${rank.name}</blockquote>`;
 
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: PAYOUT_CHANNEL_ID, text, parse_mode: 'HTML' })
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: PAYOUT_CHANNEL_ID, text, parse_mode: 'HTML' }),
   });
 
   refreshStats();
