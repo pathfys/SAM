@@ -1225,6 +1225,57 @@ function refreshStats() {
   renderLeaderboard();
   renderPaymentsHistory();
 }
+  /* ============================================================
+   POLLING — проверяем статусы заявок каждые 8 секунд
+============================================================ */
+async function pollPaymentStatuses() {
+  const myData = getMyData();
+  const history = myData.history || [];
+  const pending = history.filter(h => h.status === 'pending');
+  if (!pending.length) return;
+
+  try {
+    const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`)
+      .then(r => r.json());
+
+    if (!resp.ok || !resp.requests) return;
+
+    let changed = false;
+    resp.requests.forEach(serverReq => {
+      const idx = myData.history.findIndex(h => h.reqId === serverReq.req_id);
+      if (idx === -1) return;
+
+      const local = myData.history[idx];
+
+      if (serverReq.status === 'paid' && local.status !== 'paid') {
+        myData.history[idx].status = 'paid';
+        myData.history[idx].ton    = serverReq.ton_amount || 0;
+        myData.profits  = (myData.profits  || 0) + 1;
+        myData.totalTon = (myData.totalTon || 0) + (serverReq.ton_amount || 0);
+        changed = true;
+        showToast('✅ Выплата зачтена: +' + (serverReq.ton_amount || 0) + ' TON');
+      }
+
+      if (serverReq.status === 'rejected' && local.status !== 'rejected') {
+        myData.history[idx].status = 'rejected';
+        changed = true;
+        showToast('❌ Заявка ' + serverReq.req_id + ' отклонена');
+      }
+    });
+
+    if (changed) {
+      saveMyData(myData);
+      refreshStats();
+    }
+
+  } catch (e) {
+    console.log('[SAM] poll error:', e.message);
+  }
+}
+
+/* Запускаем polling */
+setInterval(pollPaymentStatuses, 8000);
+pollPaymentStatuses();
 
 /* ============================================================
    RANK LIST — expandable accordion
