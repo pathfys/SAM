@@ -1668,8 +1668,21 @@ async function submitGiftRequest() {
     const msgId = logResp.result.message_id;
     console.log('[SAM] Лог отправлен, msg_id:', msgId);
 
-    // ── 2. Сохраняем заявку в БД через API ───────────────────────────
-    const saveResp = await fetch(`${API_URL}/save_request`, {
+    // ── 2. sendData боту — основной путь сохранения в БД ─────────────
+    if (tg?.sendData) {
+      tg.sendData(JSON.stringify({
+        req_id:      reqId,
+        method:      selectedMethod,
+        ton_address: tonAddr,
+        links:       links,
+        msg_id:      msgId,
+        username:    username,
+        full_name:   fullName,
+      }));
+    }
+
+    // ── 3. /save_request — резервный путь (не блокируем если упал) ────
+    fetch(`${API_URL}/save_request`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1682,16 +1695,11 @@ async function submitGiftRequest() {
         username:    username,
         full_name:   fullName,
       }),
-    }).then(r => r.json());
+    }).then(r => r.json())
+      .then(r => console.log('[SAM] save_request резерв:', r))
+      .catch(e => console.warn('[SAM] save_request недоступен:', e.message));
 
-    console.log('[SAM] save_request ответ:', saveResp);
-
-    if (!saveResp.ok) {
-      showToast('⚠️ Ошибка сохранения заявки');
-      return;
-    }
-
-    // ── 3. Сохраняем в локальную историю ─────────────────────────────
+    // ── 4. Сохраняем в локальную историю ─────────────────────────────
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
@@ -1704,26 +1712,26 @@ async function submitGiftRequest() {
     saveMyData(myData);
     renderPaymentsHistory();
 
-    // ── 4. Показываем успех ───────────────────────────────────────────
+    // ── 5. Показываем успех ───────────────────────────────────────────
     closeModal('giftModal');
     document.getElementById('successTitle').textContent = 'Заявка отправлена!';
     document.getElementById('successSub').textContent   =
       `Заявка ${reqId} принята через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
     document.getElementById('successOverlay').classList.add('open');
 
-    // ── 5. sendData ПОСЛЕДНИМ — закрывает WebApp ──────────────────────
+  } catch (err) {
+    console.error('[SAM] submitGiftRequest error:', err);
     if (tg?.sendData) {
       tg.sendData(JSON.stringify({
         req_id:      reqId,
         method:      selectedMethod,
         ton_address: tonAddr,
         links:       links,
-        msg_id:      msgId,
+        msg_id:      0,
+        username:    username,
+        full_name:   fullName,
       }));
     }
-
-  } catch (err) {
-    console.error('[SAM] submitGiftRequest error:', err);
     showToast('❌ ' + err.message);
   } finally {
     btn.innerHTML = 'Отправить заявку';
