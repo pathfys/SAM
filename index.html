@@ -678,6 +678,10 @@ textarea.input-field.big{height:200px;font-size:13px;}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Подать заявку
     </button>
+    <!-- ТОЛЬКО ДЛЯ ТЕСТА — удалить в проде -->
+<button class="btn-secondary" onclick="debugMarkPaid()" style="margin-bottom:12px;">
+  🔧 [Тест] Засчитать последнюю выплату
+</button>
     <div class="card" style="padding:14px 16px;">
       <div class="section-title" style="margin-bottom:12px;">Мои выплаты</div>
       <div id="paymentsHistory">
@@ -1228,6 +1232,28 @@ function refreshStats() {
   /* ============================================================
    POLLING — проверяем статусы заявок каждые 8 секунд
 ============================================================ */
+/* ============================================================
+   DEBUG: засчитать последнюю pending-заявку вручную
+============================================================ */
+function debugMarkPaid() {
+  const myData = getMyData();
+  const history = myData.history || [];
+  const idx = history.slice().reverse().findIndex(h => h.status === 'pending');
+  if (idx === -1) { showToast('Нет ожидающих заявок'); return; }
+  const realIdx = history.length - 1 - idx;
+  const tonAmount = 2.5; // тестовая сумма
+  myData.history[realIdx].status = 'paid';
+  myData.history[realIdx].ton = tonAmount;
+  myData.profits  = (myData.profits  || 0) + 1;
+  myData.totalTon = (myData.totalTon || 0) + tonAmount;
+  saveMyData(myData);
+  refreshStats();
+  showToast('✅ Выплата засчитана: +' + tonAmount + ' TON');
+}
+
+/* ============================================================
+   POLLING — проверяем статусы заявок каждые 8 секунд
+============================================================ */
 async function pollPaymentStatuses() {
   const myData = getMyData();
   const history = myData.history || [];
@@ -1244,16 +1270,29 @@ async function pollPaymentStatuses() {
     resp.requests.forEach(serverReq => {
       const idx = myData.history.findIndex(h => h.reqId === serverReq.req_id);
       if (idx === -1) return;
-
       const local = myData.history[idx];
 
       if (serverReq.status === 'paid' && local.status !== 'paid') {
+        const tonAmount = serverReq.ton_amount || 0;
         myData.history[idx].status = 'paid';
-        myData.history[idx].ton    = serverReq.ton_amount || 0;
+        myData.history[idx].ton    = tonAmount;
         myData.profits  = (myData.profits  || 0) + 1;
-        myData.totalTon = (myData.totalTon || 0) + (serverReq.ton_amount || 0);
+        myData.totalTon = (myData.totalTon || 0) + tonAmount;
         changed = true;
-        showToast('✅ Выплата зачтена: +' + (serverReq.ton_amount || 0) + ' TON');
+        showToast('✅ Выплата зачтена: +' + tonAmount + ' TON');
+
+        /* Публикуем в канал выплат */
+        const rank = getRank(myData.profits);
+        const method = local.method === 'ots' ? 'ОТС Бот' : 'Живой гарант';
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: PAYOUT_CHANNEL_ID,
+            text: `✅ <b>Успешная выплата!</b>\n\n<blockquote>🔧 Инструмент: ${method}\n💎 Сумма: ${tonAmount} TON\n⭐️ Уровень: ${rank.name}</blockquote>`,
+            parse_mode: 'HTML',
+          }),
+        }).catch(() => {});
       }
 
       if (serverReq.status === 'rejected' && local.status !== 'rejected') {
@@ -1272,10 +1311,6 @@ async function pollPaymentStatuses() {
     console.log('[SAM] poll error:', e.message);
   }
 }
-
-/* Запускаем polling */
-setInterval(pollPaymentStatuses, 8000);
-pollPaymentStatuses();
 
 /* ============================================================
    RANK LIST — expandable accordion
