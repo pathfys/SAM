@@ -1562,6 +1562,42 @@ function renderPaymentsHistory() {
     container.appendChild(item);
   });
 }
+  /* ============================================================
+   SYNC STATUSES FROM SERVER
+============================================================ */
+async function syncStatusesFromServer() {
+  try {
+    const resp = await fetch(`${API_URL}/get_requests?uid=${uid}`).then(r => r.json());
+    if (!resp.ok || !resp.requests) return;
+
+    const myData = getMyData();
+    myData.history = myData.history || [];
+
+    let changed = false;
+    resp.requests.forEach(serverReq => {
+      const idx = myData.history.findIndex(h => h.reqId === serverReq.req_id);
+      if (idx >= 0) {
+        if (myData.history[idx].status !== serverReq.status) {
+          myData.history[idx].status = serverReq.status;
+          if (serverReq.status === 'paid' && serverReq.ton_amount > 0) {
+            myData.history[idx].ton = serverReq.ton_amount;
+            myData.profits  = (myData.profits  || 0) + 1;
+            myData.totalTon = (myData.totalTon || 0) + serverReq.ton_amount;
+          }
+          changed = true;
+        }
+      }
+    });
+
+    if (changed) {
+      saveMyData(myData);
+      refreshStats();
+      showToast('✅ Статусы обновлены');
+    }
+  } catch (e) {
+    console.warn('[SAM] sync error:', e);
+  }
+}
 
 /* ============================================================
    NAVIGATION
@@ -1844,6 +1880,8 @@ function showToast(msg) {
 
 /* boot */
 refreshStats();
+syncStatusesFromServer();
+setInterval(syncStatusesFromServer, 30000); // каждые 30 сек
 </script>
 
 <!-- ═══ SPLASH ═══ -->
