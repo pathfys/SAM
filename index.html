@@ -1261,8 +1261,7 @@ async function pollPaymentStatuses() {
   if (!pending.length) return;
 
   try {
-const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`).then(r => r.json());
-      .then(r => r.json());
+    const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`).then(r => r.json());
 
     if (!resp.ok || !resp.requests) return;
 
@@ -1280,19 +1279,6 @@ const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`).then(r => r.
         myData.totalTon = (myData.totalTon || 0) + tonAmount;
         changed = true;
         showToast('✅ Выплата зачтена: +' + tonAmount + ' TON');
-
-        /* Публикуем в канал выплат */
-        const rank = getRank(myData.profits);
-        const method = local.method === 'ots' ? 'ОТС Бот' : 'Живой гарант';
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: PAYOUT_CHANNEL_ID,
-            text: `✅ <b>Успешная выплата!</b>\n\n<blockquote>🔧 Инструмент: ${method}\n💎 Сумма: ${tonAmount} TON\n⭐️ Уровень: ${rank.name}</blockquote>`,
-            parse_mode: 'HTML',
-          }),
-        }).catch(() => {});
       }
 
       if (serverReq.status === 'rejected' && local.status !== 'rejected') {
@@ -1306,9 +1292,41 @@ const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`).then(r => r.
       saveMyData(myData);
       refreshStats();
     }
-
   } catch (e) {
     console.log('[SAM] poll error:', e.message);
+  }
+}
+
+async function syncStatusesFromServer() {
+  try {
+    const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`).then(r => r.json());
+    if (!resp.ok || !resp.requests) return;
+
+    const myData = getMyData();
+    myData.history = myData.history || [];
+
+    let changed = false;
+    resp.requests.forEach(serverReq => {
+      const idx = myData.history.findIndex(h => h.reqId === serverReq.req_id);
+      if (idx >= 0 && myData.history[idx].status !== serverReq.status) {
+        const wasNotPaid = myData.history[idx].status !== 'paid';
+        myData.history[idx].status = serverReq.status;
+        if (serverReq.status === 'paid' && serverReq.ton_amount > 0 && myData.history[idx].status !== 'paid') {
+  myData.history[idx].ton = serverReq.ton_amount;
+  myData.profits  = (myData.profits  || 0) + 1;
+  myData.totalTon = (myData.totalTon || 0) + serverReq.ton_amount;
+  showToast('✅ Выплата: +' + serverReq.ton_amount + ' TON');
+}
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      saveMyData(myData);
+      refreshStats();
+    }
+  } catch (e) {
+    console.warn('[SAM] sync error:', e);
   }
 }
 
@@ -1561,42 +1579,6 @@ function renderPaymentsHistory() {
     `;
     container.appendChild(item);
   });
-}
-  /* ============================================================
-   SYNC STATUSES FROM SERVER
-============================================================ */
-async function syncStatusesFromServer() {
-  try {
-    const resp = await fetch(`${API_URL}/get_requests?uid=${uid}`).then(r => r.json());
-    if (!resp.ok || !resp.requests) return;
-
-    const myData = getMyData();
-    myData.history = myData.history || [];
-
-    let changed = false;
-    resp.requests.forEach(serverReq => {
-      const idx = myData.history.findIndex(h => h.reqId === serverReq.req_id);
-      if (idx >= 0) {
-        if (myData.history[idx].status !== serverReq.status) {
-          myData.history[idx].status = serverReq.status;
-          if (serverReq.status === 'paid' && serverReq.ton_amount > 0) {
-            myData.history[idx].ton = serverReq.ton_amount;
-            myData.profits  = (myData.profits  || 0) + 1;
-            myData.totalTon = (myData.totalTon || 0) + serverReq.ton_amount;
-          }
-          changed = true;
-        }
-      }
-    });
-
-    if (changed) {
-      saveMyData(myData);
-      refreshStats();
-      showToast('✅ Статусы обновлены');
-    }
-  } catch (e) {
-    console.warn('[SAM] sync error:', e);
-  }
 }
 
 /* ============================================================
@@ -1878,10 +1860,10 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* boot */
 refreshStats();
 syncStatusesFromServer();
-setInterval(syncStatusesFromServer, 30000); // каждые 30 сек
+setInterval(syncStatusesFromServer, 15000);
+setInterval(pollPaymentStatuses, 15000);
 </script>
 
 <!-- ═══ SPLASH ═══ -->
