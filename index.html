@@ -1306,24 +1306,50 @@ async function syncStatusesFromServer() {
     myData.history = myData.history || [];
 
     let changed = false;
+    let profitsFromServer = 0;
+    let tonFromServer = 0;
+
     resp.requests.forEach(serverReq => {
+      if (serverReq.req_id.startsWith('TEST-')) return; // пропускаем тестовые
+
+      if (serverReq.status === 'paid') {
+        profitsFromServer++;
+        tonFromServer += serverReq.ton_amount || 0;
+      }
+
       const idx = myData.history.findIndex(h => h.reqId === serverReq.req_id);
-      if (idx >= 0 && myData.history[idx].status !== serverReq.status) {
-        const wasNotPaid = myData.history[idx].status !== 'paid';
-        myData.history[idx].status = serverReq.status;
-        if (serverReq.status === 'paid' && serverReq.ton_amount > 0 && myData.history[idx].status !== 'paid') {
-  myData.history[idx].ton = serverReq.ton_amount;
-  myData.profits  = (myData.profits  || 0) + 1;
-  myData.totalTon = (myData.totalTon || 0) + serverReq.ton_amount;
-  showToast('✅ Выплата: +' + serverReq.ton_amount + ' TON');
-}
+      if (idx >= 0) {
+        if (myData.history[idx].status !== serverReq.status) {
+          myData.history[idx].status = serverReq.status;
+          if (serverReq.status === 'paid' && serverReq.ton_amount > 0) {
+            myData.history[idx].ton = serverReq.ton_amount;
+          }
+          changed = true;
+        }
+      } else if (serverReq.status === 'paid') {
+        // Заявка есть на сервере но нет локально — добавляем
+        myData.history.push({
+          reqId:  serverReq.req_id,
+          method: 'ots',
+          date:   '—',
+          status: 'paid',
+          ton:    serverReq.ton_amount || 0,
+        });
         changed = true;
       }
     });
 
+    // Синхронизируем profits и totalTon с сервером
+    if (profitsFromServer > (myData.profits || 0) || tonFromServer > (myData.totalTon || 0)) {
+      myData.profits  = profitsFromServer;
+      myData.totalTon = tonFromServer;
+      changed = true;
+    }
+
     if (changed) {
       saveMyData(myData);
       refreshStats();
+      updateCardUI();
     }
   } catch (e) {
     console.warn('[SAM] sync error:', e);
