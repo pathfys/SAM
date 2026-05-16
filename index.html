@@ -1768,10 +1768,37 @@ const LESSONS = [
     content: '<strong>ОТС Бот</strong> — автоматическая обработка, быстрее, но есть ограничения по сумме.<br><br><strong>Живой гарант</strong> — обработка вручную, подходит для крупных сделок.<br><br>После отправки заявки администратор нажимает "Выплатить" — TON поступает на твой адрес. Ставка выплат зависит от ранга: <strong>60%</strong> до Специалиста, <strong>65%</strong> с Эксперта.',
     rule: ' Всегда указывай правильный TON-адрес. Ошибка = потеря средств.',
   },
-  {
+ {
     title: 'Работа с подарками',
-    content: '<strong>Подарки Telegram</strong> — уникальные цифровые активы. Каждый имеет рыночную стоимость в TON.<br><br>Для подачи заявки: скопируй ссылку на подарок из Telegram, вставь в форму. Можно добавить до <strong>20 ссылок</strong> за одну заявку.',
-    rule: ' Ссылка формата: https://t.me/gift/... Убедись, что подарок не заблокирован.',
+    content: `
+      <div style="margin-bottom:18px;">
+        <div style="font-size:15px;font-weight:700;color:#fbbf24;line-height:1.5;">Подарки Telegram × ОТС Бот</div>
+      </div>
+
+      <p style="margin-bottom:14px;">Подарки Telegram — это цифровые активы с реальной рыночной стоимостью в TON. Через ОТС Бот ты заводишь подаркки,после   .</p>
+
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Где найти подарок:</div>
+      <p style="margin-bottom:14px;">После ворка гоя→ выбираешь нужный гифт → скопировал ссылку вида <span style="color:#fbbf24;font-weight:600;">t.me/gift/...</span> Именно её вставляешь в заявку.</p>
+
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Сколько подарков за раз:</div>
+      <p style="margin-bottom:14px;">До <span style="color:#fbbf24;font-weight:700;">20 ссылок</span> в одной заявке. Каждую — с новой строки.</p>
+
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Как оценивается подарок:</div>
+      <p style="margin-bottom:14px;">Итоговая сумма зависит от редкости и спроса на момент подачи заявки.</p>
+
+      <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:11px 13px;margin-bottom:14px;">
+        <span style="font-size:13px;font-weight:700;color:#fbbf24;">Важно перед отправкой:</span>
+        <span style="font-size:13px;color:rgba(255,255,255,0.6);"> убедись, что ссылка открывается в Telegram.</span>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Что происходит после заявки:</div>
+      <p style="margin-bottom:8px;">Заявка уходит на проверку → администратор по своему решению выплачивает или отклоняет<span style="color:#4ade80;font-weight:600;"></span> → TON поступает на твой адрес.</p>
+      <p style="margin-bottom:14px;">Статус в разделе <span style="color:#f0f0f0;font-weight:600;">«Мои выплаты»</span> изменится с <span style="color:#fbbf24;">Ожидание</span> на <span style="color:#4ade80;">Выплачено</span>.</p>
+
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Твой процент:</div>
+      <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:0;">Ранги Новичок–Специалист — <span style="color:#4ade80;font-weight:700;">60%</span> от суммы сделки. Эксперт и Мастер — <span style="color:#fbbf24;font-weight:700;">65%</span>. Расти в карьере — получай больше профит</p>
+    `,
+    rule: 'Фейк,спам заявки=блокировка без возможности амнистии.',
   },
   {
     title: 'Продвинутые стратегии',
