@@ -1228,11 +1228,20 @@ async function syncStatusesFromServer() {
       }
     });
 
-    // Синхронизируем profits и totalTon с сервером
-    if (profitsFromServer > (myData.profits || 0) || tonFromServer > (myData.totalTon || 0)) {
-      myData.profits  = profitsFromServer;
-      myData.totalTon = tonFromServer;
-      changed = true;
+   // Синхронизируем profits и totalTon с сервером (источник истины — таблица users)
+    if (resp.profits !== undefined && resp.total_ton !== undefined) {
+      if (resp.profits > (myData.profits || 0) || resp.total_ton > (myData.totalTon || 0)) {
+        myData.profits  = resp.profits;
+        myData.totalTon = resp.total_ton;
+        changed = true;
+      }
+    } else {
+      // фолбэк: старый ручной подсчёт если сервер не вернул агрегаты
+      if (profitsFromServer > (myData.profits || 0) || tonFromServer > (myData.totalTon || 0)) {
+        myData.profits  = profitsFromServer;
+        myData.totalTon = tonFromServer;
+        changed = true;
+      }
     }
 
     if (changed) {
