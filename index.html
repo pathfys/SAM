@@ -319,7 +319,8 @@ textarea.input-field.big{height:200px;font-size:13px;}
 
 .podium-wrap{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-bottom:16px;padding:0 4px;}
 .podium-slot{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;}
-.podium-avatar-top{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:#fff;flex-shrink:0;}
+.podium-avatar-top{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:#fff;flex-shrink:0;overflow:hidden;}
+.podium-avatar-top img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .podium-name{font-size:10px;font-weight:700;color:var(--text);text-align:center;letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
 .podium-ton{font-family:'Bebas Neue',sans-serif;font-size:12px;text-align:center;letter-spacing:0.5px;}
 .podium-step{width:100%;border-radius:10px 10px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 12px;}
@@ -335,7 +336,8 @@ textarea.input-field.big{height:200px;font-size:13px;}
 .leader-item:last-child{border-bottom:none;padding-bottom:0;}
 .leader-item:first-child{padding-top:0;}
 .leader-rank{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text-dim);width:24px;text-align:center;flex-shrink:0;}
-.leader-avatar{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;flex-shrink:0;}
+.leader-avatar{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;flex-shrink:0;overflow:hidden;}
+.leader-avatar img{width:100%;height:100%;object-fit:cover;border-radius:11px;}
 .leader-info{flex:1;}
 .leader-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1px;}
 .leader-meta{font-size:11px;color:var(--text-muted);}
