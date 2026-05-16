@@ -1389,6 +1389,17 @@ const AVATAR_COLORS = [
   'background:rgba(56,189,248,0.10);color:#7dd3fc;',
 ];
 
+function avatarHtml(entry, colorStyle, size = 44) {
+  if (entry.photo_url) {
+    return `<img src="${entry.photo_url}" 
+      style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;"
+      onerror="this.outerHTML='<div style=\\'width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size*0.4)}px;${colorStyle}\\'>${(entry.full_name||entry.username||'?')[0].toUpperCase()}</div>'"
+    >`;
+  }
+  const ini = (entry.full_name || entry.username || '?')[0].toUpperCase();
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size*0.4)}px;${colorStyle}">${ini}</div>`;
+}
+
   function upsertLeaderboard() { return []; }
 
 async function renderLeaderboard() {
