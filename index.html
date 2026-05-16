@@ -823,6 +823,10 @@ textarea.input-field.big{height:200px;font-size:13px;}
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
       История выплат
     </button>
+    <button class="btn-secondary" onclick="copyRefLink()">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  Реф ссылка
+</button>
   </div>
 
 </div>
@@ -1024,6 +1028,20 @@ const RANKS = [
 function getRank(profits)     { let r = RANKS[0]; for (const x of RANKS) { if (profits >= x.min) r = x; } return r; }
 function getNextRank(profits) { for (const r of RANKS) { if (profits < r.min) return r; } return null; }
 
+
+  function copyRefLink() {
+  const link = `https://t.me/SAMPayrollBot?start=ref_${uid}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(() => showToast('🔗 Реф ссылка скопирована'));
+  } else {
+    const el = document.createElement('textarea');
+    el.value = link; document.body.appendChild(el);
+    el.select(); document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('🔗 Реф ссылка скопирована');
+  }
+}
+  
 /* ============================================================
    INIT UI
 ============================================================ */
@@ -1707,8 +1725,8 @@ async function registerPayout(reqId, tonAmount) {
     `✅ <b>Успешная выплата!</b>\n\n` +
     `<blockquote>👤 Воркер: скрыт\n` +
     `🔧 Инструмент: ${methodLabel}\n` +
-    `💎 Сумма: ${tonAmount} TON\n` +
-    `⭐️ Уровень: ${rank.name}</blockquote>`;
+    `💳 Сумма: ${tonAmount} TON\n` +
+    `📌 Уровень: ${rank.name}</blockquote>`;
 
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method:  'POST',
@@ -1743,22 +1761,22 @@ const LESSONS = [
   {
     title: 'Введение в SAM',
     content: '<strong>SAM</strong> — профессиональная платформа для воркеров. Здесь ты работаешь с подарками Telegram, получаешь выплаты в TON и растёшь по карьерной лестнице.<br><br>Основные правила: честность, скорость, качество. Каждая выполненная заявка = 1 профит в профиле.',
-    rule: '📌 Правило: подавай заявки только с реальными подарками. Фейковые ссылки приводят к блокировке.',
+    rule: ' Правило: подавай заявки только с реальными подарками. Фейковые ссылки приводят к блокировке.',
   },
   {
     title: 'Система выплат TON',
     content: '<strong>ОТС Бот</strong> — автоматическая обработка, быстрее, но есть ограничения по сумме.<br><br><strong>Живой гарант</strong> — обработка вручную, подходит для крупных сделок.<br><br>После отправки заявки администратор нажимает "Выплатить" — TON поступает на твой адрес. Ставка выплат зависит от ранга: <strong>60%</strong> до Специалиста, <strong>65%</strong> с Эксперта.',
-    rule: '💡 Всегда указывай правильный TON-адрес. Ошибка = потеря средств.',
+    rule: ' Всегда указывай правильный TON-адрес. Ошибка = потеря средств.',
   },
   {
     title: 'Работа с подарками',
     content: '<strong>Подарки Telegram</strong> — уникальные цифровые активы. Каждый имеет рыночную стоимость в TON.<br><br>Для подачи заявки: скопируй ссылку на подарок из Telegram, вставь в форму. Можно добавить до <strong>20 ссылок</strong> за одну заявку.',
-    rule: '🎁 Ссылка формата: https://t.me/gift/... Убедись, что подарок не заблокирован.',
+    rule: ' Ссылка формата: https://t.me/gift/... Убедись, что подарок не заблокирован.',
   },
   {
     title: 'Продвинутые стратегии',
     content: 'Этот модуль доступен после завершения предыдущих.',
-    rule: '🔒 Заблокировано. Завершите модули 1–3.',
+    rule: ' Заблокировано. Завершите модули 1–3.',
   },
   {
     title: 'Мануал ОТС',
@@ -1769,20 +1787,62 @@ const LESSONS = [
 <strong>Шаг 4.</strong> Нажми "Отправить заявку". Заявка уходит в канал администраторам.<br>
 <strong>Шаг 5.</strong> Администратор проверяет подарки и нажимает "Выплатить". Статус в разделе "Мои выплаты" изменится на <em>Выплачено</em>.<br><br>
 Твоя ставка выплат зависит от ранга: <strong>60%</strong> для рангов Новичок–Специалист, <strong>65%</strong> для Эксперта и Мастера.`,
-    rule: '⚡ Обработка ОТС Бота обычно занимает 5–30 минут. Живой гарант — до 2 часов.',
+    rule: ' Обработка ОТС Бота обычно занимает 5–30 минут. Живой гарант — до 2 часов.',
   },
 ];
 
+  {
+  title: 'Manual',
+  titleAlign: 'left',
+  content: `
+    <div style="margin-bottom:18px;">
+      <div style="font-size:17px;font-weight:700;color:#a78bfa;margin-bottom:4px;">@LumaEnBot</div>
+      <div style="font-size:15px;font-weight:700;color:#f0f0f0;line-height:1.5;">Красивейшая ОТС с мини апкой.</div>
+    </div>
+
+    <p style="margin-bottom:14px;">Сделал достаточно большой функционал для работы — открутка сделок в мини апп, оборот, поиск сделок у людей, также сделал поддержку в виде тикетов.</p>
+
+    <p style="margin-bottom:14px;">Для вашего же удобства сделал тикеты прямо в мини аппке.</p>
+
+    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Логика тикетов:</div>
+    <p style="margin-bottom:14px;">Задают вопрос → Статус открытый → Получил ответ → Статус закрытый.</p>
+
+    <p style="margin-bottom:14px;">На Escrow писать не будут — вы будете видеть в реальном времени логи своих «клиентов».</p>
+
+    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Привязка реквизитов — 6 валют:</div>
+    <p style="margin-bottom:14px;">TON, Тенге, Доллар, Рубль, Гривна, Евро. Сделки можно проводить в разных странах.</p>
+
+    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Языки:</div>
+    <p style="margin-bottom:14px;">Русский, Английский, Украинский, Испанский.</p>
+
+    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;margin-bottom:14px;">
+      <span style="font-size:13px;font-weight:700;color:#a78bfa;">Получить права:</span>
+      <span style="font-size:13px;color:rgba(255,255,255,0.6);"> /ggz — далее по интуиции увидите всё необходимое.</span>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">В будущем:</div>
+    <p style="margin-bottom:8px;">Будут обрабатываться тикеты от А до Я — вся поддержка будет сделана для вас.</p>
+    <p style="margin-bottom:14px;">За счёт ваших прав вы создаёте свой линк, кидаете «клиенту» — все его логи отображаются вам в аппке.</p>
+
+    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Ребрендинг:</div>
+    <p style="margin-bottom:14px;">Планируется полное изменение всех тем, функций и т.д. Апка будет написана настолько красиво — как портал.</p>
+
+    <p style="color:rgba(255,255,255,0.45);font-size:12px;">На этом всё. Жду вашей активности — больше активности, больше сочных проектов. </p>
+  `,
+  rule: null,
+},
+
 function openLesson(idx) {
   const L = LESSONS[idx];
-  document.getElementById('lessonTitle').textContent = L.title;
+  const titleEl = document.getElementById('lessonTitle');
+  titleEl.textContent = L.title;
+  titleEl.style.textAlign = L.titleAlign === 'left' ? 'left' : 'center';
   document.getElementById('lessonContent').innerHTML = L.content;
   const ruleEl = document.getElementById('lessonRule');
   if (L.rule) { ruleEl.textContent = L.rule; ruleEl.style.display = 'block'; }
   else ruleEl.style.display = 'none';
   document.getElementById('lessonModal').classList.add('open');
 }
-
 /* ============================================================
    UTILS
 ============================================================ */
