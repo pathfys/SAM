@@ -1437,7 +1437,7 @@ async function renderLeaderboard() {
       const name = (entry.full_name || entry.username || '?').split(' ')[0];
       const ini  = name[0]?.toUpperCase() || '?';
       slot.innerHTML = `
-        <div class="podium-avatar-top" style="${st}">${ini}</div>
+        avatarHtml(entry, st, 52)
         <div class="podium-name">${name}</div>
         <div class="podium-ton" style="color:${tonColor};">${Number(entry.total_ton).toFixed(1)} TON</div>
         <div class="podium-step ${pos.cls}"><div class="podium-rank-num">${pos.idx+1}</div></div>
@@ -1456,7 +1456,7 @@ async function renderLeaderboard() {
     const rank = getRank(entry.profits);
     item.innerHTML = `
       <div class="leader-rank">${i+1}</div>
-      <div class="leader-avatar" style="${st}">${ini}</div>
+      avatarHtml(entry, st, 44)
       <div class="leader-info">
         <div class="leader-name">${name}${isMe ? ' <span style="font-size:9px;color:#e52222;font-weight:700;">ВЫ</span>' : ''}</div>
         <div class="leader-meta">${rank.name} · ${entry.profits} заявок</div>
