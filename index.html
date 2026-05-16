@@ -1391,17 +1391,17 @@ const AVATAR_COLORS = [
   'background:rgba(56,189,248,0.10);color:#7dd3fc;',
 ];
 
-function avatarHtml(entry, colorStyle, size = 44) {
-  if (entry.photo_url) {
-    return `<img src="${entry.photo_url}" 
-      style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;"
-      onerror="this.outerHTML='<div style=\\'width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size*0.4)}px;${colorStyle}\\'>${(entry.full_name||entry.username||'?')[0].toUpperCase()}</div>'"
-    >`;
-  }
+function avatarHtml(entry, colorStyle, cls) {
   const ini = (entry.full_name || entry.username || '?')[0].toUpperCase();
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size*0.4)}px;${colorStyle}">${ini}</div>`;
+  if (entry.photo_url) {
+    return `<div class="${cls}" style="${colorStyle}">
+      <img src="${entry.photo_url}"
+        onerror="this.style.display='none';this.parentNode.innerText='${ini}';"
+      >
+    </div>`;
+  }
+  return `<div class="${cls}" style="${colorStyle}">${ini}</div>`;
 }
-
   function upsertLeaderboard() { return []; }
 
 async function renderLeaderboard() {
@@ -1409,7 +1409,6 @@ async function renderLeaderboard() {
   const list   = document.getElementById('leaderboardList');
   podium.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">Загрузка...</div>';
   list.innerHTML   = '';
-
   let board = [];
   try {
     const resp = await fetch(`${API_URL}/get_leaderboard`).then(r => r.json());
@@ -1417,15 +1416,12 @@ async function renderLeaderboard() {
   } catch(e) {
     console.warn('[SAM] leaderboard error:', e);
   }
-
   const myData = getMyData();
   if (myData.totalTon > 0 && !board.find(e => e.uid === uid)) {
     board.push({ uid, username, full_name: fullName, profits: myData.profits || 0, total_ton: myData.totalTon || 0 });
     board.sort((a,b) => b.total_ton - a.total_ton || b.profits - a.profits);
   }
-
   podium.innerHTML = '';
-
   const positions = [{ idx:1, cls:'p2' }, { idx:0, cls:'p1' }, { idx:2, cls:'p3' }];
   positions.forEach(pos => {
     const entry = board[pos.idx];
@@ -1437,9 +1433,8 @@ async function renderLeaderboard() {
       const st = AVATAR_COLORS[pos.idx % AVATAR_COLORS.length];
       const tonColor = pos.idx===0 ? 'rgba(255,215,0,0.8)' : pos.idx===1 ? 'rgba(192,192,192,0.7)' : 'rgba(205,127,50,0.7)';
       const name = (entry.full_name || entry.username || '?').split(' ')[0];
-      const ini  = name[0]?.toUpperCase() || '?';
       slot.innerHTML = `
-        avatarHtml(entry, st, 52)
+        ${avatarHtml(entry, st, 'podium-avatar-top')}
         <div class="podium-name">${name}</div>
         <div class="podium-ton" style="color:${tonColor};">${Number(entry.total_ton).toFixed(1)} TON</div>
         <div class="podium-step ${pos.cls}"><div class="podium-rank-num">${pos.idx+1}</div></div>
@@ -1447,18 +1442,16 @@ async function renderLeaderboard() {
     }
     podium.appendChild(slot);
   });
-
   board.forEach((entry, i) => {
     const isMe = entry.uid === uid;
     const item = document.createElement('div');
     item.className = 'leader-item' + (isMe ? ' me' : '');
     const st   = AVATAR_COLORS[i % AVATAR_COLORS.length];
     const name = entry.full_name || entry.username || 'Пользователь';
-    const ini  = name[0]?.toUpperCase() || '?';
     const rank = getRank(entry.profits);
     item.innerHTML = `
       <div class="leader-rank">${i+1}</div>
-      avatarHtml(entry, st, 44)
+      ${avatarHtml(entry, st, 'leader-avatar')}
       <div class="leader-info">
         <div class="leader-name">${name}${isMe ? ' <span style="font-size:9px;color:#e52222;font-weight:700;">ВЫ</span>' : ''}</div>
         <div class="leader-meta">${rank.name} · ${entry.profits} заявок</div>
@@ -1470,7 +1463,6 @@ async function renderLeaderboard() {
     `;
     list.appendChild(item);
   });
-
   if (!board.length) list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:13px;">Рейтинг пока пустой</div>';
 }
 
