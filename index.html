@@ -1389,45 +1389,47 @@ const AVATAR_COLORS = [
   'background:rgba(56,189,248,0.10);color:#7dd3fc;',
 ];
 
-function upsertLeaderboard() {
-  const data = getMyData();
-  let board = getGlobalLeaderboard();
-  const idx = board.findIndex(e => e.uid === uid);
-  const entry = { uid, name: fullName, initials, profits: data.profits || 0, totalTon: data.totalTon || 0 };
-  if (idx >= 0) board[idx] = entry; else board.push(entry);
-  board.sort((a,b) => b.totalTon - a.totalTon || b.profits - a.profits);
-  board = board.slice(0, 10);
-  saveGlobalLeaderboard(board);
-  return board;
-}
+  function upsertLeaderboard() { return []; }
 
-function renderLeaderboard() {
-  const board  = upsertLeaderboard();
+async function renderLeaderboard() {
   const podium = document.getElementById('podiumWrap');
   const list   = document.getElementById('leaderboardList');
-  podium.innerHTML = '';
+  podium.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">Загрузка...</div>';
   list.innerHTML   = '';
 
-  const positions = [
-    { idx: 1, cls: 'p2' },
-    { idx: 0, cls: 'p1' },
-    { idx: 2, cls: 'p3' },
-  ];
+  let board = [];
+  try {
+    const resp = await fetch(`${API_URL}/get_leaderboard`).then(r => r.json());
+    if (resp.ok && resp.board) board = resp.board;
+  } catch(e) {
+    console.warn('[SAM] leaderboard error:', e);
+  }
 
+  const myData = getMyData();
+  if (myData.totalTon > 0 && !board.find(e => e.uid === uid)) {
+    board.push({ uid, username, full_name: fullName, profits: myData.profits || 0, total_ton: myData.totalTon || 0 });
+    board.sort((a,b) => b.total_ton - a.total_ton || b.profits - a.profits);
+  }
+
+  podium.innerHTML = '';
+
+  const positions = [{ idx:1, cls:'p2' }, { idx:0, cls:'p1' }, { idx:2, cls:'p3' }];
   positions.forEach(pos => {
     const entry = board[pos.idx];
     const slot  = document.createElement('div');
     slot.className = 'podium-slot';
     if (!entry) {
-      slot.innerHTML = `<div style="height:52px;"></div><div class="podium-name" style="color:#333;">—</div><div class="podium-ton" style="color:#333;">0 TON</div><div class="podium-step ${pos.cls}" style="opacity:0.2;"><div class="podium-rank-num">${pos.idx + 1}</div></div>`;
+      slot.innerHTML = `<div style="height:52px;"></div><div class="podium-name" style="color:#333;">—</div><div class="podium-ton" style="color:#333;">0 TON</div><div class="podium-step ${pos.cls}" style="opacity:0.2;"><div class="podium-rank-num">${pos.idx+1}</div></div>`;
     } else {
       const st = AVATAR_COLORS[pos.idx % AVATAR_COLORS.length];
-      const tonColor = pos.idx === 0 ? 'rgba(255,215,0,0.8)' : pos.idx === 1 ? 'rgba(192,192,192,0.7)' : 'rgba(205,127,50,0.7)';
+      const tonColor = pos.idx===0 ? 'rgba(255,215,0,0.8)' : pos.idx===1 ? 'rgba(192,192,192,0.7)' : 'rgba(205,127,50,0.7)';
+      const name = (entry.full_name || entry.username || '?').split(' ')[0];
+      const ini  = name[0]?.toUpperCase() || '?';
       slot.innerHTML = `
-        <div class="podium-avatar-top" style="${st}">${entry.initials || '?'}</div>
-        <div class="podium-name">${entry.name.split(' ')[0]}</div>
-        <div class="podium-ton" style="color:${tonColor};">${entry.totalTon.toFixed(1)} TON</div>
-        <div class="podium-step ${pos.cls}"><div class="podium-rank-num">${pos.idx + 1}</div></div>
+        <div class="podium-avatar-top" style="${st}">${ini}</div>
+        <div class="podium-name">${name}</div>
+        <div class="podium-ton" style="color:${tonColor};">${Number(entry.total_ton).toFixed(1)} TON</div>
+        <div class="podium-step ${pos.cls}"><div class="podium-rank-num">${pos.idx+1}</div></div>
       `;
     }
     podium.appendChild(slot);
@@ -1437,16 +1439,19 @@ function renderLeaderboard() {
     const isMe = entry.uid === uid;
     const item = document.createElement('div');
     item.className = 'leader-item' + (isMe ? ' me' : '');
-    const st = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const st   = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const name = entry.full_name || entry.username || 'Пользователь';
+    const ini  = name[0]?.toUpperCase() || '?';
+    const rank = getRank(entry.profits);
     item.innerHTML = `
-      <div class="leader-rank">${i + 1}</div>
-      <div class="leader-avatar" style="${st}">${entry.initials || '?'}</div>
+      <div class="leader-rank">${i+1}</div>
+      <div class="leader-avatar" style="${st}">${ini}</div>
       <div class="leader-info">
-        <div class="leader-name">${entry.name}${isMe ? ' <span style="font-size:9px;color:#e52222;font-weight:700;">ВЫ</span>' : ''}</div>
-        <div class="leader-meta">${getRank(entry.profits).name} · ${entry.profits} заявок</div>
+        <div class="leader-name">${name}${isMe ? ' <span style="font-size:9px;color:#e52222;font-weight:700;">ВЫ</span>' : ''}</div>
+        <div class="leader-meta">${rank.name} · ${entry.profits} заявок</div>
       </div>
       <div class="leader-right">
-        <div class="leader-ton">${entry.totalTon.toFixed(1)} TON</div>
+        <div class="leader-ton">${Number(entry.total_ton).toFixed(1)} TON</div>
         <div class="leader-count">${entry.profits} профитов</div>
       </div>
     `;
@@ -1504,7 +1509,8 @@ function showScreen(name) {
   const nav = document.getElementById('nav-' + name);
   if (nav) nav.classList.add('active');
   window.scrollTo(0, 0);
- if (['top','profile','career','payments','home'].includes(name)) refreshStats();
+ if (['profile','career','payments','home'].includes(name)) refreshStats();
+ if (name === 'top') renderLeaderboard();
 }
 
 /* ============================================================
