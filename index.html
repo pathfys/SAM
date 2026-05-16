@@ -1885,11 +1885,6 @@ setInterval(pollPaymentStatuses, 15000);
     <svg width="110" height="150" viewBox="0 0 110 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;filter:drop-shadow(0 0 22px rgba(229,34,34,0.45));">
       <defs><linearGradient id="sGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff4444"/><stop offset="100%" stop-color="#7a0000"/></linearGradient></defs>
       <text x="55" y="128" text-anchor="middle" font-family="'Bebas Neue', sans-serif" font-size="128" fill="url(#sGrad)" style="letter-spacing:0;">S</text>
-      <path d="M 78 18 Q 79 35 77 52 Q 76 60 75 72" stroke="rgba(160,0,0,0.6)" stroke-width="2.2" fill="none" stroke-linecap="round" style="stroke-dasharray:80;stroke-dashoffset:80;animation:dripDraw 1.6s ease 0.4s forwards;"/>
-      <path d="M 30 22 Q 29 38 31 55 Q 32 64 30 75" stroke="rgba(140,0,0,0.5)" stroke-width="1.8" fill="none" stroke-linecap="round" style="stroke-dasharray:70;stroke-dashoffset:70;animation:dripDraw 1.5s ease 0.9s forwards;"/>
-      <g style="animation:dropA 2.6s ease-in 0.5s infinite;"><path d="M77 52 Q79.5 57 77 62 Q74.5 57 77 52Z" fill="#cc0000"/><ellipse cx="77" cy="64" rx="4.5" ry="6" fill="#cc0000"/></g>
-      <g style="animation:dropB 3.0s ease-in 1.1s infinite;"><path d="M30 55 Q32.5 60 30 65 Q27.5 60 30 55Z" fill="#bb0000"/><ellipse cx="30" cy="67" rx="4" ry="5.5" fill="#bb0000"/></g>
-    </svg>
   </div>
   <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;">
     <div style="width:200px;height:3px;background:rgba(229,34,34,0.12);border-radius:3px;overflow:hidden;">
@@ -1899,9 +1894,6 @@ setInterval(pollPaymentStatuses, 15000);
   </div>
 </div>
 <style>
-@keyframes dripDraw{to{stroke-dashoffset:0;}}
-@keyframes dropA{0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(96px);opacity:1;}72%{transform:translateY(106px);opacity:0;}100%{transform:translateY(0);opacity:0;}}
-@keyframes dropB{0%{transform:translateY(0);opacity:0;}5%{opacity:1;}55%{transform:translateY(90px);opacity:1;}72%{transform:translateY(100px);opacity:0;}100%{transform:translateY(0);opacity:0;}}
 #sam-splash.sam-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity 0.6s ease,visibility 0.6s!important;}
 </style>
 <script>
