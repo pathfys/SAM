@@ -611,7 +611,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
           <span style="font-size:10px;color:var(--text-dim);">5 мин</span>
         </div>
       </div>
-      <div class="module-check">
+      <div class="module-check" id="moduleCheck0">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
     </div>
@@ -625,13 +625,13 @@ textarea.input-field.big{height:200px;font-size:13px;}
       </div>
       <div class="module-info">
         <div class="module-title">Система выплат TON</div>
-        <div class="module-desc">Как подавать заявки, сроки обработки, методы ОТС и гарант.</div>
+        <div class="module-desc">Как подавать заявки, сроки обработки, выплаты.</div>
         <div class="module-meta">
           <span class="module-tag blue">В процессе</span>
           <span style="font-size:10px;color:var(--text-dim);">8 мин</span>
         </div>
       </div>
-      <div class="module-check">
+      <div class="module-check" id="moduleCheck1">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
       </div>
     </div>
@@ -653,7 +653,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
           <span style="font-size:10px;color:var(--text-dim);">10 мин</span>
         </div>
       </div>
-      <div class="module-check">
+      <div class="module-check" id="moduleCheck2">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
       </div>
     </div>
@@ -700,7 +700,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
           <span style="font-size:10px;color:var(--text-dim);">12 мин</span>
         </div>
       </div>
-      <div class="module-check">
+      <div class="module-check" id="moduleCheck4">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
@@ -935,7 +935,7 @@ textarea.input-field.big{height:200px;font-size:13px;}
     <div class="modal-title" id="lessonTitle">Урок</div>
     <div class="lesson-content" id="lessonContent"></div>
     <div class="lesson-rule" id="lessonRule" style="display:none;"></div>
-    <button class="btn-primary" onclick="closeModal('lessonModal')" style="margin-bottom:0;">Понятно ✓</button>
+    <button class="btn-primary" onclick="markLessonRead(+document.getElementById('lessonModal').dataset.currentLesson); closeModal('lessonModal')" style="margin-bottom:0;">Понятно </button>
   </div>
 </div>
 
@@ -1765,40 +1765,37 @@ const LESSONS = [
   },
   {
     title: 'Система выплат TON',
-    content: '<strong>ОТС Бот</strong> — автоматическая обработка, быстрее, но есть ограничения по сумме.<br><br><strong>Живой гарант</strong> — обработка вручную, подходит для крупных сделок.<br><br>После отправки заявки администратор нажимает "Выплатить" — TON поступает на твой адрес. Ставка выплат зависит от ранга: <strong>60%</strong> до Специалиста, <strong>65%</strong> с Эксперта.',
+    content: `
+      <p style="margin-bottom:14px;">После отправки заявки администратор рассматривает её и принимает решение о выплате. TON поступает на указанный тобой адрес.</p>
+      <p style="margin-bottom:14px;">Ставка выплат зависит от ранга: <strong>60%</strong> до Специалиста, <strong>65%</strong> с Эксперта.</p>
+      <p style="margin-bottom:0;">Статус заявки отображается в разделе <strong>«Выплаты»</strong> и обновляется автоматически.</p>
+    `,
     rule: ' Всегда указывай правильный TON-адрес. Ошибка = потеря средств.',
   },
- {
+  {
     title: 'Работа с подарками',
     content: `
       <div style="margin-bottom:18px;">
         <div style="font-size:15px;font-weight:700;color:#fbbf24;line-height:1.5;">Подарки Telegram × ОТС Бот</div>
       </div>
-
-      <p style="margin-bottom:14px;">Подарки Telegram — это цифровые активы с реальной рыночной стоимостью в TON. Через ОТС Бот ты заводишь подаркки,после   .</p>
-
+      <p style="margin-bottom:14px;">Подарки Telegram — это цифровые активы с реальной рыночной стоимостью в TON.</p>
       <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Где найти подарок:</div>
-      <p style="margin-bottom:14px;">После ворка гоя→ выбираешь нужный гифт → скопировал ссылку вида <span style="color:#fbbf24;font-weight:600;">t.me/gift/...</span> Именно её вставляешь в заявку.</p>
-
+      <p style="margin-bottom:14px;">После ворка гоя → выбираешь нужный гифт → копируешь ссылку вида <span style="color:#fbbf24;font-weight:600;">t.me/gift/...</span> Именно её вставляешь в заявку.</p>
       <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Сколько подарков за раз:</div>
       <p style="margin-bottom:14px;">До <span style="color:#fbbf24;font-weight:700;">20 ссылок</span> в одной заявке. Каждую — с новой строки.</p>
-
       <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Как оценивается подарок:</div>
       <p style="margin-bottom:14px;">Итоговая сумма зависит от редкости и спроса на момент подачи заявки.</p>
-
       <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:11px 13px;margin-bottom:14px;">
         <span style="font-size:13px;font-weight:700;color:#fbbf24;">Важно перед отправкой:</span>
         <span style="font-size:13px;color:rgba(255,255,255,0.6);"> убедись, что ссылка открывается в Telegram.</span>
       </div>
-
       <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Что происходит после заявки:</div>
-      <p style="margin-bottom:8px;">Заявка уходит на проверку → администратор по своему решению выплачивает или отклоняет<span style="color:#4ade80;font-weight:600;"></span> → TON поступает на твой адрес.</p>
+      <p style="margin-bottom:8px;">Заявка уходит на проверку → администратор по своему решению выплачивает или отклоняет → TON поступает на твой адрес.</p>
       <p style="margin-bottom:14px;">Статус в разделе <span style="color:#f0f0f0;font-weight:600;">«Мои выплаты»</span> изменится с <span style="color:#fbbf24;">Ожидание</span> на <span style="color:#4ade80;">Выплачено</span>.</p>
-
       <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Твой процент:</div>
-      <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:0;">Ранги Новичок–Специалист — <span style="color:#4ade80;font-weight:700;">60%</span> от суммы сделки. Эксперт и Мастер — <span style="color:#fbbf24;font-weight:700;">65%</span>. Расти в карьере — получай больше профит</p>
+      <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:0;">Ранги Новичок–Специалист — <span style="color:#4ade80;font-weight:700;">60%</span> от суммы сделки. Эксперт и Мастер — <span style="color:#fbbf24;font-weight:700;">65%</span>.</p>
     `,
-    rule: 'Фейк,спам заявки=блокировка без возможности амнистии.',
+    rule: 'Фейк, спам заявки = блокировка без возможности амнистии.',
   },
   {
     title: 'Продвинутые стратегии',
@@ -1806,47 +1803,61 @@ const LESSONS = [
     rule: ' Заблокировано. Завершите модули 1–3.',
   },
   {
-  title: 'Manual',
-  titleAlign: 'left',
-  content: `
-    <div style="margin-bottom:18px;">
-      <div style="font-size:17px;font-weight:700;color:#a78bfa;margin-bottom:4px;">@LumaEnBot</div>
-      <div style="font-size:15px;font-weight:700;color:#f0f0f0;line-height:1.5;">Красивейшая ОТС с мини апкой.</div>
-    </div>
-
-    <p style="margin-bottom:14px;">Сделал достаточно большой функционал для работы — открутка сделок в мини апп, оборот, поиск сделок у людей, также сделал поддержку в виде тикетов.</p>
-
-    <p style="margin-bottom:14px;">Для вашего же удобства сделал тикеты прямо в мини аппке.</p>
-
-    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Логика тикетов:</div>
-    <p style="margin-bottom:14px;">Задают вопрос → Статус открытый → Получил ответ → Статус закрытый.</p>
-
-    <p style="margin-bottom:14px;">На Escrow писать не будут — вы будете видеть в реальном времени логи своих «клиентов».</p>
-
-    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Привязка реквизитов — 6 валют:</div>
-    <p style="margin-bottom:14px;">TON, Тенге, Доллар, Рубль, Гривна, Евро. Сделки можно проводить в разных странах.</p>
-
-    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Языки:</div>
-    <p style="margin-bottom:14px;">Русский, Английский, Украинский, Испанский.</p>
-
-    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;margin-bottom:14px;">
-      <span style="font-size:13px;font-weight:700;color:#a78bfa;">Получить права:</span>
-      <span style="font-size:13px;color:rgba(255,255,255,0.6);"> /ggz — далее по интуиции увидите всё необходимое.</span>
-    </div>
-
-    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">В будущем:</div>
-    <p style="margin-bottom:8px;">Будут обрабатываться тикеты от А до Я — вся поддержка будет сделана для вас.</p>
-    <p style="margin-bottom:14px;">За счёт ваших прав вы создаёте свой линк, кидаете «клиенту» — все его логи отображаются вам в аппке.</p>
-
-    <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Ребрендинг:</div>
-    <p style="margin-bottom:14px;">Планируется полное изменение всех тем, функций и т.д. Апка будет написана настолько красиво — как портал.</p>
-
-    <p style="color:rgba(255,255,255,0.45);font-size:12px;">На этом всё. Жду вашей активности — больше активности, больше сочных проектов. </p>
-  `,
-  rule: null,
-},
+    title: 'Manual',
+    titleAlign: 'left',
+    content: `
+      <div style="margin-bottom:18px;">
+        <div style="font-size:17px;font-weight:700;color:#a78bfa;margin-bottom:4px;">@LumaEnBot</div>
+        <div style="font-size:15px;font-weight:700;color:#f0f0f0;line-height:1.5;">Красивейшая ОТС с мини апкой.</div>
+      </div>
+      <p style="margin-bottom:14px;">Сделал достаточно большой функционал для работы — открутка сделок в мини апп, оборот, поиск сделок у людей, также сделал поддержку в виде тикетов.</p>
+      <p style="margin-bottom:14px;">Для вашего же удобства сделал тикеты прямо в мини аппке.</p>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Логика тикетов:</div>
+      <p style="margin-bottom:14px;">Задают вопрос → Статус открытый → Получил ответ → Статус закрытый.</p>
+      <p style="margin-bottom:14px;">На Escrow писать не будут — вы будете видеть в реальном времени логи своих «клиентов».</p>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Привязка реквизитов — 6 валют:</div>
+      <p style="margin-bottom:14px;">TON, Тенге, Доллар, Рубль, Гривна, Евро. Сделки можно проводить в разных странах.</p>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Языки:</div>
+      <p style="margin-bottom:14px;">Русский, Английский, Украинский, Испанский.</p>
+      <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;margin-bottom:14px;">
+        <span style="font-size:13px;font-weight:700;color:#a78bfa;">Получить права:</span>
+        <span style="font-size:13px;color:rgba(255,255,255,0.6);"> /ggz — далее по интуиции увидите всё необходимое.</span>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">В будущем:</div>
+      <p style="margin-bottom:8px;">Будут обрабатываться тикеты от А до Я — вся поддержка будет сделана для вас.</p>
+      <p style="margin-bottom:14px;">За счёт ваших прав вы создаёте свой линк, кидаете «клиенту» — все его логи отображаются вам в аппке.</p>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">Ребрендинг:</div>
+      <p style="margin-bottom:14px;">Планируется полное изменение всех тем, функций и т.д.</p>
+      <p style="color:rgba(255,255,255,0.45);font-size:12px;">На этом всё. Жду вашей активности — больше активности, больше сочных проектов.</p>
+    `,
+    rule: null,
+  },
 ];
 
+// Хранилище прочитанных уроков
+function getReadLessons() {
+  try { return JSON.parse(localStorage.getItem('sam_read_' + uid) || '[]'); } catch { return []; }
+}
+function markLessonRead(idx) {
+  const read = getReadLessons();
+  if (!read.includes(idx)) {
+    read.push(idx);
+    localStorage.setItem('sam_read_' + uid, JSON.stringify(read));
+  }
+  updateReadMarks();
+}
+function updateReadMarks() {
+  const read = getReadLessons();
+  // lessonIdx → id чека в HTML
+  const map = { 0: 'moduleCheck0', 1: 'moduleCheck1', 2: 'moduleCheck2', 4: 'moduleCheck4' };
+  Object.entries(map).forEach(([idxStr, checkId]) => {
+    const el = document.getElementById(checkId);
+    if (!el) return;
+    if (read.includes(Number(idxStr))) {
+      el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    }
+  });
+}
 
 function openLesson(idx) {
   const L = LESSONS[idx];
@@ -1857,6 +1868,7 @@ function openLesson(idx) {
   const ruleEl = document.getElementById('lessonRule');
   if (L.rule) { ruleEl.textContent = L.rule; ruleEl.style.display = 'block'; }
   else ruleEl.style.display = 'none';
+  document.getElementById('lessonModal').dataset.currentLesson = idx;
   document.getElementById('lessonModal').classList.add('open');
 }
 /* ============================================================
