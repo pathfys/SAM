@@ -1538,29 +1538,176 @@ function renderPaymentsHistory() {
   }
   container.innerHTML = '';
   history.slice().reverse().forEach(h => {
-    const statusMap = {
-      pending:  { cls: 'pending', txt: 'Ожидание' },
-      paid:     { cls: 'success', txt: 'Выплачено' },
-      rejected: { cls: 'failed',  txt: 'Отклонено' },
-    };
-    const st = statusMap[h.status] || statusMap.pending;
-    const item = document.createElement('div');
-    item.className = 'payment-item';
-    item.innerHTML = `
-      <div class="payment-avatar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(229,34,34,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
-      </div>
-      <div class="payment-info">
-        <div class="payment-name">${h.reqId}</div>
-        <div class="payment-date">${h.method === 'ots' ? '🤖 ОТС Бот' : '🛡️ Гарант'} · ${h.date}</div>
-      </div>
-      <div class="payment-amount">
-        <div class="payment-ton">${h.ton != null ? h.ton + ' TON' : '—'}</div>
-        <span class="payment-status ${st.cls}">${st.txt}</span>
+    const card = document.createElement('div');
+    card.className = 'pay-gift-card';
+    card.dataset.reqid = h.reqId;
+    container.appendChild(card);
+    renderGiftCard(card, h, data);
+  });
+}
+
+async function renderGiftCard(card, h, data) {
+  const rank    = getRank(data.profits || 0);
+  const pct     = rank.payout;
+  const isExpert = pct >= 65;
+  const linksArr = h.links || [];
+  const count    = linksArr.length || h.linksCount || 1;
+  const methodLabel = h.method === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
+
+  const statusMap = {
+    pending:  'pending',
+    paid:     'paid',
+    rejected: 'rejected',
+  };
+  const stCls = statusMap[h.status] || 'pending';
+  const stTxt = { pending: '⏳ Ожидание', paid: '✅ Выплачено', rejected: '❌ Отклонено' }[h.status] || '⏳ Ожидание';
+
+  // скелетон пока грузим
+  card.innerHTML = `
+    <div class="pay-gift-card-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+      ${count} подарков · ${methodLabel} · ${h.date || ''}
+    </div>
+    <div class="pay-gift-loading">
+      <div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>
+      Загружаем цены...
+    </div>
+  `;
+
+  // если есть уже сохранённая цена — используем
+  if (h.marketTon) {
+    buildGiftCardHtml(card, h, h.marketTon, pct, isExpert, stCls, stTxt, count, methodLabel);
+    return;
+  }
+
+  // пробуем получить цену первого подарка
+  let marketTon = null;
+  if (linksArr.length > 0) {
+    const giftName = parseGiftLinkCalc(linksArr[0]);
+    if (giftName) {
+      try {
+        const tonPrice = await getTonPriceCalc();
+        const priceData = await fetchGiftPriceCalc(giftName);
+        if (priceData) {
+          marketTon = parseFloat((priceData.ton * count).toFixed(2));
+          // кешируем в историю
+          const myData = getMyData();
+          const idx = myData.history.findIndex(x => x.reqId === h.reqId);
+          if (idx >= 0) { myData.history[idx].marketTon = marketTon; saveMyData(myData); }
+        }
+      } catch(e) {}
+    }
+  }
+
+  buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel);
+}
+
+function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel) {
+  const tonPrice  = parseFloat(localStorage.getItem('sam_ton_price') || '3.2');
+  const linksArr  = h.links || [];
+
+  const tonDisplay   = marketTon != null ? marketTon : (h.ton || null);
+  const payTon       = tonDisplay != null ? (tonDisplay * pct / 100).toFixed(2) : null;
+
+  const priceHtml = tonDisplay != null
+    ? `<div class="pay-gift-price">~${tonDisplay} <span>TON</span></div>
+       <div class="pay-gift-payout">Примерная выплата (${pct}%): <b>~${payTon} TON</b></div>`
+    : `<div class="pay-gift-price" style="font-size:24px;color:#555;">Цена недоступна</div>
+       <div class="pay-gift-payout" style="color:#444;">Администратор установит сумму вручную</div>`;
+
+  // список подарков (до 3х, остальные сворачиваем)
+  const showLinks = linksArr.slice(0, 3);
+  const moreCount = linksArr.length > 3 ? linksArr.length - 3 : 0;
+
+  const giftItemsHtml = showLinks.map((link, i) => {
+    const name = parseGiftLinkCalc(link) || ('Подарок ' + (i + 1));
+    const displayName = name.replace(/-(\d+)$/, ' #$1');
+    const perTon = tonDisplay != null ? (tonDisplay / (linksArr.length || 1)).toFixed(2) : null;
+    const imgUrl = `https://nft.fragment.com/gift/${name.replace(/-\d+$/,'').toLowerCase()}-${name.match(/-(\d+)$/)?.[1] || '1'}.small.jpg`;
+    return `
+      <div class="pay-gift-item" style="${i > 0 ? 'margin-top:8px;' : ''}">
+        <div class="pay-gift-item-left">
+          <div class="pay-gift-thumb">
+            <img src="${imgUrl}" onerror="this.style.display='none';this.parentNode.innerHTML='🎁';" alt="">
+          </div>
+          <div>
+            <div class="pay-gift-item-name">${displayName}</div>
+            <div class="pay-gift-item-sub">${h.method === 'ots' ? 'ОТС Бот' : 'Гарант'}</div>
+          </div>
+        </div>
+        ${perTon ? `<div class="pay-gift-item-ton">${perTon} TON</div>` : ''}
       </div>
     `;
-    container.appendChild(item);
-  });
+  }).join('');
+
+  const moreHtml = moreCount > 0
+    ? `<div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;">+ ещё ${moreCount} подарков</div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="pay-gift-card-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+      ${linksArr.length || count} подарков · ${methodLabel} · ${h.date || ''}
+    </div>
+    ${priceHtml}
+    <div class="pay-gift-divider"></div>
+    ${giftItemsHtml}
+    ${moreHtml}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+      <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${h.reqId}</div>
+      <div class="pay-gift-status ${stCls}">${stTxt}</div>
+    </div>
+  `;
+}
+
+/* helpers для калькулятора */
+let _cachedTonPrice = 0;
+async function getTonPriceCalc() {
+  if (_cachedTonPrice > 0) return _cachedTonPrice;
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', { signal: AbortSignal.timeout(5000) });
+    const d = await r.json();
+    _cachedTonPrice = d['the-open-network']?.usd || 3.2;
+  } catch { _cachedTonPrice = 3.2; }
+  localStorage.setItem('sam_ton_price', _cachedTonPrice);
+  return _cachedTonPrice;
+}
+
+function parseGiftLinkCalc(raw) {
+  if (!raw) return null;
+  const s = raw.trim();
+  const m = s.match(/(?:t\.me\/nft\/|t\.me\/gift\/|nft\.fragment\.com\/gift\/)([A-Za-z0-9_-]+)/i);
+  if (m) return m[1];
+  if (/^[A-Za-z][A-Za-z0-9]+-\d+$/.test(s)) return s;
+  return null;
+}
+
+async function fetchGiftPriceCalc(giftName) {
+  const slug   = giftName.replace(/-\d+$/, '').toLowerCase();
+  const hasNum = /-\d+$/.test(giftName);
+  // конкретный NFT
+  if (hasNum) {
+    try {
+      const r = await fetch(`https://nft.fragment.com/gift/${giftName.toLowerCase()}.json`, { signal: AbortSignal.timeout(6000) });
+      if (r.ok) {
+        const d = await r.json();
+        const raw = d.price || d.resell_price || d.floor_price;
+        const ton = raw ? (raw > 1e9 ? raw / 1e9 : raw) : null;
+        if (ton && ton > 0) return { ton, name: d.title || d.name || giftName, data: d };
+      }
+    } catch(e) {}
+  }
+  // коллекция (floor)
+  try {
+    const r = await fetch(`https://nft.fragment.com/gift/${slug}.json`, { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      const raw = d.price || d.floor_price || d.avg_price;
+      const ton = raw ? (raw > 1e9 ? raw / 1e9 : raw) : null;
+      if (ton && ton > 0) return { ton, name: d.title || d.name || giftName, data: d };
+    }
+  } catch(e) {}
+  return null;
 }
 
 /* ============================================================
@@ -1704,12 +1851,14 @@ async function submitGiftRequest() {
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
-      reqId,
-      method: selectedMethod,
-      date:   new Date().toLocaleDateString('ru-RU'),
-      status: 'pending',
-      ton:    null,
-    });
+  reqId,
+  method:     selectedMethod,
+  date:       new Date().toLocaleDateString('ru-RU'),
+  status:     'pending',
+  ton:        null,
+  links:      links,        // ← массив ссылок
+  linksCount: links.length, // ← количество
+});
     saveMyData(myData);
     renderPaymentsHistory();
 
@@ -2107,46 +2256,27 @@ getTonPrice();
 <style>
 #sam-splash.sam-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity 0.6s ease,visibility 0.6s!important;}
 
-/* ==================== CALC ПЛАШКА ==================== */
-.calc-block{background:rgba(10,20,10,0.8);border:1px solid rgba(34,197,94,0.18);border-radius:18px;padding:16px;margin-bottom:12px;}
-.calc-block-title{font-size:10px;font-weight:700;color:rgba(34,197,94,0.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.calc-block-title::before{content:'';width:14px;height:1px;background:rgba(34,197,94,0.5);}
-.calc-input-row{display:flex;gap:8px;margin-bottom:6px;}
-.calc-input-row .input-field{flex:1;height:44px;margin:0;font-size:13px;}
-.calc-go-btn{width:44px;height:44px;border-radius:11px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s;box-shadow:0 4px 12px rgba(34,197,94,0.28);}
-.calc-go-btn:active{transform:scale(0.92);}
-.calc-go-btn.loading{background:rgba(34,197,94,0.12);box-shadow:none;pointer-events:none;}
-.calc-hint-text{font-size:10px;color:var(--text-dim);margin-bottom:0;padding:0 2px;}
-
-.calc-result{display:none;margin-top:12px;animation:fadeUp 0.25s ease both;}
-.calc-result.show{display:block;}
-
-/* большая зелёная цена */
-.calc-price-big{font-family:'Bebas Neue',sans-serif;font-size:44px;color:#4ade80;letter-spacing:1px;line-height:1;filter:drop-shadow(0 0 14px rgba(34,197,94,0.3));margin-bottom:1px;}
-.calc-price-big span{font-size:20px;color:rgba(74,222,128,0.5);}
-.calc-price-usd{font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:10px;}
-
-/* описание заявки маленьким */
-.calc-desc-row{font-size:11px;color:var(--text-muted);line-height:1.7;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:9px;}
-.calc-desc-row b{color:rgba(255,255,255,0.6);font-weight:600;}
-
-/* ставка */
-.calc-pct-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
-.calc-pct-label{font-size:11px;color:var(--text-muted);}
-.calc-pct-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.5px;}
-.calc-pct-badge.base{background:rgba(34,197,94,0.12);color:#4ade80;}
-.calc-pct-badge.expert{background:rgba(245,158,11,0.14);color:#fbbf24;}
-
-/* итоговая выплата */
-.calc-payout-box{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
-.calc-payout-box-label{font-size:10px;font-weight:700;color:rgba(34,197,94,0.55);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
-.calc-payout-box-ton{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#4ade80;letter-spacing:0.5px;}
-.calc-payout-box-ton span{font-size:12px;color:rgba(74,222,128,0.5);}
-.calc-payout-box-usd{font-size:10px;color:rgba(255,255,255,0.25);}
-.calc-payout-box-right{text-align:right;}
-
-.calc-error-box{display:none;font-size:12px;color:#f87171;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:10px 12px;margin-top:8px;line-height:1.6;}
-.calc-error-box.show{display:block;}
+/* ── GIFT CALC CARD в истории ── */
+.pay-gift-card{background:rgba(8,18,8,0.95);border:1px solid rgba(34,197,94,0.2);border-radius:16px;padding:14px 16px;margin-bottom:10px;animation:fadeUp 0.3s ease both;}
+.pay-gift-card-header{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);margin-bottom:8px;}
+.pay-gift-card-header svg{opacity:0.5;}
+.pay-gift-price{font-family:'Bebas Neue',sans-serif;font-size:40px;color:#4ade80;letter-spacing:1px;line-height:1;margin-bottom:2px;filter:drop-shadow(0 0 12px rgba(34,197,94,0.28));}
+.pay-gift-price span{font-size:18px;color:rgba(74,222,128,0.45);}
+.pay-gift-payout{font-size:13px;color:var(--text-muted);margin-bottom:10px;}
+.pay-gift-payout b{color:#fbbf24;}
+.pay-gift-divider{height:1px;background:rgba(255,255,255,0.05);margin-bottom:10px;}
+.pay-gift-item{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pay-gift-item-left{display:flex;align-items:center;gap:8px;}
+.pay-gift-thumb{width:36px;height:36px;border-radius:10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.pay-gift-thumb img{width:100%;height:100%;object-fit:cover;border-radius:9px;}
+.pay-gift-item-name{font-size:13px;font-weight:700;color:var(--text);}
+.pay-gift-item-sub{font-size:10px;color:var(--text-muted);margin-top:1px;}
+.pay-gift-item-ton{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#4ade80;letter-spacing:0.5px;white-space:nowrap;}
+.pay-gift-loading{font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:8px;padding:8px 0;}
+.pay-gift-status{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px;}
+.pay-gift-status.pending{background:rgba(245,158,11,0.1);color:#fbbf24;}
+.pay-gift-status.paid{background:rgba(34,197,94,0.1);color:#4ade80;}
+.pay-gift-status.rejected{background:rgba(239,68,68,0.1);color:#f87171;}
   
 </style>
 <script>
