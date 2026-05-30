@@ -564,9 +564,41 @@ textarea.input-field.big{height:200px;font-size:13px;}
 
 </div><!-- конец screen-home -->
 
-  <!-- ═══════════════ PAYMENTS ═══════════════ -->
+ <!-- ═══════════════ PAYMENTS ═══════════════ -->
   <div class="screen" id="screen-payments">
     <div class="screen-title">Выплаты</div>
+
+    <!-- CALC ПЛАШКА -->
+    <div class="calc-block">
+      <div class="calc-block-title">Калькулятор подарка</div>
+      <div class="calc-input-row">
+        <input class="input-field" id="calcGiftLink" type="text" placeholder="https://t.me/nft/PlushPepe-1"/>
+        <button class="calc-go-btn" id="calcGoBtn" onclick="runCalc()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="calc-hint-text">Вставь ссылку t.me/nft/... — рассчитаем выплату по твоему рангу</div>
+      <div class="calc-error-box" id="calcError"></div>
+      <div class="calc-result" id="calcResult">
+        <div class="calc-price-big" id="calcPriceTon">— <span>TON</span></div>
+        <div class="calc-price-usd" id="calcPriceUsd">≈ $— USD</div>
+        <div class="calc-desc-row" id="calcDesc"></div>
+        <div class="calc-pct-row">
+          <div class="calc-pct-label">Ставка выплаты:</div>
+          <div class="calc-pct-badge base" id="calcPctBadge">60%</div>
+          <div class="calc-pct-label" id="calcRankLabel" style="color:var(--text-dim);"></div>
+        </div>
+        <div class="calc-payout-box">
+          <div>
+            <div class="calc-payout-box-label">Твоя выплата</div>
+            <div class="calc-payout-box-ton" id="calcPayoutTon">— <span>TON</span></div>
+            <div class="calc-payout-box-usd" id="calcPayoutUsd"></div>
+          </div>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(34,197,94,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+    </div>
+
     <button class="btn-primary" onclick="openPayModal()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Подать заявку
@@ -1885,6 +1917,173 @@ refreshStats();
 syncStatusesFromServer();
 setInterval(syncStatusesFromServer, 15000);
 setInterval(pollPaymentStatuses, 15000);
+
+  /* ============================================================
+   CALCULATOR
+============================================================ */
+let cachedTonPrice = 0;
+
+async function getTonPrice() {
+  if (cachedTonPrice > 0) return cachedTonPrice;
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', { signal: AbortSignal.timeout(5000) });
+    const d = await r.json();
+    cachedTonPrice = d['the-open-network']?.usd || 3.2;
+  } catch { cachedTonPrice = 3.2; }
+  localStorage.setItem('sam_ton_price', cachedTonPrice);
+  return cachedTonPrice;
+}
+
+function parseGiftLink(raw) {
+  // t.me/nft/PlushPepe-1234  или  t.me/gift/abc  или просто PlushPepe-1234
+  const s = raw.trim();
+  const m = s.match(/(?:t\.me\/nft\/|t\.me\/gift\/|nft\.fragment\.com\/gift\/)([A-Za-z0-9_-]+)/i);
+  if (m) return m[1];
+  // голое имя без домена
+  if (/^[A-Za-z][A-Za-z0-9]+-\d+$/.test(s)) return s;
+  return null;
+}
+
+function giftSlug(name) {
+  // PlushPepe-1234 → plushpepe  (для fragment endpoint)
+  return name.replace(/-\d+$/, '').toLowerCase();
+}
+
+function detectRarity(data) {
+  // fragment JSON содержит поля attributes с rarity или name
+  if (!data) return { label: 'Unknown', cls: 'rarity-common' };
+  const attrs = data.attributes || [];
+  const rarityAttr = attrs.find(a => (a.trait_type || a.name || '').toLowerCase().includes('rarity'));
+  const val = (rarityAttr?.value || '').toLowerCase();
+  if (val.includes('legendary') || val.includes('unique')) return { label: 'Legendary', cls: 'rarity-legendary' };
+  if (val.includes('epic'))   return { label: 'Epic',    cls: 'rarity-epic' };
+  if (val.includes('rare'))   return { label: 'Rare',    cls: 'rarity-rare' };
+  // fallback: смотрим на количество
+  const issued = data.issued || data.availability_issued || null;
+  if (issued && issued < 1000)  return { label: 'Legendary', cls: 'rarity-legendary' };
+  if (issued && issued < 5000)  return { label: 'Epic',      cls: 'rarity-epic' };
+  if (issued && issued < 20000) return { label: 'Rare',      cls: 'rarity-rare' };
+  return { label: 'Common', cls: 'rarity-common' };
+}
+
+async function fetchGiftPrice(giftName) {
+  // 1) Пробуем fragment JSON для конкретного NFT (если есть номер)
+  const slug = giftSlug(giftName);
+  const hasNum = /-\d+$/.test(giftName);
+
+  if (hasNum) {
+    try {
+      const url = `https://nft.fragment.com/gift/${giftName.toLowerCase()}.json`;
+      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      if (r.ok) {
+        const d = await r.json();
+        // price в нанотонах или TON напрямую
+        const priceNano = d.price || d.resell_price || d.floor_price || null;
+        const priceTon  = priceNano ? (priceNano > 1e9 ? priceNano / 1e9 : priceNano) : null;
+        if (priceTon && priceTon > 0) {
+          return { ton: priceTon, name: d.title || d.name || giftName, data: d, source: 'fragment' };
+        }
+      }
+    } catch(e) { /* fallthrough */ }
+  }
+
+  // 2) Fallback — коллекция на fragment (floor price)
+  try {
+    const url = `https://nft.fragment.com/gift/${slug}.json`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      const priceNano = d.price || d.floor_price || d.avg_price || null;
+      const priceTon  = priceNano ? (priceNano > 1e9 ? priceNano / 1e9 : priceNano) : null;
+      if (priceTon && priceTon > 0) {
+        return { ton: priceTon, name: d.title || d.name || giftName, data: d, source: 'fragment-collection' };
+      }
+    }
+  } catch(e) { /* fallthrough */ }
+
+  // 3) Нет данных — возвращаем null (покажем ошибку)
+  return null;
+}
+
+async function runCalc() {
+  const raw = document.getElementById('calcGiftLink').value.trim();
+  const errEl = document.getElementById('calcError');
+  const resEl = document.getElementById('calcResult');
+  const btn   = document.getElementById('calcGoBtn');
+
+  errEl.classList.remove('show');
+  resEl.classList.remove('show');
+
+  if (!raw) { errEl.textContent = 'Вставь ссылку на подарок'; errEl.classList.add('show'); return; }
+
+  const giftName = parseGiftLink(raw);
+  if (!giftName) {
+    errEl.textContent = 'Не удалось распознать ссылку. Формат: t.me/nft/PlushPepe-1234';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // loading
+  btn.classList.add('loading');
+  btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;border-top-color:rgba(34,197,94,0.6);border-color:rgba(255,255,255,0.1);"></div>';
+
+  try {
+    const [priceData, tonUsd] = await Promise.all([fetchGiftPrice(giftName), getTonPrice()]);
+
+    if (!priceData) {
+      errEl.innerHTML = `Не удалось получить цену для <b>${giftName}</b>.<br>Попробуй другую ссылку или вернись позже — Fragment может быть недоступен.`;
+      errEl.classList.add('show');
+      return;
+    }
+
+    const myData  = getMyData();
+    const rank    = getRank(myData.profits || 0);
+    const pct     = rank.payout;
+    const isExpert = pct >= 65;
+    const ton     = parseFloat(priceData.ton.toFixed(2));
+    const usd     = (ton * tonUsd).toFixed(2);
+    const payTon  = (ton * pct / 100).toFixed(2);
+    const payUsd  = (payTon * tonUsd).toFixed(2);
+    const rarity  = detectRarity(priceData.data);
+    const linksCount = document.getElementById('giftLinks')?.value.trim().split('\n').filter(Boolean).length || 1;
+
+    // имя подарка красиво
+    const displayName = (priceData.name || giftName).replace(/-(\d+)$/, ' #$1');
+
+    // описание
+    const descHtml =
+      `<b>${displayName}</b><br>` +
+      `Редкость: <span class="rarity-badge ${rarity.cls}">${rarity.label}</span>&nbsp;&nbsp;` +
+      `Источник цены: Fragment`;
+
+    document.getElementById('calcPriceTon').innerHTML  = ton + ' <span>TON</span>';
+    document.getElementById('calcPriceUsd').textContent = '≈ $' + usd + ' USD';
+    document.getElementById('calcDesc').innerHTML       = descHtml;
+
+    const pctBadge = document.getElementById('calcPctBadge');
+    pctBadge.textContent = pct + '%';
+    pctBadge.className   = 'calc-pct-badge ' + (isExpert ? 'expert' : 'base');
+    document.getElementById('calcRankLabel').textContent = '(' + rank.name + ')';
+
+    document.getElementById('calcPayoutTon').innerHTML  = payTon + ' <span>TON</span>';
+    document.getElementById('calcPayoutUsd').textContent = '≈ $' + payUsd + ' USD';
+
+    resEl.classList.add('show');
+
+  } catch(e) {
+    errEl.textContent = 'Ошибка: ' + e.message;
+    errEl.classList.add('show');
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  }
+}
+
+// Enter в поле тоже запускает
+document.getElementById('calcGiftLink')?.addEventListener('keydown', e => { if (e.key === 'Enter') runCalc(); });
+
+// Подгружаем курс TON в фоне при старте
+getTonPrice();
 </script>
 
   <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
@@ -1907,6 +2106,48 @@ setInterval(pollPaymentStatuses, 15000);
 </div>
 <style>
 #sam-splash.sam-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity 0.6s ease,visibility 0.6s!important;}
+
+/* ==================== CALC ПЛАШКА ==================== */
+.calc-block{background:rgba(10,20,10,0.8);border:1px solid rgba(34,197,94,0.18);border-radius:18px;padding:16px;margin-bottom:12px;}
+.calc-block-title{font-size:10px;font-weight:700;color:rgba(34,197,94,0.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.calc-block-title::before{content:'';width:14px;height:1px;background:rgba(34,197,94,0.5);}
+.calc-input-row{display:flex;gap:8px;margin-bottom:6px;}
+.calc-input-row .input-field{flex:1;height:44px;margin:0;font-size:13px;}
+.calc-go-btn{width:44px;height:44px;border-radius:11px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s;box-shadow:0 4px 12px rgba(34,197,94,0.28);}
+.calc-go-btn:active{transform:scale(0.92);}
+.calc-go-btn.loading{background:rgba(34,197,94,0.12);box-shadow:none;pointer-events:none;}
+.calc-hint-text{font-size:10px;color:var(--text-dim);margin-bottom:0;padding:0 2px;}
+
+.calc-result{display:none;margin-top:12px;animation:fadeUp 0.25s ease both;}
+.calc-result.show{display:block;}
+
+/* большая зелёная цена */
+.calc-price-big{font-family:'Bebas Neue',sans-serif;font-size:44px;color:#4ade80;letter-spacing:1px;line-height:1;filter:drop-shadow(0 0 14px rgba(34,197,94,0.3));margin-bottom:1px;}
+.calc-price-big span{font-size:20px;color:rgba(74,222,128,0.5);}
+.calc-price-usd{font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:10px;}
+
+/* описание заявки маленьким */
+.calc-desc-row{font-size:11px;color:var(--text-muted);line-height:1.7;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:9px;}
+.calc-desc-row b{color:rgba(255,255,255,0.6);font-weight:600;}
+
+/* ставка */
+.calc-pct-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.calc-pct-label{font-size:11px;color:var(--text-muted);}
+.calc-pct-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.5px;}
+.calc-pct-badge.base{background:rgba(34,197,94,0.12);color:#4ade80;}
+.calc-pct-badge.expert{background:rgba(245,158,11,0.14);color:#fbbf24;}
+
+/* итоговая выплата */
+.calc-payout-box{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
+.calc-payout-box-label{font-size:10px;font-weight:700;color:rgba(34,197,94,0.55);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.calc-payout-box-ton{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#4ade80;letter-spacing:0.5px;}
+.calc-payout-box-ton span{font-size:12px;color:rgba(74,222,128,0.5);}
+.calc-payout-box-usd{font-size:10px;color:rgba(255,255,255,0.25);}
+.calc-payout-box-right{text-align:right;}
+
+.calc-error-box{display:none;font-size:12px;color:#f87171;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:10px 12px;margin-top:8px;line-height:1.6;}
+.calc-error-box.show{display:block;}
+  
 </style>
 <script>
 (function(){
