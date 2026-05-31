@@ -1633,29 +1633,13 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
     || (linksArr[0] ? (parseGiftLink(linksArr[0]) || '').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : 'Подарок');
 
 card.innerHTML = `
-  <div class="pay-gift-card-header">
-    ${linksArr.length || count} подарков · ${methodLabel} · ${h.date || ''}
-  </div>
-  ${mediaHtml}
-  <div style="font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">${displayName}</div>
-  ${priceHtml}
-  ${extraHtml}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
-    <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${h.reqId}</div>
-    <div class="pay-gift-status ${stCls2}">${stTxt2}</div>
-  </div>
-`;
-
+    <div class="pay-gift-card-header">
+      ${linksArr.length || count} подарков · ${methodLabel} · ${h.date || ''}
+    </div>
     ${mediaHtml}
-
     <div style="font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">${displayName}</div>
-
-    ${attrsHtml}
-
     ${priceHtml}
-
     ${extraHtml}
-
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
       <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${h.reqId}</div>
       <div class="pay-gift-status ${stCls2}">${stTxt2}</div>
