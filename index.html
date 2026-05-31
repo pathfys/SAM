@@ -2007,48 +2007,58 @@ function parseGiftLink(raw) {
   return null;
 }
 
-async function fetchGiftPrice(giftName) {
+  async function fetchGiftPrice(giftName) {
+  const slug   = giftName.toLowerCase().replace(/\s+/g, '-');
+  const numMatch = slug.match(/-(\d+)$/);
+  const num    = numMatch ? numMatch[1] : '1';
+  const base   = slug.replace(/-\d+$/, '');
+
+  // Источник 1: fragment.com — прямой JSON конкретного подарка
+  try {
+    const urls = [
+      `https://nft.fragment.com/gift/${base}-${num}.json`,
+      `https://nft.fragment.com/gift/${slug}.json`,
+    ];
+    for (const url of urls) {
+      const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (r.ok) {
+        const d = await r.json();
+        const raw = d.resell_price || d.price || d.floor_price || d.avg_price || d.min_price;
+        if (raw && raw > 0) {
+          const ton = raw > 1_000_000 ? raw / 1e9 : parseFloat(raw);
+          if (ton > 0) {
+            return {
+              ton: Math.round(ton * 100) / 100,
+              name: d.title || d.name || giftName,
+              source: 'fragment'
+            };
+          }
+        }
+      }
+    }
+  } catch (e) { /* продолжаем */ }
+
+  // Источник 2: наш backend /gift_price (который бьёт в Tonnel и другие источники)
   try {
     const r = await fetch(
-      `${API_URL}/gift_price?name=${encodeURIComponent(giftName.toLowerCase())}`,
-      { signal: AbortSignal.timeout(6000) }
+      `${API_URL}/gift_price?name=${encodeURIComponent(slug)}`,
+      { signal: AbortSignal.timeout(7000) }
     );
     if (r.ok) {
       const d = await r.json();
-      if (d.ok && d.ton > 0) return { ton: d.ton, name: d.name || giftName, data: {} };
+      if (d.ok && d.ton > 0) {
+        return { ton: d.ton, name: d.name || giftName, source: d.source || 'backend' };
+      }
     }
-  } catch(e) {}
-  return null;
-}
+  } catch (e) { /* продолжаем */ }
 
-let _cachedTonPrice = 0;
-async function getTonPriceCalc() {
-  if (_cachedTonPrice > 0) return _cachedTonPrice;
-  try {
-    const r = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd',
-      { signal: AbortSignal.timeout(5000) }
-    );
-    const d = await r.json();
-    _cachedTonPrice = d['the-open-network']?.usd || 3.2;
-  } catch { _cachedTonPrice = 3.2; }
-  localStorage.setItem('sam_ton_price', _cachedTonPrice);
-  return _cachedTonPrice;
+  return null;
 }
 
 async function fetchGiftPriceCalc(giftName) {
-  try {
-    const r = await fetch(
-      `${API_URL}/gift_price?name=${encodeURIComponent(giftName.toLowerCase())}`,
-      { signal: AbortSignal.timeout(6000) }
-    );
-    if (r.ok) {
-      const d = await r.json();
-      if (d.ok && d.ton > 0) return { ton: d.ton, name: d.name || giftName, data: {} };
-    }
-  } catch(e) {}
-  return null;
+  return fetchGiftPrice(giftName);
 }
+  
 </script>
 
   <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
