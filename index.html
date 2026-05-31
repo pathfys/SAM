@@ -978,7 +978,7 @@ function getGlobalLeaderboard()  { try { return JSON.parse(localStorage.getItem(
 function saveGlobalLeaderboard(a){ localStorage.setItem('sam_leaderboard', JSON.stringify(a)); }
 
 /* ============================================================
-   RANKS  (payout: Новичок→Специалист = 60%, Эксперт→Мастер = 65%)
+   RANKS
 ============================================================ */
 const RANKS = [
   {
@@ -1028,8 +1028,7 @@ const RANKS = [
 function getRank(profits)     { let r = RANKS[0]; for (const x of RANKS) { if (profits >= x.min) r = x; } return r; }
 function getNextRank(profits) { for (const r of RANKS) { if (profits < r.min) return r; } return null; }
 
-
-  function copyRefLink() {
+function copyRefLink() {
   const link = `https://t.me/SAMPayrollBot?start=ref_${uid}`;
   if (navigator.clipboard) {
     navigator.clipboard.writeText(link).then(() => showToast('🔗 Реф ссылка скопирована'));
@@ -1041,7 +1040,7 @@ function getNextRank(profits) { for (const r of RANKS) { if (profits < r.min) re
     showToast('🔗 Реф ссылка скопирована');
   }
 }
-  
+
 /* ============================================================
    INIT UI
 ============================================================ */
@@ -1063,7 +1062,6 @@ if (user.photo_url) {
 const savedWallet = getMyData().wallet || '';
 if (savedWallet) document.getElementById('profileWallet').textContent = savedWallet.slice(0,6) + '...' + savedWallet.slice(-4);
 
-  /* карточка: никнейм и ранг */
 function updateCardUI() {
   const el = document.getElementById('cardUsername');
   const er = document.getElementById('cardRank');
@@ -1082,20 +1080,17 @@ function refreshStats() {
   const history  = data.history  || [];
   const pending  = history.filter(h => h.status === 'pending').length;
 
-  /* ── ГЛАВНАЯ ── */
   const elHP = document.getElementById('homeProfits');
   const elHT = document.getElementById('homeTotalTon');
   if (elHP) elHP.textContent = profits;
   if (elHT) elHT.innerHTML  = (totalTon > 0 ? totalTon.toFixed(2) : '0') +
     ' <span style="font-size:16px;color:rgba(255,255,255,0.35);">TON</span>';
 
-  /* баланс-карточка */
   document.getElementById('balanceAmount').innerHTML =
     (totalTon > 0 ? totalTon.toFixed(2) : '0') + ' <span>TON</span>';
   document.getElementById('balanceUsd').textContent =
     '≈ $' + (totalTon * 1.9).toFixed(2) + ' USD';
 
-  /* ── ВЫПЛАТЫ ── */
   const elPS = document.getElementById('payStatProfits');
   const elPT = document.getElementById('payStatTon');
   const elPP = document.getElementById('payStatPending');
@@ -1103,13 +1098,11 @@ function refreshStats() {
   if (elPT) elPT.textContent = totalTon > 0 ? totalTon.toFixed(2) : '0';
   if (elPP) elPP.textContent = pending;
 
-  /* ── ПРОФИЛЬ ── */
   document.getElementById('statProfits').textContent  = profits;
   document.getElementById('statTotalTon').textContent = totalTon > 0 ? totalTon.toFixed(2) : '—';
   const elSPend = document.getElementById('statPending');
   if (elSPend) elSPend.textContent = pending;
 
-  /* ── РАНГ ── */
   const rank = getRank(profits);
   const next = getNextRank(profits);
   document.getElementById('profileRankRow').textContent = rank.name;
@@ -1136,11 +1129,9 @@ function refreshStats() {
   renderLeaderboard();
   renderPaymentsHistory();
 }
-  /* ============================================================
-   POLLING — проверяем статусы заявок каждые 8 секунд
-============================================================ */
+
 /* ============================================================
-   DEBUG: засчитать последнюю pending-заявку вручную
+   DEBUG
 ============================================================ */
 function debugMarkPaid() {
   const myData = getMyData();
@@ -1148,7 +1139,7 @@ function debugMarkPaid() {
   const idx = history.slice().reverse().findIndex(h => h.status === 'pending');
   if (idx === -1) { showToast('Нет ожидающих заявок'); return; }
   const realIdx = history.length - 1 - idx;
-  const tonAmount = 2.5; // тестовая сумма
+  const tonAmount = 2.5;
   myData.history[realIdx].status = 'paid';
   myData.history[realIdx].ton = tonAmount;
   myData.profits  = (myData.profits  || 0) + 1;
@@ -1159,7 +1150,7 @@ function debugMarkPaid() {
 }
 
 /* ============================================================
-   POLLING — проверяем статусы заявок каждые 8 секунд
+   POLLING
 ============================================================ */
 async function pollPaymentStatuses() {
   const myData = getMyData();
@@ -1169,7 +1160,6 @@ async function pollPaymentStatuses() {
 
   try {
     const resp = await fetch(`${API_URL}/get_user_requests?uid=${uid}`).then(r => r.json());
-
     if (!resp.ok || !resp.requests) return;
 
     let changed = false;
@@ -1217,7 +1207,7 @@ async function syncStatusesFromServer() {
     let tonFromServer = 0;
 
     resp.requests.forEach(serverReq => {
-      if (serverReq.req_id.startsWith('TEST-')) return; // пропускаем тестовые
+      if (serverReq.req_id.startsWith('TEST-')) return;
 
       if (serverReq.status === 'paid') {
         profitsFromServer++;
@@ -1234,7 +1224,6 @@ async function syncStatusesFromServer() {
           changed = true;
         }
       } else if (serverReq.status === 'paid') {
-        // Заявка есть на сервере но нет локально — добавляем
         myData.history.push({
           reqId:  serverReq.req_id,
           method: 'ots',
@@ -1246,7 +1235,6 @@ async function syncStatusesFromServer() {
       }
     });
 
-   // Синхронизируем profits и totalTon с сервером (источник истины — таблица users)
     if (resp.profits !== undefined && resp.total_ton !== undefined) {
       if (resp.profits > (myData.profits || 0) || resp.total_ton > (myData.totalTon || 0)) {
         myData.profits  = resp.profits;
@@ -1254,7 +1242,6 @@ async function syncStatusesFromServer() {
         changed = true;
       }
     } else {
-      // фолбэк: старый ручной подсчёт если сервер не вернул агрегаты
       if (profitsFromServer > (myData.profits || 0) || tonFromServer > (myData.totalTon || 0)) {
         myData.profits  = profitsFromServer;
         myData.totalTon = tonFromServer;
@@ -1273,7 +1260,7 @@ async function syncStatusesFromServer() {
 }
 
 /* ============================================================
-   RANK LIST — expandable accordion
+   RANK LIST
 ============================================================ */
 function renderRankList(profits) {
   const list = document.getElementById('rankList');
@@ -1294,7 +1281,6 @@ function renderRankList(profits) {
         <span style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">${p}</span>
       </div>`).join('');
 
-    /* payout badge */
     const isExpertPlus = r.payout >= 65;
     const payoutBadge = `<span class="payout-pct-badge ${isExpertPlus ? 'expert' : 'base'}">${r.payout}% выплата</span>`;
 
@@ -1309,7 +1295,6 @@ function renderRankList(profits) {
     card.innerHTML = `
       <div class="rank-card-hdr" data-idx="${idx}"
            style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;">
-        <!-- icon -->
         <div style="
           width:48px;height:48px;border-radius:14px;flex-shrink:0;
           display:flex;align-items:center;justify-content:center;
@@ -1318,8 +1303,6 @@ function renderRankList(profits) {
           color:${isUnlocked ? r.colorHex : '#333'};
           transition:all 0.3s;
         ">${r.icon}</div>
-
-        <!-- info -->
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
             <span style="font-size:15px;font-weight:700;color:${isUnlocked ? '#f0f0f0' : '#444'};">${r.name}</span>
@@ -1338,8 +1321,6 @@ function renderRankList(profits) {
               </div>
             </div>` : ''}
         </div>
-
-        <!-- chevron -->
         <div class="rank-chev" data-idx="${idx}"
              style="color:#333;transition:transform 0.25s;flex-shrink:0;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1348,14 +1329,11 @@ function renderRankList(profits) {
           </svg>
         </div>
       </div>
-
-      <!-- body -->
       <div class="rank-body" data-idx="${idx}"
            style="max-height:0;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1);">
         <div style="padding:0 16px 20px;">
           <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:14px;"></div>
           <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.75;margin-bottom:14px;">${r.desc}</p>
-          <!-- payout highlight -->
           <div style="
             background:rgba(${a},0.07);border:1px solid rgba(${a},0.18);
             border-radius:12px;padding:12px 14px;margin-bottom:14px;
@@ -1367,7 +1345,6 @@ function renderRankList(profits) {
               <div style="font-size:11px;color:rgba(255,255,255,0.35);">Ставка начисления воркера</div>
             </div>
           </div>
-          <!-- perks -->
           <div style="font-size:10px;font-weight:700;color:rgba(${a},0.55);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Привилегии</div>
           ${perkHTML}
         </div>
@@ -1376,13 +1353,12 @@ function renderRankList(profits) {
     list.appendChild(card);
   });
 
-  /* toggle accordion */
   list.querySelectorAll('.rank-card-hdr').forEach(hdr => {
     hdr.addEventListener('click', function() {
-      const idx     = this.dataset.idx;
-      const body    = list.querySelector(`.rank-body[data-idx="${idx}"]`);
-      const chev    = list.querySelector(`.rank-chev[data-idx="${idx}"]`);
-      const isOpen  = body.style.maxHeight && body.style.maxHeight !== '0px';
+      const idx    = this.dataset.idx;
+      const body   = list.querySelector(`.rank-body[data-idx="${idx}"]`);
+      const chev   = list.querySelector(`.rank-chev[data-idx="${idx}"]`);
+      const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
       list.querySelectorAll('.rank-body').forEach(b => { b.style.maxHeight = '0'; });
       list.querySelectorAll('.rank-chev').forEach(c => { c.style.transform = 'rotate(0deg)'; });
       if (!isOpen) {
@@ -1392,7 +1368,6 @@ function renderRankList(profits) {
     });
   });
 
-  /* auto-open current */
   const ci = RANKS.findIndex(r => r.min === getRank(profits).min);
   setTimeout(() => {
     const b = list.querySelector(`.rank-body[data-idx="${ci}"]`);
@@ -1423,13 +1398,13 @@ function avatarHtml(entry, colorStyle, cls) {
   if (entry.photo_url) {
     return `<div class="${cls}" style="${colorStyle}">
       <img src="${entry.photo_url}"
-        onerror="this.style.display='none';this.parentNode.innerText='${ini}';"
-      >
+        onerror="this.style.display='none';this.parentNode.innerText='${ini}';">
     </div>`;
   }
   return `<div class="${cls}" style="${colorStyle}">${ini}</div>`;
 }
-  function upsertLeaderboard() { return []; }
+
+function upsertLeaderboard() { return []; }
 
 async function renderLeaderboard() {
   const podium = document.getElementById('podiumWrap');
@@ -1515,22 +1490,16 @@ function renderPaymentsHistory() {
 }
 
 async function renderGiftCard(card, h, data) {
-  const rank    = getRank(data.profits || 0);
-  const pct     = rank.payout;
+  const rank     = getRank(data.profits || 0);
+  const pct      = rank.payout;
   const isExpert = pct >= 65;
   const linksArr = h.links || [];
   const count    = linksArr.length || h.linksCount || 1;
   const methodLabel = h.method === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
 
-  const statusMap = {
-    pending:  'pending',
-    paid:     'paid',
-    rejected: 'rejected',
-  };
-  const stCls = statusMap[h.status] || 'pending';
+  const stCls = { pending: 'pending', paid: 'paid', rejected: 'rejected' }[h.status] || 'pending';
   const stTxt = { pending: '⏳ Ожидание', paid: '✅ Выплачено', rejected: '❌ Отклонено' }[h.status] || '⏳ Ожидание';
 
-  // скелетон пока грузим
   card.innerHTML = `
     <div class="pay-gift-card-header">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
@@ -1542,23 +1511,20 @@ async function renderGiftCard(card, h, data) {
     </div>
   `;
 
-  // если есть уже сохранённая цена — используем
   if (h.marketTon) {
     buildGiftCardHtml(card, h, h.marketTon, pct, isExpert, stCls, stTxt, count, methodLabel);
     return;
   }
 
-  // пробуем получить цену первого подарка
   let marketTon = null;
   if (linksArr.length > 0) {
     const giftName = parseGiftLinkCalc(linksArr[0]);
     if (giftName) {
       try {
-        const tonPrice = await getTonPriceCalc();
+        const tonPrice  = await getTonPriceCalc();
         const priceData = await fetchGiftPriceCalc(giftName);
         if (priceData) {
           marketTon = parseFloat((priceData.ton * count).toFixed(2));
-          // кешируем в историю
           const myData = getMyData();
           const idx = myData.history.findIndex(x => x.reqId === h.reqId);
           if (idx >= 0) { myData.history[idx].marketTon = marketTon; saveMyData(myData); }
@@ -1574,8 +1540,8 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
   const tonPrice  = parseFloat(localStorage.getItem('sam_ton_price') || '3.2');
   const linksArr  = h.links || [];
 
-  const tonDisplay   = marketTon != null ? marketTon : (h.ton || null);
-  const payTon       = tonDisplay != null ? (tonDisplay * pct / 100).toFixed(2) : null;
+  const tonDisplay = marketTon != null ? marketTon : (h.ton || null);
+  const payTon     = tonDisplay != null ? (tonDisplay * pct / 100).toFixed(2) : null;
 
   const priceHtml = tonDisplay != null
     ? `<div class="pay-gift-price">~${tonDisplay} <span>TON</span></div>
@@ -1583,8 +1549,7 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
     : `<div class="pay-gift-price" style="font-size:24px;color:#555;">Цена недоступна</div>
        <div class="pay-gift-payout" style="color:#444;">Администратор установит сумму вручную</div>`;
 
-  // список подарков (до 3х, остальные сворачиваем)
-const showLinks = linksArr.slice(0, 3);
+  const showLinks = linksArr.slice(0, 3);
   const moreCount = linksArr.length > 3 ? linksArr.length - 3 : 0;
   const savedNames = h.giftNames || [];
 
@@ -1594,12 +1559,12 @@ const showLinks = linksArr.slice(0, 3);
     const dispName = saved
       ? (saved.displayName || saved.name || rawName).replace(/-(\d+)$/, ' #$1')
       : rawName.replace(/-(\d+)$/, ' #$1');
-    const perTon   = saved
+    const perTon = saved
       ? saved.ton
       : (tonDisplay != null ? (tonDisplay / (linksArr.length || 1)).toFixed(2) : null);
-    const slug     = rawName.replace(/-\d+$/, '').toLowerCase();
-    const num      = rawName.match(/-(\d+)$/)?.[1] || '1';
-    const imgUrl   = `https://nft.fragment.com/gift/${slug}-${num}.small.jpg`;
+    const slug   = rawName.replace(/-\d+$/, '').toLowerCase();
+    const num    = rawName.match(/-(\d+)$/)?.[1] || '1';
+    const imgUrl = `https://nft.fragment.com/gift/${slug}-${num}.small.jpg`;
 
     return `
       <div class="pay-gift-item" style="${i > 0 ? 'margin-top:8px;' : ''}">
@@ -1637,8 +1602,6 @@ const showLinks = linksArr.slice(0, 3);
   `;
 }
 
-/* helpers для калькулятора */
-
 function parseGiftLinkCalc(raw) {
   if (!raw) return null;
   const s = raw.trim();
@@ -1658,8 +1621,8 @@ function showScreen(name) {
   const nav = document.getElementById('nav-' + name);
   if (nav) nav.classList.add('active');
   window.scrollTo(0, 0);
- if (['profile','career','payments','home'].includes(name)) refreshStats();
- if (name === 'top') renderLeaderboard();
+  if (['profile','career','payments','home'].includes(name)) refreshStats();
+  if (name === 'top') renderLeaderboard();
 }
 
 /* ============================================================
@@ -1712,7 +1675,6 @@ async function submitGiftRequest() {
   const now = new Date().toLocaleString('ru-RU');
 
   try {
-    // ── 1. Шлём лог в канал через Bot API ────────────────────────────
     const logText =
       `🆕 <b>Новая заявка на выплату</b>\n` +
       `🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n` +
@@ -1752,9 +1714,7 @@ async function submitGiftRequest() {
     }
 
     const msgId = logResp.result.message_id;
-    console.log('[SAM] Лог отправлен, msg_id:', msgId);
 
-    // ── 2. sendData боту — основной путь сохранения в БД ─────────────
     if (tg?.sendData) {
       tg.sendData(JSON.stringify({
         req_id:      reqId,
@@ -1767,7 +1727,6 @@ async function submitGiftRequest() {
       }));
     }
 
-    // ── 3. /save_request — резервный путь (не блокируем если упал) ────
     fetch(`${API_URL}/save_request`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1785,7 +1744,6 @@ async function submitGiftRequest() {
       .then(r => console.log('[SAM] save_request резерв:', r))
       .catch(e => console.warn('[SAM] save_request недоступен:', e.message));
 
-// ── 4. Получаем цену подарка перед сохранением ────────────────────
     let savedMarketTon = null;
     let savedGiftNames = [];
     try {
@@ -1802,7 +1760,6 @@ async function submitGiftRequest() {
       if (savedMarketTon) savedMarketTon = parseFloat(savedMarketTon.toFixed(2));
     } catch(e) { console.log('[SAM] price pre-fetch:', e); }
 
-    // ── 5. Сохраняем в локальную историю ─────────────────────────────
     const myData = getMyData();
     myData.history = myData.history || [];
     myData.history.push({
@@ -1819,7 +1776,6 @@ async function submitGiftRequest() {
     saveMyData(myData);
     renderPaymentsHistory();
 
-    // ── 6. Показываем успех ───────────────────────────────────────────
     closeModal('giftModal');
     document.getElementById('successTitle').textContent = 'Заявка отправлена!';
     document.getElementById('successSub').textContent   =
@@ -1972,7 +1928,6 @@ const LESSONS = [
   },
 ];
 
-// Хранилище прочитанных уроков
 function getReadLessons() {
   try { return JSON.parse(localStorage.getItem('sam_read_' + uid) || '[]'); } catch { return []; }
 }
@@ -1986,7 +1941,6 @@ function markLessonRead(idx) {
 }
 function updateReadMarks() {
   const read = getReadLessons();
-  // lessonIdx → id чека в HTML
   const map = { 0: 'moduleCheck0', 1: 'moduleCheck1', 2: 'moduleCheck2', 4: 'moduleCheck4' };
   Object.entries(map).forEach(([idxStr, checkId]) => {
     const el = document.getElementById(checkId);
@@ -2009,6 +1963,7 @@ function openLesson(idx) {
   document.getElementById('lessonModal').dataset.currentLesson = idx;
   document.getElementById('lessonModal').classList.add('open');
 }
+
 /* ============================================================
    UTILS
 ============================================================ */
@@ -2024,7 +1979,7 @@ syncStatusesFromServer();
 setInterval(syncStatusesFromServer, 15000);
 setInterval(pollPaymentStatuses, 15000);
 
-  /* ============================================================
+/* ============================================================
    CALCULATOR
 ============================================================ */
 let cachedTonPrice = 0;
@@ -2032,7 +1987,10 @@ let cachedTonPrice = 0;
 async function getTonPrice() {
   if (cachedTonPrice > 0) return cachedTonPrice;
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', { signal: AbortSignal.timeout(5000) });
+    const r = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd',
+      { signal: AbortSignal.timeout(5000) }
+    );
     const d = await r.json();
     cachedTonPrice = d['the-open-network']?.usd || 3.2;
   } catch { cachedTonPrice = 3.2; }
@@ -2041,99 +1999,15 @@ async function getTonPrice() {
 }
 
 function parseGiftLink(raw) {
-  // t.me/nft/PlushPepe-1234  или  t.me/gift/abc  или просто PlushPepe-1234
+  if (!raw) return null;
   const s = raw.trim();
   const m = s.match(/(?:t\.me\/nft\/|t\.me\/gift\/|nft\.fragment\.com\/gift\/)([A-Za-z0-9_-]+)/i);
   if (m) return m[1];
-  // голое имя без домена
   if (/^[A-Za-z][A-Za-z0-9]+-\d+$/.test(s)) return s;
   return null;
 }
 
-
 async function fetchGiftPrice(giftName) {
-  // 1) Пробуем fragment JSON для конкретного NFT (если есть номер)
-  const slug = giftSlug(giftName);
-  const hasNum = /-\d+$/.test(giftName);
-
-  if (hasNum) {
-    try {
-      const url = `https://nft.fragment.com/gift/${giftName.toLowerCase()}.json`;
-      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if (r.ok) {
-        const d = await r.json();
-        // price в нанотонах или TON напрямую
-        const priceNano = d.price || d.resell_price || d.floor_price || null;
-        const priceTon  = priceNano ? (priceNano > 1e9 ? priceNano / 1e9 : priceNano) : null;
-        if (priceTon && priceTon > 0) {
-          return { ton: priceTon, name: d.title || d.name || giftName, data: d, source: 'fragment' };
-        }
-      }
-    } catch(e) { /* fallthrough */ }
-  }
-
-  // 2) Fallback — коллекция на fragment (floor price)
-  try {
-    const url = `https://nft.fragment.com/gift/${slug}.json`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (r.ok) {
-      const d = await r.json();
-      const priceNano = d.price || d.floor_price || d.avg_price || null;
-      const priceTon  = priceNano ? (priceNano > 1e9 ? priceNano / 1e9 : priceNano) : null;
-      if (priceTon && priceTon > 0) {
-        return { ton: priceTon, name: d.title || d.name || giftName, data: d, source: 'fragment-collection' };
-      }
-    }
-  } catch(e) { /* fallthrough */ }
-
-  // 3) Нет данных — возвращаем null (покажем ошибку)
-  return null;
-}
-
-    const myData  = getMyData();
-    const rank    = getRank(myData.profits || 0);
-    const pct     = rank.payout;
-    const isExpert = pct >= 65;
-    const ton     = parseFloat(priceData.ton.toFixed(2));
-    const usd     = (ton * tonUsd).toFixed(2);
-    const payTon  = (ton * pct / 100).toFixed(2);
-    const payUsd  = (payTon * tonUsd).toFixed(2);
-    const rarity  = detectRarity(priceData.data);
-    const linksCount = document.getElementById('giftLinks')?.value.trim().split('\n').filter(Boolean).length || 1;
-
-    // имя подарка красиво
-    const displayName = (priceData.name || giftName).replace(/-(\d+)$/, ' #$1');
-
-    // описание
-    const descHtml =
-      `<b>${displayName}</b><br>` +
-      `Редкость: <span class="rarity-badge ${rarity.cls}">${rarity.label}</span>&nbsp;&nbsp;` +
-      `Источник цены: Fragment`;
-
-    document.getElementById('calcPriceTon').innerHTML  = ton + ' <span>TON</span>';
-    document.getElementById('calcPriceUsd').textContent = '≈ $' + usd + ' USD';
-    document.getElementById('calcDesc').innerHTML       = descHtml;
-
-    const pctBadge = document.getElementById('calcPctBadge');
-    pctBadge.textContent = pct + '%';
-    pctBadge.className   = 'calc-pct-badge ' + (isExpert ? 'expert' : 'base');
-    document.getElementById('calcRankLabel').textContent = '(' + rank.name + ')';
-
-    document.getElementById('calcPayoutTon').innerHTML  = payTon + ' <span>TON</span>';
-    document.getElementById('calcPayoutUsd').textContent = '≈ $' + payUsd + ' USD';
-
-    resEl.classList.add('show');
-
-  } catch(e) {
-    errEl.textContent = 'Ошибка: ' + e.message;
-    errEl.classList.add('show');
-  } finally {
-    btn.classList.remove('loading');
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
-  }
-}
-
-  async function fetchGiftPrice(giftName) {
   try {
     const r = await fetch(
       `${API_URL}/gift_price?name=${encodeURIComponent(giftName.toLowerCase())}`,
@@ -2145,6 +2019,21 @@ async function fetchGiftPrice(giftName) {
     }
   } catch(e) {}
   return null;
+}
+
+let _cachedTonPrice = 0;
+async function getTonPriceCalc() {
+  if (_cachedTonPrice > 0) return _cachedTonPrice;
+  try {
+    const r = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd',
+      { signal: AbortSignal.timeout(5000) }
+    );
+    const d = await r.json();
+    _cachedTonPrice = d['the-open-network']?.usd || 3.2;
+  } catch { _cachedTonPrice = 3.2; }
+  localStorage.setItem('sam_ton_price', _cachedTonPrice);
+  return _cachedTonPrice;
 }
 
 async function fetchGiftPriceCalc(giftName) {
@@ -2160,7 +2049,6 @@ async function fetchGiftPriceCalc(giftName) {
   } catch(e) {}
   return null;
 }
-  
 </script>
 
   <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
