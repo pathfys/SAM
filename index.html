@@ -1603,12 +1603,7 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
 }
 
 function parseGiftLinkCalc(raw) {
-  if (!raw) return null;
-  const s = raw.trim();
-  const m = s.match(/(?:t\.me\/nft\/|t\.me\/gift\/|nft\.fragment\.com\/gift\/)([A-Za-z0-9_-]+)/i);
-  if (m) return m[1];
-  if (/^[A-Za-z][A-Za-z0-9]+-\d+$/.test(s)) return s;
-  return null;
+  return parseGiftLink(raw);
 }
 
 /* ============================================================
@@ -2001,9 +1996,16 @@ async function getTonPrice() {
 function parseGiftLink(raw) {
   if (!raw) return null;
   const s = raw.trim();
+  // t.me/nft/PetSnake-159677  или  t.me/gift/petsnake-159677
   const m = s.match(/(?:t\.me\/nft\/|t\.me\/gift\/|nft\.fragment\.com\/gift\/)([A-Za-z0-9_-]+)/i);
-  if (m) return m[1];
-  if (/^[A-Za-z][A-Za-z0-9]+-\d+$/.test(s)) return s;
+  if (m) {
+    // Приводим к lowercase с дефисами: PetSnake-159677 -> petsnake-159677
+    return m[1].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  }
+  // Уже в нужном формате: petsnake-159677
+  if (/^[A-Za-z][A-Za-z0-9-]+-\d+$/.test(s)) {
+    return s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  }
   return null;
 }
 
