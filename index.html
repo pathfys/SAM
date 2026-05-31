@@ -567,38 +567,6 @@ textarea.input-field.big{height:200px;font-size:13px;}
  <!-- ═══════════════ PAYMENTS ═══════════════ -->
   <div class="screen" id="screen-payments">
     <div class="screen-title">Выплаты</div>
-
-    <!-- CALC ПЛАШКА -->
-    <div class="calc-block">
-      <div class="calc-block-title">Калькулятор подарка</div>
-      <div class="calc-input-row">
-        <input class="input-field" id="calcGiftLink" type="text" placeholder="https://t.me/nft/PlushPepe-1"/>
-        <button class="calc-go-btn" id="calcGoBtn" onclick="runCalc()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-      <div class="calc-hint-text">Вставь ссылку t.me/nft/... — рассчитаем выплату по твоему рангу</div>
-      <div class="calc-error-box" id="calcError"></div>
-      <div class="calc-result" id="calcResult">
-        <div class="calc-price-big" id="calcPriceTon">— <span>TON</span></div>
-        <div class="calc-price-usd" id="calcPriceUsd">≈ $— USD</div>
-        <div class="calc-desc-row" id="calcDesc"></div>
-        <div class="calc-pct-row">
-          <div class="calc-pct-label">Ставка выплаты:</div>
-          <div class="calc-pct-badge base" id="calcPctBadge">60%</div>
-          <div class="calc-pct-label" id="calcRankLabel" style="color:var(--text-dim);"></div>
-        </div>
-        <div class="calc-payout-box">
-          <div>
-            <div class="calc-payout-box-label">Твоя выплата</div>
-            <div class="calc-payout-box-ton" id="calcPayoutTon">— <span>TON</span></div>
-            <div class="calc-payout-box-usd" id="calcPayoutUsd"></div>
-          </div>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(34,197,94,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-      </div>
-    </div>
-
     <button class="btn-primary" onclick="openPayModal()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Подать заявку
@@ -1670,17 +1638,6 @@ const showLinks = linksArr.slice(0, 3);
 }
 
 /* helpers для калькулятора */
-let _cachedTonPrice = 0;
-async function getTonPriceCalc() {
-  if (_cachedTonPrice > 0) return _cachedTonPrice;
-  try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', { signal: AbortSignal.timeout(5000) });
-    const d = await r.json();
-    _cachedTonPrice = d['the-open-network']?.usd || 3.2;
-  } catch { _cachedTonPrice = 3.2; }
-  localStorage.setItem('sam_ton_price', _cachedTonPrice);
-  return _cachedTonPrice;
-}
 
 function parseGiftLinkCalc(raw) {
   if (!raw) return null;
@@ -1688,34 +1645,6 @@ function parseGiftLinkCalc(raw) {
   const m = s.match(/(?:t\.me\/nft\/|t\.me\/gift\/|nft\.fragment\.com\/gift\/)([A-Za-z0-9_-]+)/i);
   if (m) return m[1];
   if (/^[A-Za-z][A-Za-z0-9]+-\d+$/.test(s)) return s;
-  return null;
-}
-
-async function fetchGiftPriceCalc(giftName) {
-  const slug   = giftName.replace(/-\d+$/, '').toLowerCase();
-  const hasNum = /-\d+$/.test(giftName);
-  // конкретный NFT
-  if (hasNum) {
-    try {
-      const r = await fetch(`https://nft.fragment.com/gift/${giftName.toLowerCase()}.json`, { signal: AbortSignal.timeout(6000) });
-      if (r.ok) {
-        const d = await r.json();
-        const raw = d.price || d.resell_price || d.floor_price;
-        const ton = raw ? (raw > 1e9 ? raw / 1e9 : raw) : null;
-        if (ton && ton > 0) return { ton, name: d.title || d.name || giftName, data: d };
-      }
-    } catch(e) {}
-  }
-  // коллекция (floor)
-  try {
-    const r = await fetch(`https://nft.fragment.com/gift/${slug}.json`, { signal: AbortSignal.timeout(6000) });
-    if (r.ok) {
-      const d = await r.json();
-      const raw = d.price || d.floor_price || d.avg_price;
-      const ton = raw ? (raw > 1e9 ? raw / 1e9 : raw) : null;
-      if (ton && ton > 0) return { ton, name: d.title || d.name || giftName, data: d };
-    }
-  } catch(e) {}
   return null;
 }
 
@@ -2121,27 +2050,6 @@ function parseGiftLink(raw) {
   return null;
 }
 
-function giftSlug(name) {
-  // PlushPepe-1234 → plushpepe  (для fragment endpoint)
-  return name.replace(/-\d+$/, '').toLowerCase();
-}
-
-function detectRarity(data) {
-  // fragment JSON содержит поля attributes с rarity или name
-  if (!data) return { label: 'Unknown', cls: 'rarity-common' };
-  const attrs = data.attributes || [];
-  const rarityAttr = attrs.find(a => (a.trait_type || a.name || '').toLowerCase().includes('rarity'));
-  const val = (rarityAttr?.value || '').toLowerCase();
-  if (val.includes('legendary') || val.includes('unique')) return { label: 'Legendary', cls: 'rarity-legendary' };
-  if (val.includes('epic'))   return { label: 'Epic',    cls: 'rarity-epic' };
-  if (val.includes('rare'))   return { label: 'Rare',    cls: 'rarity-rare' };
-  // fallback: смотрим на количество
-  const issued = data.issued || data.availability_issued || null;
-  if (issued && issued < 1000)  return { label: 'Legendary', cls: 'rarity-legendary' };
-  if (issued && issued < 5000)  return { label: 'Epic',      cls: 'rarity-epic' };
-  if (issued && issued < 20000) return { label: 'Rare',      cls: 'rarity-rare' };
-  return { label: 'Common', cls: 'rarity-common' };
-}
 
 async function fetchGiftPrice(giftName) {
   // 1) Пробуем fragment JSON для конкретного NFT (если есть номер)
@@ -2181,37 +2089,6 @@ async function fetchGiftPrice(giftName) {
   // 3) Нет данных — возвращаем null (покажем ошибку)
   return null;
 }
-
-async function runCalc() {
-  const raw = document.getElementById('calcGiftLink').value.trim();
-  const errEl = document.getElementById('calcError');
-  const resEl = document.getElementById('calcResult');
-  const btn   = document.getElementById('calcGoBtn');
-
-  errEl.classList.remove('show');
-  resEl.classList.remove('show');
-
-  if (!raw) { errEl.textContent = 'Вставь ссылку на подарок'; errEl.classList.add('show'); return; }
-
-  const giftName = parseGiftLink(raw);
-  if (!giftName) {
-    errEl.textContent = 'Не удалось распознать ссылку. Формат: t.me/nft/PlushPepe-1234';
-    errEl.classList.add('show');
-    return;
-  }
-
-  // loading
-  btn.classList.add('loading');
-  btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;border-top-color:rgba(34,197,94,0.6);border-color:rgba(255,255,255,0.1);"></div>';
-
-  try {
-    const [priceData, tonUsd] = await Promise.all([fetchGiftPrice(giftName), getTonPrice()]);
-
-    if (!priceData) {
-      errEl.innerHTML = `Не удалось получить цену для <b>${giftName}</b>.<br>Попробуй другую ссылку или вернись позже — Fragment может быть недоступен.`;
-      errEl.classList.add('show');
-      return;
-    }
 
     const myData  = getMyData();
     const rank    = getRank(myData.profits || 0);
@@ -2256,11 +2133,34 @@ async function runCalc() {
   }
 }
 
-// Enter в поле тоже запускает
-document.getElementById('calcGiftLink')?.addEventListener('keydown', e => { if (e.key === 'Enter') runCalc(); });
+  async function fetchGiftPrice(giftName) {
+  try {
+    const r = await fetch(
+      `${API_URL}/gift_price?name=${encodeURIComponent(giftName.toLowerCase())}`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d.ok && d.ton > 0) return { ton: d.ton, name: d.name || giftName, data: {} };
+    }
+  } catch(e) {}
+  return null;
+}
 
-// Подгружаем курс TON в фоне при старте
-getTonPrice();
+async function fetchGiftPriceCalc(giftName) {
+  try {
+    const r = await fetch(
+      `${API_URL}/gift_price?name=${encodeURIComponent(giftName.toLowerCase())}`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d.ok && d.ton > 0) return { ton: d.ton, name: d.name || giftName, data: {} };
+    }
+  } catch(e) {}
+  return null;
+}
+  
 </script>
 
   <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
