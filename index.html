@@ -1537,67 +1537,128 @@ async function renderGiftCard(card, h, data) {
 }
 
 function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel) {
-  const tonPrice  = parseFloat(localStorage.getItem('sam_ton_price') || '3.2');
   const linksArr  = h.links || [];
-
-  const tonDisplay = marketTon != null ? marketTon : (h.ton || null);
-  const payTon     = tonDisplay != null ? (tonDisplay * pct / 100).toFixed(2) : null;
-
-  const priceHtml = tonDisplay != null
-    ? `<div class="pay-gift-price">~${tonDisplay} <span>TON</span></div>
-       <div class="pay-gift-payout">Примерная выплата (${pct}%): <b>~${payTon} TON</b></div>`
-    : `<div class="pay-gift-price" style="font-size:24px;color:#555;">Цена недоступна</div>
-       <div class="pay-gift-payout" style="color:#444;">Администратор установит сумму вручную</div>`;
-
-  const showLinks = linksArr.slice(0, 3);
-  const moreCount = linksArr.length > 3 ? linksArr.length - 3 : 0;
   const savedNames = h.giftNames || [];
 
-  const giftItemsHtml = showLinks.map((link, i) => {
-    const rawName  = parseGiftLinkCalc(link) || ('Подарок ' + (i + 1));
-    const saved    = savedNames[i] || null;
-    const dispName = saved
-      ? (saved.displayName || saved.name || rawName).replace(/-(\d+)$/, ' #$1')
-      : rawName.replace(/-(\d+)$/, ' #$1');
-    const perTon = saved
-      ? saved.ton
-      : (tonDisplay != null ? (tonDisplay / (linksArr.length || 1)).toFixed(2) : null);
-    const slug   = rawName.replace(/-\d+$/, '').toLowerCase();
-    const num    = rawName.match(/-(\d+)$/)?.[1] || '1';
-    const imgUrl = `https://nft.fragment.com/gift/${slug}-${num}.small.jpg`;
+  const stCls2 = { pending:'pending', paid:'paid', rejected:'rejected' }[h.status] || 'pending';
+  const stTxt2 = { pending:'⏳ Ожидание', paid:'✅ Выплачено', rejected:'❌ Отклонено' }[h.status] || '⏳ Ожидание';
 
-    return `
-      <div class="pay-gift-item" style="${i > 0 ? 'margin-top:8px;' : ''}">
-        <div class="pay-gift-item-left">
-          <div class="pay-gift-thumb">
-            <img src="${imgUrl}" onerror="this.style.display='none';this.parentNode.innerHTML='🎁';" alt="">
-          </div>
-          <div>
-            <div class="pay-gift-item-name">${dispName}</div>
-            <div class="pay-gift-item-sub">${h.method === 'ots' ? 'ОТС Бот' : 'Гарант'}</div>
-          </div>
-        </div>
-        ${perTon ? `<div class="pay-gift-item-ton">${perTon} TON</div>` : ''}
+  // ── медиа первого подарка ──
+  const firstName = savedNames[0];
+  let mediaHtml = '';
+
+  if (firstName) {
+    const raw   = firstName.name || '';
+    const slug  = raw.replace(/([a-z])([A-Z])/g,'$1-$2').toLowerCase().replace(/\s+/g,'-');
+    const base  = slug.replace(/-\d+$/,'');
+    const num   = (raw.match(/-(\d+)$/) || ['','1'])[1];
+    const webm  = firstName.webm  || `https://nft.fragment.com/gift/${base}-${num}.webm`;
+    const large = firstName.large || `https://nft.fragment.com/gift/${base}-${num}.large.jpg`;
+    const small = firstName.small || `https://nft.fragment.com/gift/${base}-${num}.small.jpg`;
+
+    mediaHtml = `
+      <div class="gift-media-wrap">
+        <video
+          src="${webm}"
+          autoplay loop muted playsinline
+          poster="${large}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        ></video>
+        <img
+          src="${large}"
+          style="display:none;width:100%;height:100%;object-fit:cover;border-radius:16px;"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        />
+        <div class="gift-media-fallback" style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">🎁</div>
       </div>
     `;
-  }).join('');
+  } else {
+    // Если нет сохранённых данных — пробуем по ссылке
+    if (linksArr[0]) {
+      const raw  = parseGiftLink(linksArr[0]) || '';
+      const base = raw.replace(/-\d+$/,'');
+      const num  = (raw.match(/-(\d+)$/) || ['','1'])[1];
+      const webm  = `https://nft.fragment.com/gift/${base}-${num}.webm`;
+      const large = `https://nft.fragment.com/gift/${base}-${num}.large.jpg`;
+      mediaHtml = `
+        <div class="gift-media-wrap">
+          <video
+            src="${webm}"
+            autoplay loop muted playsinline
+            poster="${large}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          ></video>
+          <img
+            src="${large}"
+            style="display:none;width:100%;height:100%;object-fit:cover;border-radius:16px;"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          />
+          <div class="gift-media-fallback" style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">🎁</div>
+        </div>
+      `;
+    }
+  }
 
-  const moreHtml = moreCount > 0
-    ? `<div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;">+ ещё ${moreCount} подарков</div>`
+  // ── атрибуты подарка ──
+  const attrs     = h.giftAttrs || firstName?.attrs || '';
+  const attrsHtml = attrs
+    ? '<div class="gift-attrs-row">' +
+      attrs.split('\n').filter(Boolean).map(a => {
+        const idx = a.indexOf(':');
+        if (idx < 0) return '';
+        const k = a.slice(0, idx).trim();
+        const v = a.slice(idx + 1).trim();
+        return `<div class="gift-attr-chip">${k}: <span>${v}</span></div>`;
+      }).join('') +
+      '</div>'
     : '';
 
-  card.innerHTML = `
-    <div class="pay-gift-card-header">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
-      ${linksArr.length || count} подарков · ${methodLabel} · ${h.date || ''}
-    </div>
+  // ── цена ──
+  const tonDisplay = (marketTon != null && marketTon > 0) ? marketTon : (h.ton || null);
+  const payTon     = tonDisplay ? (tonDisplay * pct / 100).toFixed(2) : null;
+
+ const priceHtml = (tonDisplay && tonDisplay > 0)
+    ? `<div class="pay-gift-price">${tonDisplay} <span>TON</span></div>
+       <div class="pay-gift-payout">Выплата (${pct}%): <b>${payTon} TON</b></div>`
+    : '';
+
+  // ── остальные подарки (миниатюры) ──
+  const moreCount   = linksArr.length > 1 ? linksArr.length - 1 : 0;
+  const extraHtml   = moreCount > 0
+    ? `<div style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:4px;">+ ещё ${moreCount} подарков</div>`
+    : '';
+
+  // ── название ──
+  const displayName = firstName?.displayName || firstName?.name
+    || (linksArr[0] ? (parseGiftLink(linksArr[0]) || '').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : 'Подарок');
+
+card.innerHTML = `
+  <div class="pay-gift-card-header">
+    ${linksArr.length || count} подарков · ${methodLabel} · ${h.date || ''}
+  </div>
+  ${mediaHtml}
+  <div style="font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">${displayName}</div>
+  ${priceHtml}
+  ${extraHtml}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+    <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${h.reqId}</div>
+    <div class="pay-gift-status ${stCls2}">${stTxt2}</div>
+  </div>
+`;
+
+    ${mediaHtml}
+
+    <div style="font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:6px;">${displayName}</div>
+
+    ${attrsHtml}
+
     ${priceHtml}
-    <div class="pay-gift-divider"></div>
-    ${giftItemsHtml}
-    ${moreHtml}
+
+    ${extraHtml}
+
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
       <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${h.reqId}</div>
-      <div class="pay-gift-status ${stCls}">${stTxt}</div>
+      <div class="pay-gift-status ${stCls2}">${stTxt2}</div>
     </div>
   `;
 }
@@ -1748,7 +1809,15 @@ async function submitGiftRequest() {
           const priceData = await fetchGiftPrice(gName);
           if (priceData) {
             savedMarketTon = (savedMarketTon || 0) + parseFloat(priceData.ton.toFixed(2));
-            savedGiftNames.push({ name: gName, displayName: priceData.name || gName, ton: parseFloat(priceData.ton.toFixed(2)) });
+            savedGiftNames.push({
+  name:        gName,
+  displayName: priceData.name  || gName,
+  ton:         parseFloat((priceData.ton  || 0).toFixed(2)),
+  attrs:       priceData.attrs || '',
+  webm:        priceData.webm  || '',
+  large:       priceData.large || '',
+  small:       priceData.small || '',
+});
           }
         }
       }
@@ -1767,6 +1836,7 @@ async function submitGiftRequest() {
       linksCount:  links.length,
       marketTon:   savedMarketTon,
       giftNames:   savedGiftNames,
+      giftAttrs: savedGiftNames[0]?.attrs || '',
     });
     saveMyData(myData);
     renderPaymentsHistory();
@@ -2152,6 +2222,54 @@ async function fetchGiftPriceCalc(giftName) {
 .rarity-rare{background:rgba(34,100,229,0.12);color:#60a5fa;}
 .rarity-epic{background:rgba(139,92,246,0.12);color:#a78bfa;}
 .rarity-legendary{background:rgba(245,158,11,0.14);color:#fbbf24;}
+
+  /* ── GIFT MEDIA CARD ── */
+.gift-media-wrap{
+  width:100%;
+  aspect-ratio:1;
+  border-radius:16px;
+  overflow:hidden;
+  background:rgba(0,0,0,0.3);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:10px;
+  position:relative;
+}
+.gift-media-wrap video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:16px;
+}
+.gift-media-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:16px;
+}
+.gift-media-fallback{
+  font-size:64px;
+  line-height:1;
+}
+.gift-attrs-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:10px;
+}
+.gift-attr-chip{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  padding:3px 10px;
+  font-size:11px;
+  color:#aaa;
+}
+.gift-attr-chip span{
+  color:#f0f0f0;
+  font-weight:600;
+}
   
 </style>
 <script>
