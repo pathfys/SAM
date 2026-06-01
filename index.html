@@ -1506,8 +1506,8 @@ async function renderGiftCard(card, h, data) {
   if (h.marketTon || h.ton) return;
 
   // Пробуем загрузить цену в фоне с коротким таймаутом
-  if (linksArr.length > 0) {
-   const giftName = parseGiftLink(linksArr[0]
+if (linksArr.length > 0) {
+    const giftName = parseGiftLink(linksArr[0]);
     if (giftName) {
       try {
         const priceData = await Promise.race([
