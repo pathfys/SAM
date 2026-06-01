@@ -1691,9 +1691,9 @@ async function submitGiftRequest() {
   const now = new Date().toLocaleString('ru-RU');
 
   try {
-        const msgId = 0; // бот сам отправит в канал через save_request
+     const msgId = 0;
 
-    fetch(`${API_URL}/save_request`, {
+    const saveResp = await fetch(`${API_URL}/save_request`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1706,9 +1706,12 @@ async function submitGiftRequest() {
         username:    username,
         full_name:   fullName,
       }),
-    }).then(r => r.json())
-      .then(r => console.log('[SAM] save_request резерв:', r))
-      .catch(e => console.warn('[SAM] save_request недоступен:', e.message));
+    }).then(r => r.json());
+
+    if (!saveResp.ok) {
+      showToast('⚠️ Сервер недоступен: ' + (saveResp.error || 'попробуйте снова'));
+      return;
+    }
 
     let savedMarketTon = null;
     let savedGiftNames = [];
