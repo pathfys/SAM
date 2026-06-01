@@ -1490,50 +1490,44 @@ function renderPaymentsHistory() {
 }
 
 async function renderGiftCard(card, h, data) {
-  const rank     = getRank(data.profits || 0);
-  const pct      = rank.payout;
-  const isExpert = pct >= 65;
-  const linksArr = h.links || [];
-  const count    = linksArr.length || h.linksCount || 1;
+  const rank      = getRank(data.profits || 0);
+  const pct       = rank.payout;
+  const isExpert  = pct >= 65;
+  const linksArr  = h.links || [];
+  const count     = linksArr.length || h.linksCount || 1;
   const methodLabel = h.method === 'ots' ? '🤖 ОТС Бот' : '🛡️ Живой гарант';
+  const stCls = { pending:'pending', paid:'paid', rejected:'rejected' }[h.status] || 'pending';
+  const stTxt = { pending:'⏳ Ожидание', paid:'✅ Выплачено', rejected:'❌ Отклонено' }[h.status] || '⏳ Ожидание';
 
-  const stCls = { pending: 'pending', paid: 'paid', rejected: 'rejected' }[h.status] || 'pending';
-  const stTxt = { pending: '⏳ Ожидание', paid: '✅ Выплачено', rejected: '❌ Отклонено' }[h.status] || '⏳ Ожидание';
+  // Сразу рисуем карточку без ожидания цены
+  buildGiftCardHtml(card, h, h.marketTon || h.ton || null, pct, isExpert, stCls, stTxt, count, methodLabel);
 
-  card.innerHTML = `
-    <div class="pay-gift-card-header">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
-      ${count} подарков · ${methodLabel} · ${h.date || ''}
-    </div>
-    <div class="pay-gift-loading">
-      <div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>
-      Загружаем цены...
-    </div>
-  `;
+  // Если цена уже есть — не грузим
+  if (h.marketTon || h.ton) return;
 
-  if (h.marketTon) {
-    buildGiftCardHtml(card, h, h.marketTon, pct, isExpert, stCls, stTxt, count, methodLabel);
-    return;
-  }
-
-  let marketTon = null;
+  // Пробуем загрузить цену в фоне с коротким таймаутом
   if (linksArr.length > 0) {
     const giftName = parseGiftLinkCalc(linksArr[0]);
     if (giftName) {
       try {
-        const tonPrice  = await getTonPriceCalc();
-        const priceData = await fetchGiftPriceCalc(giftName);
-        if (priceData) {
-          marketTon = parseFloat((priceData.ton * count).toFixed(2));
+        const priceData = await Promise.race([
+          fetchGiftPriceCalc(giftName),
+          new Promise(resolve => setTimeout(() => resolve(null), 5000))
+        ]);
+        if (priceData && priceData.ton > 0) {
+          const marketTon = parseFloat((priceData.ton * count).toFixed(2));
           const myData = getMyData();
           const idx = myData.history.findIndex(x => x.reqId === h.reqId);
-          if (idx >= 0) { myData.history[idx].marketTon = marketTon; saveMyData(myData); }
+          if (idx >= 0) {
+            myData.history[idx].marketTon = marketTon;
+            saveMyData(myData);
+          }
+          // Перерисовываем с ценой
+          buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel);
         }
       } catch(e) {}
     }
   }
-
-  buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel);
 }
 
 function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, count, methodLabel) {
