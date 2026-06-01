@@ -1535,14 +1535,12 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
   const stCls2 = { pending:'pending', paid:'paid', rejected:'rejected' }[h.status] || 'pending';
   const stTxt2 = { pending:'⏳ Ожидание', paid:'✅ Выплачено', rejected:'❌ Отклонено' }[h.status] || '⏳ Ожидание';
 
-  // Берём первую ссылку и вытаскиваем slug
   const firstLink = linksArr[0] || '';
   const rawSlug   = parseGiftLink(firstLink) || '';
   const baseSlug  = rawSlug.replace(/-[A-Za-z0-9]+$/, '').replace(/-\d+$/, '').toLowerCase();
   const numMatch  = rawSlug.match(/-(\d+)$/);
   const giftNum   = numMatch ? numMatch[1] : '';
 
-  // Название подарка
   const savedNames  = h.giftNames || [];
   const displayName = savedNames[0]?.displayName
     || savedNames[0]?.name
@@ -1550,21 +1548,30 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
         ? rawSlug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
         : 'Подарок');
 
-  // Картинка: fragment для минтнутых (nft), стикер через бот для обычных (gift)
-  const isNft     = firstLink.includes('t.me/nft/');
-  const fragBase  = baseSlug && giftNum ? `https://nft.fragment.com/gift/${baseSlug}-${giftNum}` : '';
-  const imgSrc    = isNft && fragBase ? `${fragBase}.medium.jpg` : '';
-  const imgId     = 'gi-' + h.reqId;
-  const fbId      = 'gf-' + h.reqId;
-  const encLink   = encodeURIComponent(firstLink);
+  // Для t.me/nft/ — fragment даёт картинку, для t.me/gift/ — только через /gift_sticker
+  const isNft    = firstLink.includes('t.me/nft/');
+  const fragBase = isNft && baseSlug && giftNum
+    ? `https://nft.fragment.com/gift/${baseSlug}-${giftNum}`
+    : '';
 
-  // Цена
+  const imgId = 'gi-' + h.reqId;
+  const fbId  = 'gf-' + h.reqId;
+
+  // Стартовый src:
+  // - NFT: пробуем fragment .medium.jpg
+  // - gift: сразу прозрачный пиксель → триггерит onerror → идёт в /gift_sticker
+  const startSrc = isNft && fragBase
+    ? `${fragBase}.medium.jpg`
+    : `data:image/gif;base64,R0lGODlhAQABAAAAACw=`;
+
   const tonDisplay = (marketTon != null && marketTon > 0) ? marketTon : (h.ton || null);
   const payTon     = tonDisplay ? (tonDisplay * pct / 100).toFixed(2) : null;
   const priceHtml  = (tonDisplay && tonDisplay > 0)
     ? `<div class="pay-gift-price">${tonDisplay} <span>TON</span></div>
        <div class="pay-gift-payout">Выплата (${pct}%): <b>${payTon} TON</b></div>`
     : '';
+
+  const encLink = encodeURIComponent(firstLink);
 
   card.innerHTML = `
     <div class="pay-gift-card-header">
@@ -1585,31 +1592,43 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
     ">
       <img
         id="${imgId}"
-        src="${imgSrc}"
-        data-step="0"
+        src="${startSrc}"
         data-link="${encLink}"
-        style="width:80%;height:80%;object-fit:contain;"
+        data-step="0"
+        style="width:80%;height:80%;object-fit:contain;display:block;"
         onerror="(function(el){
-          var step = el.dataset.step;
+          var step = parseInt(el.dataset.step || '0');
           var link = decodeURIComponent(el.dataset.link);
-          if(step==='0' && '${fragBase}'){
-            el.dataset.step='1';
-            el.src='${fragBase}.small.jpg';
-          } else {
-            el.dataset.step='2';
-            fetch('${API_URL}/gift_sticker?link='+encodeURIComponent(link))
-              .then(function(r){return r.json();})
-              .then(function(d){
-                if(d.ok && d.url){ el.src=d.url; }
-                else { el.style.display='none'; document.getElementById('${fbId}').style.display='flex'; }
-              })
-              .catch(function(){ el.style.display='none'; document.getElementById('${fbId}').style.display='flex'; });
+          var fb   = document.getElementById('${fbId}');
+
+          if(step === 0 && ${isNft ? "'1'" : "'0'"} === '1'){
+            // NFT: попробуем .small.jpg
+            el.dataset.step = '1';
+            el.src = '${fragBase ? fragBase + '.small.jpg' : ''}';
+            return;
           }
+
+          // Идём за стикером через бот
+          el.dataset.step = '99';
+          el.style.display = 'none';
+          if(fb) fb.style.display = 'flex';
+
+          fetch('${API_URL}/gift_sticker?link=' + encodeURIComponent(link))
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+              if(d.ok && d.url){
+                el.src = d.url;
+                el.style.display = 'block';
+                if(fb) fb.style.display = 'none';
+              }
+            })
+            .catch(function(){});
         })(this)"
+        onload="if(this.naturalWidth < 2){ this.dispatchEvent(new Event('error')); }"
       />
       <div
         id="${fbId}"
-        style="display:${imgSrc ? 'none' : 'flex'};width:100%;height:100%;align-items:center;justify-content:center;font-size:90px;"
+        style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:90px;"
       >🎁</div>
     </div>
 
