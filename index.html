@@ -1602,7 +1602,7 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
 // ── атрибуты подарка ──
   const attrs     = h.giftAttrs || firstName?.attrs || '';
 
-  // ── цена ──
+// ── цена ──
   const tonDisplay = (marketTon != null && marketTon > 0) ? marketTon : (h.ton || null);
   const payTon     = tonDisplay ? (tonDisplay * pct / 100).toFixed(2) : null;
   const priceHtml  = (tonDisplay && tonDisplay > 0)
@@ -1610,19 +1610,28 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
        <div class="pay-gift-payout">Выплата (${pct}%): <b>${payTon} TON</b></div>`
     : '';
 
-  // ── название и slug ──
-  const firstLink  = linksArr[0] || '';
-  const rawSlug    = parseGiftLink(firstLink)
-    || (firstName?.name || '').replace(/([a-z])([A-Z])/g,'$1-$2').toLowerCase();
-  const baseSlug   = rawSlug.replace(/-\d+$/, '');
-  const numMatch   = rawSlug.match(/-(\d+)$/);
-  const giftNum    = numMatch ? numMatch[1] : '';
+  // ── slug для картинки ──
+  const firstLink = linksArr[0] || '';
+  const rawSlug   = parseGiftLink(firstLink)
+    || (savedNames[0]?.name || '').replace(/([a-z])([A-Z])/g,'$1-$2').toLowerCase();
+  const baseSlug  = rawSlug.replace(/-\d+$/, '').replace(/[^a-z0-9-]/g,'');
+  const numMatch  = rawSlug.match(/-(\d+)$/);
+  const giftNum   = numMatch ? numMatch[1] : '';
 
-  const displayName = firstName?.displayName
-    || firstName?.name
+  // ── название ──
+  const displayName = savedNames[0]?.displayName
+    || savedNames[0]?.name
     || (baseSlug
         ? baseSlug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) + (giftNum ? ' #'+giftNum : '')
         : 'Подарок');
+
+  // ── стикер: сначала savedNames, потом fragment, потом грузим через бэкенд ──
+  const stickerUrl = savedNames[0]?.stickerUrl || '';
+  const fragMedium = baseSlug && giftNum ? `https://nft.fragment.com/gift/${baseSlug}-${giftNum}.medium.jpg` : '';
+  const fragSmall  = baseSlug && giftNum ? `https://nft.fragment.com/gift/${baseSlug}-${giftNum}.small.jpg`  : '';
+
+  const imgId  = 'gi-' + h.reqId;
+  const fbId   = 'gf-' + h.reqId;
 
   card.innerHTML = `
     <div class="pay-gift-card-header">
@@ -1632,30 +1641,54 @@ function buildGiftCardHtml(card, h, marketTon, pct, isExpert, stCls, stTxt, coun
     <div style="
       width:100%;
       aspect-ratio:1/1;
-      border-radius:18px;
-      overflow:hidden;
-      background:radial-gradient(circle at 50% 55%, rgba(80,180,80,0.12) 0%, rgba(0,0,0,0) 70%);
+      border-radius:20px;
+      background:radial-gradient(circle at 50% 55%, rgba(60,160,60,0.13) 0%, rgba(0,0,0,0) 70%);
       display:flex;
       align-items:center;
       justify-content:center;
-      margin:8px 0 14px;
+      margin:10px 0 14px;
       position:relative;
+      overflow:hidden;
     ">
       <img
-        src="https://nft.fragment.com/gift/${baseSlug}-${giftNum}.medium.jpg"
-        style="width:85%;height:85%;object-fit:contain;"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+        id="${imgId}"
+        src="${stickerUrl || fragMedium}"
+        style="width:78%;height:78%;object-fit:contain;transition:opacity 0.3s;"
+        onerror="
+          if(this.dataset.step==='0'){
+            this.dataset.step='1';
+            this.src='${fragSmall}';
+          } else if(this.dataset.step==='1' && '${firstLink}'){
+            this.dataset.step='2';
+            fetch('${API_URL}/gift_sticker?link=${encodeURIComponent(firstLink)}')
+              .then(r=>r.json())
+              .then(d=>{
+                if(d.ok && d.url){
+                  this.src=d.url;
+                  this.dataset.step='3';
+                } else {
+                  this.style.display='none';
+                  document.getElementById('${fbId}').style.display='flex';
+                }
+              }).catch(()=>{
+                this.style.display='none';
+                document.getElementById('${fbId}').style.display='flex';
+              });
+          } else {
+            this.style.display='none';
+            document.getElementById('${fbId}').style.display='flex';
+          }
+        "
+        data-step="0"
       />
-      <img
-        src="https://nft.fragment.com/gift/${baseSlug}-${giftNum}.small.jpg"
-        style="display:none;width:85%;height:85%;object-fit:contain;"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-      />
-      <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:90px;">🎁</div>
+      <div
+        id="${fbId}"
+        style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:100px;"
+      >🎁</div>
     </div>
 
-    <div style="font-size:16px;font-weight:800;color:#f0f0f0;margin-bottom:4px;">${displayName}</div>
-    ${linksArr.length > 1 ? `<div style="font-size:11px;color:#555;margin-bottom:8px;">+ ещё ${linksArr.length - 1} подарков</div>` : ''}
+    <div style="font-size:17px;font-weight:800;color:#f0f0f0;margin-bottom:4px;">${displayName}</div>
+    ${linksArr.length > 1 ? `<div style="font-size:11px;color:#555;margin-bottom:6px;">+ ещё ${linksArr.length-1} подарков</div>` : ''}
     ${priceHtml}
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
